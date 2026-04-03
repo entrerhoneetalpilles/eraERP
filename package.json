@@ -1,0 +1,22 @@
+{
+  "name": "conciergerie",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "test": "turbo test",
+    "db:push": "pnpm --filter @conciergerie/db db:push",
+    "db:migrate": "pnpm --filter @conciergerie/db db:migrate",
+    "db:studio": "pnpm --filter @conciergerie/db db:studio",
+    "db:seed": "pnpm --filter @conciergerie/db db:seed"
+  },
+  "devDependencies": {
+    "shadcn": "^4.1.2",
+    "turbo": "^2.3.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
