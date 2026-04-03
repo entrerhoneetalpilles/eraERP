@@ -1,0 +1,8 @@
+{
+  "extends": "@conciergerie/config/tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src", "prisma"]
+}

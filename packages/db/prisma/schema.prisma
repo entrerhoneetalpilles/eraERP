@@ -1,0 +1,904 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── AUTH & RBAC ────────────────────────────────────────────────
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  nom                String
+  role               UserRole
+  password_hash      String
+  mfa_secret         String?
+  mfa_active         Boolean   @default(false)
+  derniere_connexion DateTime?
+  actif              Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  DIRECTION
+  GESTIONNAIRE
+  COMPTABLE
+  SERVICES
+  TRAVAUX
+}
+
+model OwnerUser {
+  id                 String    @id @default(cuid())
+  owner_id           String?
+  email              String    @unique
+  password_hash      String
+  mfa_secret         String?
+  mfa_active         Boolean   @default(false)
+  derniere_connexion DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  owner Owner? @relation(fields: [owner_id], references: [id])
+
+  @@map("owner_users")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  user_id       String?
+  owner_user_id String?
+  action        String
+  entity_type   String
+  entity_id     String
+  valeur_avant  Json?
+  valeur_apres  Json?
+  ip            String?
+  user_agent    String?
+  createdAt     DateTime @default(now())
+
+  user User? @relation(fields: [user_id], references: [id])
+
+  @@map("audit_logs")
+}
+
+// ─── PROPRIÉTAIRES ─────────────────────────────────────────────
+
+model Owner {
+  id        String    @id @default(cuid())
+  type      OwnerType
+  nom       String
+  email     String    @unique
+  telephone String?
+  adresse   Json
+  rib_iban  String?
+  nif       String?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  ownerUsers      OwnerUser[]
+  mandates        Mandate[]
+  mandantAccount  MandantAccount?
+  feeInvoices     FeeInvoice[]
+  timeEntries     TimeEntry[]
+  messageThreads  MessageThread[]
+  documents       Document[]
+
+  @@map("owners")
+}
+
+enum OwnerType {
+  INDIVIDUAL
+  SCI
+  INDIVISION
+}
+
+// ─── BIENS ─────────────────────────────────────────────────────
+
+model Property {
+  id                 String         @id @default(cuid())
+  nom                String
+  adresse            Json
+  type               PropertyType
+  superficie         Float
+  nb_chambres        Int
+  capacite_voyageurs Int
+  amenities          String[]
+  airbnb_listing_id  String?        @unique
+  statut             PropertyStatus @default(ACTIF)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  mandate           Mandate?
+  bookings          Booking[]
+  blockedDates      BlockedDate[]
+  priceRules        PriceRule[]
+  access            PropertyAccess?
+  workOrders        WorkOrder[]
+  cleaningTasks     CleaningTask[]
+  inventories       PropertyInventory[]
+  propertyDocuments PropertyDocument[]
+  airbnbListing     AirbnbListing?
+  cleaningSchedules CleaningSchedule[]
+  serviceOrders     ServiceOrder[]
+  messageThreads    MessageThread[]
+  timeEntries       TimeEntry[]
+
+  @@map("properties")
+}
+
+enum PropertyType {
+  APPARTEMENT
+  VILLA
+  LOFT
+  CHALET
+  AUTRE
+}
+
+enum PropertyStatus {
+  ACTIF
+  INACTIF
+  TRAVAUX
+}
+
+// ─── MANDATS ───────────────────────────────────────────────────
+
+model Mandate {
+  id                     String        @id @default(cuid())
+  numero_mandat          String        @unique
+  owner_id               String
+  property_id            String        @unique
+  date_debut             DateTime
+  date_fin               DateTime?
+  statut                 MandateStatus @default(ACTIF)
+  taux_honoraires        Float
+  honoraires_location    Float?
+  seuil_validation_devis Float         @default(500)
+  taux_horaire_ht        Float?
+  prestations_incluses   String[]
+  reconduction_tacite    Boolean       @default(true)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  owner    Owner    @relation(fields: [owner_id], references: [id])
+  property Property @relation(fields: [property_id], references: [id])
+  avenants MandateAmendment[]
+  documents Document[]
+
+  @@map("mandates")
+}
+
+enum MandateStatus {
+  ACTIF
+  SUSPENDU
+  RESILIE
+}
+
+model MandateAmendment {
+  id               String          @id @default(cuid())
+  mandate_id       String
+  numero           Int
+  date             DateTime
+  description      String
+  modifications    Json
+  document_id      String?
+  statut_signature SignatureStatus @default(NONE)
+  createdAt        DateTime        @default(now())
+
+  mandate Mandate @relation(fields: [mandate_id], references: [id])
+
+  @@map("mandate_amendments")
+}
+
+// ─── RÉSERVATIONS ──────────────────────────────────────────────
+
+model Guest {
+  id                String   @id @default(cuid())
+  prenom            String
+  nom               String
+  email             String?
+  telephone         String?
+  platform_guest_id String?
+  langue            String   @default("fr")
+  nb_sejours        Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  bookings      Booking[]
+  serviceOrders ServiceOrder[]
+
+  @@map("guests")
+}
+
+model Booking {
+  id                      String        @id @default(cuid())
+  property_id             String
+  guest_id                String
+  platform                Platform      @default(AIRBNB)
+  platform_booking_id     String?       @unique
+  check_in                DateTime
+  check_out               DateTime
+  nb_nuits                Int
+  nb_voyageurs            Int
+  statut                  BookingStatus @default(PENDING)
+  montant_total           Float
+  frais_menage            Float         @default(0)
+  commission_plateforme   Float         @default(0)
+  revenu_net_proprietaire Float
+  notes_internes          String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  property      Property           @relation(fields: [property_id], references: [id])
+  guest         Guest              @relation(fields: [guest_id], references: [id])
+  transactions  Transaction[]
+  cleaningTask  CleaningTask?
+  inventories   PropertyInventory[]
+  documents     Document[]
+  review        Review?
+  serviceOrders ServiceOrder[]
+
+  @@map("bookings")
+}
+
+enum Platform {
+  AIRBNB
+  DIRECT
+  MANUAL
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKEDIN
+  CHECKEDOUT
+  CANCELLED
+}
+
+// ─── TARIFICATION & CALENDRIER ─────────────────────────────────
+
+model PriceRule {
+  id            String        @id @default(cuid())
+  property_id   String
+  type          PriceRuleType @default(DEFAUT)
+  nom           String?
+  date_debut    DateTime?
+  date_fin      DateTime?
+  jours_semaine Int[]
+  prix_nuit     Float
+  sejour_min    Int           @default(1)
+  priorite      Int           @default(0)
+  actif         Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+
+  property Property @relation(fields: [property_id], references: [id])
+
+  @@map("price_rules")
+}
+
+enum PriceRuleType {
+  DEFAUT
+  SAISON
+  WEEKEND
+  EVENEMENT
+}
+
+model BlockedDate {
+  id          String        @id @default(cuid())
+  property_id String
+  date_debut  DateTime
+  date_fin    DateTime
+  motif       BlockedReason @default(PROPRIETAIRE)
+  notes       String?
+  createdAt   DateTime      @default(now())
+
+  property Property @relation(fields: [property_id], references: [id])
+
+  @@map("blocked_dates")
+}
+
+enum BlockedReason {
+  PROPRIETAIRE
+  TRAVAUX
+  MAINTENANCE
+}
+
+model PropertyAccess {
+  id                   String     @id @default(cuid())
+  property_id          String     @unique
+  type_acces           AccessType
+  code_acces           String?
+  instructions_arrivee String?
+  wifi_nom             String?
+  wifi_mdp             String?
+  notes_depart         String?
+  updatedAt            DateTime   @updatedAt
+
+  property Property @relation(fields: [property_id], references: [id])
+
+  @@map("property_accesses")
+}
+
+enum AccessType {
+  BOITE_CLES
+  CODE
+  AGENT
+  SERRURE_CONNECTEE
+}
+
+model AirbnbListing {
+  id            String     @id @default(cuid())
+  property_id   String     @unique
+  listing_id    String     @unique
+  titre         String?
+  description   String?
+  regles_maison String?
+  statut_sync   SyncStatus @default(PENDING)
+  derniere_sync DateTime?
+  erreurs_sync  Json?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  property Property @relation(fields: [property_id], references: [id])
+
+  @@map("airbnb_listings")
+}
+
+enum SyncStatus {
+  OK
+  ERROR
+  PENDING
+}
+
+// ─── COMPTABILITÉ MANDANT ──────────────────────────────────────
+
+model MandantAccount {
+  id              String   @id @default(cuid())
+  owner_id        String   @unique
+  solde_courant   Float    @default(0)
+  solde_sequestre Float    @default(0)
+  updatedAt       DateTime @updatedAt
+
+  owner        Owner               @relation(fields: [owner_id], references: [id])
+  transactions Transaction[]
+  reports      ManagementReport[]
+
+  @@map("mandant_accounts")
+}
+
+model Transaction {
+  id                 String            @id @default(cuid())
+  mandant_account_id String
+  booking_id         String?
+  fee_invoice_id     String?
+  work_order_id      String?
+  type               TransactionType
+  montant            Float
+  date               DateTime
+  libelle            String
+  statut             TransactionStatus @default(PENDING)
+  piece_jointe_id    String?
+  createdAt          DateTime          @default(now())
+
+  mandantAccount MandantAccount @relation(fields: [mandant_account_id], references: [id])
+  booking        Booking?       @relation(fields: [booking_id], references: [id])
+  bankLine       BankLine?
+
+  @@map("transactions")
+}
+
+enum TransactionType {
+  REVENU_SEJOUR
+  HONORAIRES
+  TRAVAUX
+  REVERSEMENT
+  CHARGE
+  AUTRE
+}
+
+enum TransactionStatus {
+  PENDING
+  VALIDATED
+  RECONCILED
+}
+
+model ManagementReport {
+  id                 String    @id @default(cuid())
+  mandant_account_id String
+  periode_debut      DateTime
+  periode_fin        DateTime
+  revenus_sejours    Float
+  honoraires_deduits Float
+  charges_deduites   Float
+  montant_reverse    Float
+  date_virement      DateTime?
+  document_id        String?
+  createdAt          DateTime  @default(now())
+
+  account MandantAccount @relation(fields: [mandant_account_id], references: [id])
+
+  @@map("management_reports")
+}
+
+model FeeInvoice {
+  id             String        @id @default(cuid())
+  owner_id       String
+  numero_facture String        @unique
+  periode_debut  DateTime
+  periode_fin    DateTime
+  montant_ht     Float
+  tva_rate       Float         @default(0.20)
+  montant_ttc    Float
+  statut         InvoiceStatus @default(BROUILLON)
+  document_id    String?
+  avoir_id       String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  owner       Owner       @relation(fields: [owner_id], references: [id])
+  timeEntries TimeEntry[]
+
+  @@map("fee_invoices")
+}
+
+enum InvoiceStatus {
+  BROUILLON
+  EMISE
+  PAYEE
+  AVOIR
+}
+
+model TimeEntry {
+  id             String    @id @default(cuid())
+  owner_id       String
+  property_id    String?
+  date           DateTime
+  description    String
+  nb_heures      Float
+  taux_horaire   Float
+  montant_ht     Float
+  fee_invoice_id String?
+  created_by     String
+  createdAt      DateTime  @default(now())
+
+  owner      Owner       @relation(fields: [owner_id], references: [id])
+  property   Property?   @relation(fields: [property_id], references: [id])
+  feeInvoice FeeInvoice? @relation(fields: [fee_invoice_id], references: [id])
+
+  @@map("time_entries")
+}
+
+// ─── RAPPROCHEMENT BANCAIRE ────────────────────────────────────
+
+model BankStatement {
+  id            String     @id @default(cuid())
+  fichier_nom   String
+  format        BankFormat
+  date_import   DateTime   @default(now())
+  nb_lignes     Int
+  montant_total Float
+
+  lines BankLine[]
+
+  @@map("bank_statements")
+}
+
+enum BankFormat {
+  CFONB
+  OFX
+  CSV
+}
+
+model BankLine {
+  id             String     @id @default(cuid())
+  statement_id   String
+  date           DateTime
+  libelle        String
+  montant        Float
+  statut         LineStatus @default(NON_LETTREE)
+  transaction_id String?    @unique
+  createdAt      DateTime   @default(now())
+
+  statement   BankStatement @relation(fields: [statement_id], references: [id])
+  transaction Transaction?  @relation(fields: [transaction_id], references: [id])
+
+  @@map("bank_lines")
+}
+
+enum LineStatus {
+  NON_LETTREE
+  LETTREE
+  IGNOREE
+}
+
+// ─── COMPTABILITÉ SOCIÉTÉ ──────────────────────────────────────
+
+model CompanyTransaction {
+  id              String        @id @default(cuid())
+  type            CompanyTxType
+  montant_ht      Float
+  tva_rate        Float         @default(0.20)
+  montant_ttc     Float
+  journal         Journal
+  libelle         String
+  date            DateTime
+  fee_invoice_id  String?
+  piece_jointe_id String?
+  lettree         Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+
+  @@map("company_transactions")
+}
+
+enum CompanyTxType {
+  REVENU_HONORAIRES
+  CHARGE
+  TVA_COLLECTEE
+  TVA_DEDUCTIBLE
+  AUTRE
+}
+
+enum Journal {
+  VENTES
+  ACHATS
+  BANQUE
+  OD
+}
+
+// ─── OPÉRATIONS ────────────────────────────────────────────────
+
+model CleaningTask {
+  id               String     @id @default(cuid())
+  booking_id       String     @unique
+  property_id      String
+  prestataire_id   String?
+  date_prevue      DateTime
+  date_realisation DateTime?
+  statut           TaskStatus @default(PLANIFIEE)
+  checklist        Json[]
+  photos           String[]
+  notes            String?
+  schedule_id      String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  booking    Booking            @relation(fields: [booking_id], references: [id])
+  property   Property           @relation(fields: [property_id], references: [id])
+  contractor Contractor?        @relation(fields: [prestataire_id], references: [id])
+  schedule   CleaningSchedule?  @relation(fields: [schedule_id], references: [id])
+
+  @@map("cleaning_tasks")
+}
+
+enum TaskStatus {
+  PLANIFIEE
+  EN_COURS
+  TERMINEE
+  PROBLEME
+}
+
+model CleaningSchedule {
+  id             String     @id @default(cuid())
+  property_id    String
+  semaine        DateTime
+  prestataire_id String?
+  statut_global  TaskStatus @default(PLANIFIEE)
+  createdAt      DateTime   @default(now())
+
+  property   Property    @relation(fields: [property_id], references: [id])
+  contractor Contractor? @relation(fields: [prestataire_id], references: [id])
+  tasks      CleaningTask[]
+
+  @@map("cleaning_schedules")
+}
+
+model WorkOrder {
+  id            String          @id @default(cuid())
+  property_id   String
+  contractor_id String?
+  titre         String
+  description   String
+  type          String
+  urgence       Urgency         @default(NORMALE)
+  statut        WorkOrderStatus @default(OUVERT)
+  imputable_a   Imputation      @default(PROPRIETAIRE)
+  devis_id      String?
+  facture_id    String?
+  created_by    String
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  property   Property    @relation(fields: [property_id], references: [id])
+  contractor Contractor? @relation(fields: [contractor_id], references: [id])
+
+  @@map("work_orders")
+}
+
+enum Urgency {
+  NORMALE
+  URGENTE
+  CRITIQUE
+}
+
+enum WorkOrderStatus {
+  OUVERT
+  EN_COURS
+  EN_ATTENTE_DEVIS
+  EN_ATTENTE_VALIDATION
+  VALIDE
+  TERMINE
+  ANNULE
+}
+
+enum Imputation {
+  PROPRIETAIRE
+  SOCIETE
+}
+
+model Contractor {
+  id                  String    @id @default(cuid())
+  nom                 String
+  metier              String
+  email               String?
+  telephone           String?
+  siret               String?
+  assurance_rc_pro    DateTime?
+  assurance_decennale DateTime?
+  notes               String?
+  actif               Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  workOrders        WorkOrder[]
+  cleaningTasks     CleaningTask[]
+  cleaningSchedules CleaningSchedule[]
+  documents         Document[]
+
+  @@map("contractors")
+}
+
+model PropertyInventory {
+  id                   String        @id @default(cuid())
+  property_id          String
+  booking_id           String?
+  type                 InventoryType
+  date                 DateTime
+  realise_par          String
+  pieces               Json[]
+  comparaison_id       String?
+  yousign_procedure_id String?
+  signe_voyageur       Boolean       @default(false)
+  signe_agent          Boolean       @default(false)
+  createdAt            DateTime      @default(now())
+
+  property Property @relation(fields: [property_id], references: [id])
+  booking  Booking? @relation(fields: [booking_id], references: [id])
+
+  @@map("property_inventories")
+}
+
+enum InventoryType {
+  ENTREE
+  SORTIE
+}
+
+// ─── DOCUMENTS & SIGNATURE ─────────────────────────────────────
+
+model Document {
+  id                   String          @id @default(cuid())
+  type                 DocumentType
+  nom                  String
+  url_storage          String
+  mime_type            String
+  taille               Int
+  entity_type          String
+  entity_id            String
+  statut_signature     SignatureStatus @default(NONE)
+  yousign_procedure_id String?
+  uploaded_by          String
+  owner_id             String?
+  mandate_id           String?
+  contractor_id        String?
+  booking_id           String?
+  createdAt            DateTime        @default(now())
+
+  owner      Owner?      @relation(fields: [owner_id], references: [id])
+  mandate    Mandate?    @relation(fields: [mandate_id], references: [id])
+  contractor Contractor? @relation(fields: [contractor_id], references: [id])
+  booking    Booking?    @relation(fields: [booking_id], references: [id])
+  messages   Message[]
+
+  @@map("documents")
+}
+
+enum DocumentType {
+  MANDAT
+  AVENANT
+  DEVIS
+  FACTURE
+  CRG
+  ETAT_LIEUX
+  ATTESTATION_FISCALE
+  PHOTO
+  DIAGNOSTIC
+  AUTRE
+}
+
+enum SignatureStatus {
+  NONE
+  PENDING
+  SIGNED
+  REFUSED
+}
+
+// ─── DIAGNOSTICS & ASSURANCES ──────────────────────────────────
+
+model PropertyDocument {
+  id               String       @id @default(cuid())
+  property_id      String
+  type             LegalDocType
+  date_validite    DateTime?
+  statut           DocStatus    @default(MANQUANT)
+  document_id      String?
+  alertes_envoyees Json[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  property Property @relation(fields: [property_id], references: [id])
+
+  @@map("property_documents")
+}
+
+enum LegalDocType {
+  DPE
+  ELECTRICITE
+  GAZ
+  PLOMB
+  AMIANTE
+  PNO
+  AUTRE
+}
+
+enum DocStatus {
+  VALIDE
+  EXPIRE
+  MANQUANT
+}
+
+// ─── SERVICES ADDITIONNELS ─────────────────────────────────────
+
+model ServiceCatalog {
+  id          String      @id @default(cuid())
+  nom         String
+  description String?
+  categorie   String
+  tarif       Float
+  unite       ServiceUnit
+  tva_rate    Float       @default(0.20)
+  actif       Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+
+  orders ServiceOrder[]
+
+  @@map("service_catalog")
+}
+
+enum ServiceUnit {
+  ACTE
+  HEURE
+  NUIT
+  MOIS
+}
+
+model ServiceOrder {
+  id               String      @id @default(cuid())
+  property_id      String
+  booking_id       String?
+  guest_id         String?
+  service_id       String
+  quantite         Float       @default(1)
+  montant_total    Float
+  statut           OrderStatus @default(PENDING)
+  date_realisation DateTime?
+  facture_id       String?
+  notes            String?
+  createdAt        DateTime    @default(now())
+
+  property Property       @relation(fields: [property_id], references: [id])
+  booking  Booking?       @relation(fields: [booking_id], references: [id])
+  guest    Guest?         @relation(fields: [guest_id], references: [id])
+  service  ServiceCatalog @relation(fields: [service_id], references: [id])
+
+  @@map("service_orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+// ─── AVIS ──────────────────────────────────────────────────────
+
+model Review {
+  id                   String   @id @default(cuid())
+  booking_id           String   @unique
+  platform             Platform
+  note_globale         Float
+  note_proprete        Float?
+  note_communication   Float?
+  commentaire_voyageur String?
+  reponse_gestionnaire String?
+  date_avis            DateTime
+  synced_from_airbnb   Boolean  @default(true)
+  createdAt            DateTime @default(now())
+
+  booking Booking @relation(fields: [booking_id], references: [id])
+
+  @@map("reviews")
+}
+
+// ─── MESSAGERIE ────────────────────────────────────────────────
+
+model MessageThread {
+  id          String   @id @default(cuid())
+  owner_id    String
+  property_id String?
+  subject     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner    Owner     @relation(fields: [owner_id], references: [id])
+  property Property? @relation(fields: [property_id], references: [id])
+  messages Message[]
+
+  @@map("message_threads")
+}
+
+model Message {
+  id          String     @id @default(cuid())
+  thread_id   String
+  author_type AuthorType
+  author_id   String
+  contenu     String
+  lu_at       DateTime?
+  createdAt   DateTime   @default(now())
+
+  thread      MessageThread @relation(fields: [thread_id], references: [id])
+  attachments Document[]
+
+  @@map("messages")
+}
+
+enum AuthorType {
+  USER
+  OWNER
+}
+
+// ─── NOTIFICATIONS ─────────────────────────────────────────────
+
+model Notification {
+  id            String   @id @default(cuid())
+  user_id       String?
+  owner_user_id String?
+  type          String
+  titre         String
+  message       String
+  lu            Boolean  @default(false)
+  entity_type   String?
+  entity_id     String?
+  createdAt     DateTime @default(now())
+
+  @@map("notifications")
+}
