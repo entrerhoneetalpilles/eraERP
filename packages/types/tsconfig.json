@@ -1,0 +1,4 @@
+{
+  "extends": "@conciergerie/config/tsconfig.base.json",
+  "include": ["src"]
+}
