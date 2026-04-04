@@ -33,6 +33,8 @@ const STATUS_MAP: Record<string, { label: string; className: string }> = {
   LOFT: { label: "Loft", className: "bg-cyan-100 text-cyan-800" },
   CHALET: { label: "Chalet", className: "bg-amber-100 text-amber-800" },
   AUTRE: { label: "Autre", className: "bg-slate-100 text-slate-600" },
+  VALIDATED: { label: "Validé", className: "bg-green-100 text-green-800" },
+  RECONCILED: { label: "Rapproché", className: "bg-blue-100 text-blue-800" },
 }
 
 export function getStatusConfig(status: string) {
