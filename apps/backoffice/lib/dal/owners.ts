@@ -28,7 +28,7 @@ export async function createOwner(data: {
   nom: string
   email: string
   telephone?: string
-  adresse: object
+  adresse: Record<string, unknown>
   rib_iban?: string
   nif?: string
   notes?: string
@@ -48,7 +48,7 @@ export async function updateOwner(
     nom: string
     email: string
     telephone: string
-    adresse: object
+    adresse: Record<string, unknown>
     rib_iban: string
     nif: string
     notes: string

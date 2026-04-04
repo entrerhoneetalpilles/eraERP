@@ -3,7 +3,7 @@ import { z } from "zod"
 const adresseSchema = z.object({
   rue: z.string().min(1, "Rue requise"),
   complement: z.string().optional(),
-  code_postal: z.string().min(5, "Code postal invalide").max(5),
+  code_postal: z.string().min(5, "Code postal invalide").max(5, "Code postal invalide"),
   ville: z.string().min(1, "Ville requise"),
   pays: z.string().default("France"),
 })
