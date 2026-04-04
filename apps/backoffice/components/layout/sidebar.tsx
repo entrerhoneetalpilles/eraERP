@@ -8,6 +8,7 @@ import {
   Building2,
   FileText,
   CalendarDays,
+  CalendarRange,
   UserCheck,
   Settings,
   ChevronRight,
@@ -37,6 +38,7 @@ const NAV_SECTIONS = [
     label: "Activité",
     items: [
       { href: "/reservations", label: "Réservations", icon: CalendarDays },
+      { href: "/planning", label: "Planning", icon: CalendarRange },
       { href: "/voyageurs", label: "Voyageurs", icon: UserCheck },
     ],
   },
