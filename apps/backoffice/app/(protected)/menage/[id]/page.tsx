@@ -34,19 +34,25 @@ export default async function CleaningTaskDetailPage({
         title={`Ménage — ${task.property.nom}`}
         actions={
           <div className="flex items-center gap-2">
-            {actions.map((action) => (
-              <form
-                key={action.value}
-                action={updateCleaningStatutAction.bind(null, task.id, action.value)}
-              >
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 text-sm rounded-md border border-input bg-background hover:bg-muted transition-colors"
+            {actions.length === 0 ? (
+              task.statut === "TERMINEE" ? (
+                <span className="text-sm text-muted-foreground">Tâche terminée</span>
+              ) : null
+            ) : (
+              actions.map((action) => (
+                <form
+                  key={action.value}
+                  action={updateCleaningStatutAction.bind(null, task.id, action.value)}
                 >
-                  {action.label}
-                </button>
-              </form>
-            ))}
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm rounded-md border border-input bg-background hover:bg-muted transition-colors"
+                  >
+                    {action.label}
+                  </button>
+                </form>
+              ))
+            )}
           </div>
         }
       />

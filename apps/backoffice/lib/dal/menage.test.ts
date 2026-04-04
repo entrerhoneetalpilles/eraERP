@@ -9,6 +9,7 @@ vi.mock("@conciergerie/db", () => ({
       findMany: vi.fn(),
       update: vi.fn(),
       findUnique: vi.fn(),
+      upsert: vi.fn(),
     },
     booking: {
       findUnique: vi.fn(),
@@ -28,13 +29,14 @@ describe("autoCreateCleaningTask", () => {
       property_id: "p1",
       check_out: checkOut,
     } as any)
-    vi.mocked(db.cleaningTask.findFirst).mockResolvedValue(null)
-    vi.mocked(db.cleaningTask.create).mockResolvedValue({ id: "ct1" } as any)
+    vi.mocked(db.cleaningTask.upsert).mockResolvedValue({ id: "ct1" } as any)
 
     await autoCreateCleaningTask("b1")
 
-    expect(db.cleaningTask.create).toHaveBeenCalledWith({
-      data: {
+    expect(db.cleaningTask.upsert).toHaveBeenCalledWith({
+      where: { booking_id: "b1" },
+      update: {},
+      create: {
         booking_id: "b1",
         property_id: "p1",
         date_prevue: checkOut,
@@ -45,10 +47,20 @@ describe("autoCreateCleaningTask", () => {
     })
   })
 
-  it("does nothing if a CleaningTask already exists for this booking", async () => {
-    vi.mocked(db.cleaningTask.findFirst).mockResolvedValue({ id: "ct1" } as any)
+  it("upserts idempotently (no-op if already exists)", async () => {
+    const checkOut = new Date("2026-04-15T10:00:00Z")
+    vi.mocked(db.booking.findUnique).mockResolvedValue({
+      id: "b1",
+      property_id: "p1",
+      check_out: checkOut,
+    } as any)
+    vi.mocked(db.cleaningTask.upsert).mockResolvedValue({ id: "ct1" } as any)
+
     await autoCreateCleaningTask("b1")
-    expect(db.cleaningTask.create).not.toHaveBeenCalled()
+    // Called once with update: {} — no-op if existing record
+    expect(db.cleaningTask.upsert).toHaveBeenCalledTimes(1)
+    const call = vi.mocked(db.cleaningTask.upsert).mock.calls[0][0]
+    expect(call.update).toEqual({})
   })
 })
 

@@ -30,17 +30,16 @@ export async function getCleaningTaskById(id: string) {
 }
 
 export async function autoCreateCleaningTask(booking_id: string) {
-  const existing = await db.cleaningTask.findFirst({ where: { booking_id } })
-  if (existing) return existing
-
   const booking = await db.booking.findUnique({
     where: { id: booking_id },
     select: { property_id: true, check_out: true },
   })
   if (!booking) throw new Error(`Booking ${booking_id} not found`)
 
-  return db.cleaningTask.create({
-    data: {
+  return db.cleaningTask.upsert({
+    where: { booking_id },
+    update: {},  // already exists — no-op
+    create: {
       booking_id,
       property_id: booking.property_id,
       date_prevue: booking.check_out,

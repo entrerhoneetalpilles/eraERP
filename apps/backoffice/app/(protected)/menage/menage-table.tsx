@@ -72,8 +72,6 @@ export function MenageTable({ data }: { data: CleaningRow[] }) {
     <DataTable
       columns={columns}
       data={data}
-      searchColumn="property.nom"
-      searchPlaceholder="Filtrer par bien..."
     />
   )
 }
