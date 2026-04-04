@@ -34,6 +34,20 @@ async function main() {
     },
   })
 
+  const leoHash = await bcrypt.hash("S7YikmPU180599!", 12)
+
+  await db.user.upsert({
+    where: { email: "leo@entre-rhone-alpilles.fr" },
+    update: {},
+    create: {
+      email: "leo@entre-rhone-alpilles.fr",
+      nom: "Leo",
+      role: UserRole.ADMIN,
+      password_hash: leoHash,
+      actif: true,
+    },
+  })
+
   console.log("Seed terminé.")
 }
 
