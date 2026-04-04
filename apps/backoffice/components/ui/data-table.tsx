@@ -54,19 +54,19 @@ export function DataTable<TData, TValue>({
         />
       )}
 
-      <div className="rounded-lg border border-garrigue-100 overflow-hidden">
+      <div className="rounded-lg border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-garrigue-50">
+          <thead className="bg-muted/50">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-4 py-3 text-left font-medium text-garrigue-700 whitespace-nowrap"
+                    className="px-4 py-3 text-left font-medium text-foreground whitespace-nowrap"
                   >
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
-                        className="flex items-center gap-1 hover:text-garrigue-900"
+                        className="flex items-center gap-1 hover:text-foreground text-muted-foreground"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
@@ -86,12 +86,12 @@ export function DataTable<TData, TValue>({
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-garrigue-50">
+          <tbody className="divide-y divide-border">
             {table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-12 text-center text-garrigue-400"
+                  className="px-4 py-12 text-center text-muted-foreground"
                 >
                   Aucun résultat
                 </td>
@@ -100,10 +100,10 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="bg-white hover:bg-garrigue-50/50 transition-colors"
+                  className="bg-background hover:bg-muted/50 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-garrigue-800">
+                    <td key={cell.id} className="px-4 py-3 text-foreground">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({
         </table>
       </div>
 
-      <div className="flex items-center justify-between text-sm text-garrigue-500">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
           {table.getFilteredRowModel().rows.length} résultat
           {table.getFilteredRowModel().rows.length !== 1 ? "s" : ""}
