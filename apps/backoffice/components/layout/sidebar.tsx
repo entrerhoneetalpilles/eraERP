@@ -17,6 +17,7 @@ import {
   Wrench,
   HardHat,
   SprayCan,
+  FileBarChart2,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -49,6 +50,7 @@ const NAV_SECTIONS = [
     items: [
       { href: "/comptabilite", label: "Comptabilité", icon: Wallet },
       { href: "/facturation", label: "Facturation", icon: Receipt },
+      { href: "/crg", label: "CRG", icon: FileBarChart2 },
     ],
   },
   {
