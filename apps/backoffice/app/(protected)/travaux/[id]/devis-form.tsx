@@ -30,10 +30,11 @@ export function DevisForm({
       </p>
       <form action={formAction} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label htmlFor="montant_devis" className="block text-sm font-medium text-foreground mb-1">
             Montant HT (€) <span className="text-destructive">*</span>
           </label>
           <input
+            id="montant_devis"
             type="number"
             name="montant_devis"
             step="0.01"
@@ -44,10 +45,11 @@ export function DevisForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label htmlFor="notes_devis" className="block text-sm font-medium text-foreground mb-1">
             Notes
           </label>
           <textarea
+            id="notes_devis"
             name="notes_devis"
             rows={3}
             defaultValue={notesDevisActuel ?? ""}

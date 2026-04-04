@@ -119,7 +119,6 @@ export default async function WorkOrderDetailPage({
         </div>
       </div>
 
-      {/* Devis section */}
       {wo.statut === "EN_ATTENTE_DEVIS" && (
         <DevisForm
           workOrderId={wo.id}
