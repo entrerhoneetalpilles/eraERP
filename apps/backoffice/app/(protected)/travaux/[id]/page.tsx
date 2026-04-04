@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { getWorkOrderById } from "@/lib/dal/travaux"
+import { getWorkOrderWithMandate } from "@/lib/dal/travaux"
+import { DevisForm } from "./devis-form"
 import { PageHeader } from "@/components/ui/page-header"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { updateWorkOrderStatutAction } from "./actions"
@@ -33,7 +34,7 @@ export default async function WorkOrderDetailPage({
 }: {
   params: { id: string }
 }) {
-  const wo = await getWorkOrderById(params.id)
+  const wo = await getWorkOrderWithMandate(params.id)
   if (!wo) notFound()
 
   const actions = NEXT_STATUTS[wo.statut] ?? []
@@ -117,6 +118,32 @@ export default async function WorkOrderDetailPage({
           )}
         </div>
       </div>
+
+      {/* Devis section */}
+      {wo.statut === "EN_ATTENTE_DEVIS" && (
+        <DevisForm
+          workOrderId={wo.id}
+          montantDevisActuel={wo.montant_devis ?? null}
+          notesDevisActuel={wo.notes_devis ?? null}
+          seuil={wo.property.mandate?.seuil_validation_devis ?? 500}
+        />
+      )}
+      {wo.montant_devis != null && wo.statut !== "EN_ATTENTE_DEVIS" && (
+        <div className="bg-card border rounded-lg p-6">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">Devis</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Montant HT</span>
+              <span className="font-semibold">
+                {wo.montant_devis.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
+              </span>
+            </div>
+            {wo.notes_devis && (
+              <p className="text-muted-foreground text-xs pt-1">{wo.notes_devis}</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

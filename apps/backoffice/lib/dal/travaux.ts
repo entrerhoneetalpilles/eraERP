@@ -55,3 +55,35 @@ export async function updateWorkOrderStatut(
 ) {
   return db.workOrder.update({ where: { id }, data: { statut } })
 }
+
+export async function getWorkOrderWithMandate(id: string) {
+  return db.workOrder.findUnique({
+    where: { id },
+    include: {
+      property: {
+        include: {
+          mandate: { select: { seuil_validation_devis: true } },
+        },
+      },
+      contractor: { select: { id: true, nom: true, metier: true } },
+    },
+  })
+}
+
+export async function saveDevis(
+  id: string,
+  data: {
+    montant_devis: number
+    notes_devis?: string
+    next_statut: "VALIDE" | "EN_ATTENTE_VALIDATION"
+  }
+) {
+  return db.workOrder.update({
+    where: { id },
+    data: {
+      montant_devis: data.montant_devis,
+      notes_devis: data.notes_devis,
+      statut: data.next_statut,
+    },
+  })
+}

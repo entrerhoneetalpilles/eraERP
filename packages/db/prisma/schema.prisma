@@ -614,6 +614,8 @@ model WorkOrder {
   devis_id      String?
   facture_id    String?
   created_by    String
+  montant_devis Float?
+  notes_devis   String?
   notes         String?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
