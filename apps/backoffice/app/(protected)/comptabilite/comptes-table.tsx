@@ -14,7 +14,7 @@ const columns: ColumnDef<AccountRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/comptabilite/${row.original.id}`}
-        className="font-medium text-foreground hover:text-primary"
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.owner.nom}
       </Link>
@@ -24,7 +24,7 @@ const columns: ColumnDef<AccountRow>[] = [
     id: "email",
     header: "Email",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.owner.email}</span>
+      <span className="text-sm text-muted-foreground">{row.original.owner.email}</span>
     ),
   },
   {
@@ -48,16 +48,21 @@ const columns: ColumnDef<AccountRow>[] = [
   {
     accessorKey: "solde_sequestre",
     header: "Séquestre",
-    cell: ({ row }) =>
-      row.original.solde_sequestre.toLocaleString("fr-FR", {
-        style: "currency",
-        currency: "EUR",
-      }),
+    cell: ({ row }) => (
+      <span className="text-sm text-foreground">
+        {row.original.solde_sequestre.toLocaleString("fr-FR", {
+          style: "currency",
+          currency: "EUR",
+        })}
+      </span>
+    ),
   },
   {
     id: "nb_transactions",
     header: "Transactions",
-    cell: ({ row }) => row.original._count.transactions,
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{row.original._count.transactions}</span>
+    ),
   },
   {
     id: "actions",
@@ -65,7 +70,7 @@ const columns: ColumnDef<AccountRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/comptabilite/${row.original.id}`}
-        className="text-sm text-primary hover:underline"
+        className="text-sm text-primary hover:underline cursor-pointer"
       >
         Voir
       </Link>

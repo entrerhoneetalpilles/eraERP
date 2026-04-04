@@ -20,7 +20,7 @@ export default async function PrestataireDetailPage({
         title={prestataire.nom}
         actions={
           <Link href={`/prestataires/${prestataire.id}/edit`}>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="cursor-pointer">
               <Edit className="w-4 h-4 mr-2" />
               Modifier
             </Button>
@@ -29,40 +29,40 @@ export default async function PrestataireDetailPage({
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Informations
-          </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Métier</span>
-              <span className="text-foreground font-medium">{prestataire.metier}</span>
+          </p>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Métier</span>
+              <span className="text-sm text-foreground font-medium">{prestataire.metier}</span>
             </div>
             {prestataire.email && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Email</span>
-                <span className="text-foreground">{prestataire.email}</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Email</span>
+                <span className="text-sm text-foreground">{prestataire.email}</span>
               </div>
             )}
             {prestataire.telephone && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Téléphone</span>
-                <span className="text-foreground">{prestataire.telephone}</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Téléphone</span>
+                <span className="text-sm text-foreground">{prestataire.telephone}</span>
               </div>
             )}
             {prestataire.siret && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">SIRET</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">SIRET</span>
                 <span className="font-mono text-xs text-foreground">{prestataire.siret}</span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Statut</span>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-muted-foreground">Statut</span>
               <span
                 className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                   prestataire.actif
                     ? "bg-green-100 text-green-800"
-                    : "bg-slate-100 text-slate-600"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {prestataire.actif ? "Actif" : "Inactif"}
@@ -71,30 +71,30 @@ export default async function PrestataireDetailPage({
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Statistiques
-          </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Ordres de travaux</span>
-              <span className="text-foreground font-semibold">{prestataire.workOrders.length}</span>
-            </div>
+          </p>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-muted-foreground">Ordres de travaux</span>
+            <span className="text-sm text-foreground font-semibold tabular-nums">
+              {prestataire.workOrders.length}
+            </span>
           </div>
         </div>
       </div>
 
       {prestataire.workOrders.length > 0 && (
-        <div className="bg-card border rounded-lg p-6">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Ordres de travaux récents
-          </h2>
+          </p>
           <div className="divide-y divide-border">
             {prestataire.workOrders.map((wo) => (
               <Link
                 key={wo.id}
                 href={`/travaux/${wo.id}`}
-                className="flex items-center justify-between py-3 hover:bg-muted/50 px-2 rounded transition-colors"
+                className="flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-accent transition-colors duration-100 cursor-pointer"
               >
                 <div>
                   <p className="text-sm font-medium text-foreground">{wo.titre}</p>
@@ -108,10 +108,10 @@ export default async function PrestataireDetailPage({
       )}
 
       {prestataire.notes && (
-        <div className="bg-card border rounded-lg p-6">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Notes
-          </h2>
+          </p>
           <p className="text-sm text-foreground whitespace-pre-wrap">{prestataire.notes}</p>
         </div>
       )}

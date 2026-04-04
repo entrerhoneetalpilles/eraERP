@@ -15,7 +15,7 @@ export default async function AdminPage() {
         description={`${users.length} utilisateur${users.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/admin/users/new">
-            <Button size="sm">
+            <Button size="sm" className="cursor-pointer">
               <Plus className="w-4 h-4 mr-2" />
               Nouvel utilisateur
             </Button>
@@ -23,8 +23,8 @@ export default async function AdminPage() {
         }
       />
 
-      <div className="bg-card border rounded-lg p-4 flex items-center gap-3">
-        <Shield className="w-5 h-5 text-muted-foreground" />
+      <div className="bg-card rounded-md border border-border p-4 flex items-center gap-3">
+        <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
         <p className="text-sm text-muted-foreground">
           Seul un administrateur peut créer ou désactiver des comptes. Les mots de passe ne sont jamais affichés.
         </p>

@@ -23,7 +23,7 @@ const columns: ColumnDef<CleaningRow>[] = [
     accessorKey: "property.nom",
     header: "Bien",
     cell: ({ row }) => (
-      <Link href={`/biens/${row.original.property.id}`} className="text-primary hover:underline">
+      <Link href={`/biens/${row.original.property.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
         {row.original.property.nom}
       </Link>
     ),
@@ -33,7 +33,7 @@ const columns: ColumnDef<CleaningRow>[] = [
     cell: ({ row }) => {
       const b = row.original.booking
       return (
-        <Link href={`/reservations/${b.id}`} className="text-muted-foreground hover:text-primary text-xs">
+        <Link href={`/reservations/${b.id}`} className="text-muted-foreground hover:text-primary text-xs cursor-pointer">
           {new Date(b.check_in).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
           {" → "}
           {new Date(b.check_out).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
@@ -45,7 +45,7 @@ const columns: ColumnDef<CleaningRow>[] = [
     header: "Prestataire",
     cell: ({ row }) =>
       row.original.contractor ? (
-        <Link href={`/prestataires/${row.original.contractor.id}`} className="text-primary hover:underline">
+        <Link href={`/prestataires/${row.original.contractor.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
           {row.original.contractor.nom}
         </Link>
       ) : (
@@ -60,7 +60,7 @@ const columns: ColumnDef<CleaningRow>[] = [
   {
     id: "actions",
     cell: ({ row }) => (
-      <Link href={`/menage/${row.original.id}`} className="text-xs text-primary hover:underline">
+      <Link href={`/menage/${row.original.id}`} className="text-xs text-primary hover:underline cursor-pointer">
         Voir
       </Link>
     ),

@@ -9,13 +9,13 @@ export default async function FacturationPage() {
   const invoices = await getFeeInvoices()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Facturation honoraires"
         description={`${invoices.length} facture${invoices.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/facturation/new">
-            <Button size="sm">
+            <Button size="sm" className="cursor-pointer">
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle facture
             </Button>

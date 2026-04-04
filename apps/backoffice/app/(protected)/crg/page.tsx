@@ -9,13 +9,13 @@ export default async function CrgPage() {
   const reports = await getManagementReports()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Comptes rendus de gestion"
         description={`${reports.length} CRG généré${reports.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/crg/new">
-            <Button size="sm">
+            <Button size="sm" className="cursor-pointer">
               <Plus className="w-4 h-4 mr-2" />
               Générer un CRG
             </Button>

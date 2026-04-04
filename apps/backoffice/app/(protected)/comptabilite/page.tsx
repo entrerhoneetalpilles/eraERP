@@ -6,7 +6,7 @@ export default async function ComptabilitePage() {
   const accounts = await getMandantAccounts()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Comptabilité mandant"
         description={`${accounts.length} compte${accounts.length !== 1 ? "s" : ""} mandant`}

@@ -1,11 +1,10 @@
 "use server"
 
 import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 import { propertySchema } from "@/lib/validations/property"
 import { createProperty } from "@/lib/dal/properties"
 
-export async function createPropertyAction(formData: FormData) {
+export async function createPropertyAction(_prev: unknown, formData: FormData) {
   const raw = {
     nom: formData.get("nom"),
     type: formData.get("type"),
@@ -26,7 +25,6 @@ export async function createPropertyAction(formData: FormData) {
     return { error: parsed.error.flatten().fieldErrors }
   }
 
-  const property = await createProperty(parsed.data)
-  revalidatePath("/biens")
-  redirect(`/biens/${property.id}`)
+  await createProperty(parsed.data)
+  redirect("/biens")
 }

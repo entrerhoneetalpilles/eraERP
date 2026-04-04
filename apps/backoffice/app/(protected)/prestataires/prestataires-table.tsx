@@ -14,7 +14,7 @@ const columns: ColumnDef<PrestataireRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/prestataires/${row.original.id}`}
-        className="font-medium text-foreground hover:text-primary"
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.nom}
       </Link>
@@ -30,18 +30,22 @@ const columns: ColumnDef<PrestataireRow>[] = [
   {
     accessorKey: "email",
     header: "Email",
-    cell: ({ row }) => row.original.email ?? "—",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{row.original.email ?? "—"}</span>
+    ),
   },
   {
     accessorKey: "telephone",
     header: "Téléphone",
-    cell: ({ row }) => row.original.telephone ?? "—",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{row.original.telephone ?? "—"}</span>
+    ),
   },
   {
     id: "nb_interventions",
     header: "Interventions",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">
+      <span className="text-sm text-muted-foreground tabular-nums">
         {row.original._count.workOrders} ordre{row.original._count.workOrders !== 1 ? "s" : ""}
       </span>
     ),
@@ -54,7 +58,7 @@ const columns: ColumnDef<PrestataireRow>[] = [
         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
           row.original.actif
             ? "bg-green-100 text-green-800"
-            : "bg-slate-100 text-slate-600"
+            : "bg-muted text-muted-foreground"
         }`}
       >
         {row.original.actif ? "Actif" : "Inactif"}

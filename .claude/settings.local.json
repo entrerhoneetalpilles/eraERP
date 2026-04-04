@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Developpement/conciergerie -maxdepth 3 -name README* -o -name CLAUDE* -o -name .cursor* -o -name .github)",
+      "Bash(npx shadcn*)",
+      "Bash(npm install*)",
+      "WriteFile(**/components/ui/*)",
+      "Bash(bash \"C:/Users/marga/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh\" --project-dir \"C:/Developpement/conciergerie\")",
+      "Bash(npx tsc:*)",
+      "Bash(py:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ]
+}

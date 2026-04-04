@@ -9,12 +9,12 @@ export default async function MandatsPage() {
   const mandates = await getMandates()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Mandats"
         description={`${mandates.length} mandat${mandates.length !== 1 ? "s" : ""}`}
         actions={
-          <Link href="/mandats/new">
+          <Link href="/mandats/new" className="cursor-pointer">
             <Button size="sm">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau mandat

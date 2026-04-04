@@ -1,0 +1,42 @@
+<h2>Architecture backend — quelle approche ?</h2>
+<p class="subtitle">Ce choix impacte toute la structure du projet. Il n'y a pas de mauvaise réponse, mais les trade-offs sont importants.</p>
+
+<div class="options">
+  <div class="option" data-choice="fullstack-nextjs" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Full Next.js (App Router + Server Actions)</h3>
+      <p>Un seul projet Next.js pour le back-office <em>et</em> le portail propriétaire. La logique métier dans des Server Actions et Route Handlers. Pas de backend séparé.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pour</h4><ul><li>Démarrage ultra rapide</li><li>Une seule stack TypeScript</li><li>Déploiement simple (Vercel/Railway)</li></ul></div>
+        <div class="cons"><h4>Contre</h4><ul><li>API non réutilisable (ex: intégrations futures)</li><li>Couplage fort front/back</li><li>Moins adapté à un gros ERP multi-équipes</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="monorepo-nestjs" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Monorepo Turborepo — Next.js + NestJS API ⭐ Recommandé</h3>
+      <p>Un monorepo avec 3 packages : <code>apps/backoffice</code> (Next.js), <code>apps/portail</code> (Next.js), <code>apps/api</code> (NestJS REST). Shared packages pour types et utils.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pour</h4><ul><li>API REST OpenAPI 3.0 dès le départ (spec)</li><li>Séparation claire front/back</li><li>NestJS = modules, RBAC, guards natifs</li><li>Types partagés entre tous les apps</li><li>Scalable pour une équipe</li></ul></div>
+        <div class="cons"><h4>Contre</h4><ul><li>Setup initial plus long</li><li>Deux serveurs à gérer en dev</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="nextjs-express" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Monorepo léger — Next.js + Express/Fastify API</h3>
+      <p>Même structure que B mais avec Express ou Fastify côté API. Plus simple que NestJS, moins de conventions.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pour</h4><ul><li>Plus léger que NestJS</li><li>Flexibilité maximale</li></ul></div>
+        <div class="cons"><h4>Contre</h4><ul><li>Moins de structure pour un ERP complexe</li><li>RBAC, modules, guards à implémenter manuellement</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px">Mon choix est <strong>B — Monorepo Turborepo + NestJS</strong>. Réponds dans le terminal pour confirmer ou choisir autrement.</p>

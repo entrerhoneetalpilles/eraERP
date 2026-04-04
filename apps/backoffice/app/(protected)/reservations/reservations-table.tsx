@@ -13,7 +13,10 @@ const columns: ColumnDef<BookingRow>[] = [
     id: "voyageur",
     header: "Voyageur",
     cell: ({ row }) => (
-      <Link href={`/voyageurs/${row.original.guest.id}`} className="text-foreground hover:text-primary">
+      <Link
+        href={`/voyageurs/${row.original.guest.id}`}
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
+      >
         {row.original.guest.prenom} {row.original.guest.nom}
       </Link>
     ),
@@ -22,7 +25,10 @@ const columns: ColumnDef<BookingRow>[] = [
     id: "bien",
     header: "Bien",
     cell: ({ row }) => (
-      <Link href={`/biens/${row.original.property.id}`} className="text-foreground hover:text-primary">
+      <Link
+        href={`/biens/${row.original.property.id}`}
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
+      >
         {row.original.property.nom}
       </Link>
     ),

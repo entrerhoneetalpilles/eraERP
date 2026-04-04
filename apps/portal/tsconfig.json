@@ -2,13 +2,31 @@
   "extends": "@conciergerie/config/tsconfig.nextjs.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./*"],
-      "@conciergerie/db": ["../../packages/db/src/index.ts"],
-      "@conciergerie/types": ["../../packages/types/src/index.ts"],
-      "@conciergerie/ui": ["../../packages/ui/src/index.ts"],
-      "@conciergerie/email": ["../../packages/email/src/index.ts"]
-    }
+      "@/*": [
+        "./*"
+      ],
+      "@conciergerie/db": [
+        "../../packages/db/src/index.ts"
+      ],
+      "@conciergerie/types": [
+        "../../packages/types/src/index.ts"
+      ],
+      "@conciergerie/ui": [
+        "../../packages/ui/src/index.ts"
+      ],
+      "@conciergerie/email": [
+        "../../packages/email/src/index.ts"
+      ]
+    },
+    "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -9,13 +9,13 @@ export default async function PrestatairesPage() {
   const prestataires = await getPrestataires()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Prestataires"
         description={`${prestataires.length} prestataire${prestataires.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/prestataires/new">
-            <Button size="sm">
+            <Button size="sm" className="cursor-pointer">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau prestataire
             </Button>

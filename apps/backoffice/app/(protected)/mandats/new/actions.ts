@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { mandateSchema } from "@/lib/validations/mandate"
 import { createMandate, getNextMandateNumber } from "@/lib/dal/mandates"
 
-export async function createMandateAction(formData: FormData) {
+export async function createMandateAction(_prev: unknown, formData: FormData) {
   const raw = {
     owner_id: formData.get("owner_id"),
     property_id: formData.get("property_id"),

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Button } from "@conciergerie/ui"
 
 type BookingSlot = {
   id: string
@@ -62,32 +63,36 @@ export function PlanningGrid({
   return (
     <div className="space-y-4">
       {/* Month navigation */}
-      <div className="flex items-center gap-4">
-        <button
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => navigate(-1)}
-          className="p-1.5 rounded-md hover:bg-muted transition-colors"
+          className="cursor-pointer"
           aria-label="Mois précédent"
         >
           <ChevronLeft className="w-4 h-4" />
-        </button>
+        </Button>
         <span className="text-sm font-semibold text-foreground capitalize min-w-[160px] text-center">
           {monthLabel}
         </span>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => navigate(1)}
-          className="p-1.5 rounded-md hover:bg-muted transition-colors"
+          className="cursor-pointer"
           aria-label="Mois suivant"
         >
           <ChevronRight className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
 
       {/* Grid */}
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="overflow-x-auto rounded-md border border-border bg-card">
         <table className="min-w-full text-xs border-collapse">
           <thead>
-            <tr className="border-b bg-muted/30">
-              <th className="sticky left-0 bg-muted/30 px-3 py-2 text-left font-medium text-muted-foreground w-40 min-w-[10rem]">
+            <tr className="border-b border-border bg-muted">
+              <th className="sticky left-0 bg-muted px-3 py-2 text-left text-xs font-semibold uppercase tracking-widest text-muted-foreground w-40 min-w-[10rem]">
                 Bien
               </th>
               {days.map((d) => {
@@ -95,7 +100,7 @@ export function PlanningGrid({
                 return (
                   <th
                     key={d}
-                    className={`px-1 py-2 text-center font-medium w-8 min-w-[2rem] ${
+                    className={`px-1 py-2 text-center text-xs font-medium w-8 min-w-[2rem] ${
                       isToday ? "text-primary font-bold" : "text-muted-foreground"
                     }`}
                   >
@@ -106,49 +111,57 @@ export function PlanningGrid({
             </tr>
           </thead>
           <tbody>
-            {properties.map((prop) => {
-              const propBookings = bookings.filter((b) => b.property_id === prop.id)
-              return (
-                <tr key={prop.id} className="border-b last:border-0 hover:bg-muted/10">
-                  <td className="sticky left-0 bg-card hover:bg-muted/10 border-r px-3 py-2 font-medium text-foreground text-xs truncate max-w-[10rem]">
-                    <Link href={`/biens/${prop.id}`} className="hover:text-primary">
-                      {prop.nom}
-                    </Link>
-                  </td>
-                  {days.map((d) => {
-                    const cellDate = new Date(year, month, d)
-                    const booking = propBookings.find((b) => {
-                      const ci = new Date(b.check_in)
-                      const co = new Date(b.check_out)
-                      return cellDate >= ci && cellDate < co
-                    })
-                    // Show guest name on first VISIBLE day (either check-in day or day 1 if carry-over)
-                    const firstVisibleDay = booking
-                      ? Math.max(1, new Date(booking.check_in).getMonth() === month && new Date(booking.check_in).getFullYear() === year
-                          ? new Date(booking.check_in).getDate()
-                          : 1)
-                      : null
-                    const showName = booking ? d === firstVisibleDay : false
-                    return (
-                      <td key={d} className="px-0.5 py-1 text-center align-middle">
-                        {booking ? (
-                          <Link href={`/reservations/${booking.id}`}>
-                            <span
-                              className={`block rounded px-0.5 py-0.5 border text-[10px] leading-tight truncate ${
-                                STATUS_COLORS[booking.statut] ?? "bg-gray-100"
-                              }`}
-                              title={`${booking.guest_nom} — ${booking.statut}`}
-                            >
-                              {showName ? booking.guest_nom.split(" ")[0] : "·"}
-                            </span>
-                          </Link>
-                        ) : null}
-                      </td>
-                    )
-                  })}
-                </tr>
-              )
-            })}
+            {properties.length === 0 ? (
+              <tr>
+                <td colSpan={daysInMonth + 1} className="text-center py-8">
+                  <p className="text-sm text-muted-foreground">Aucun bien actif</p>
+                </td>
+              </tr>
+            ) : (
+              properties.map((prop) => {
+                const propBookings = bookings.filter((b) => b.property_id === prop.id)
+                return (
+                  <tr key={prop.id} className="border-b border-border last:border-0 hover:bg-accent transition-colors duration-100">
+                    <td className="sticky left-0 bg-card hover:bg-accent border-r border-border px-3 py-2 text-sm truncate max-w-[10rem]">
+                      <Link href={`/biens/${prop.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
+                        {prop.nom}
+                      </Link>
+                    </td>
+                    {days.map((d) => {
+                      const cellDate = new Date(year, month, d)
+                      const booking = propBookings.find((b) => {
+                        const ci = new Date(b.check_in)
+                        const co = new Date(b.check_out)
+                        return cellDate >= ci && cellDate < co
+                      })
+                      // Show guest name on first VISIBLE day (either check-in day or day 1 if carry-over)
+                      const firstVisibleDay = booking
+                        ? Math.max(1, new Date(booking.check_in).getMonth() === month && new Date(booking.check_in).getFullYear() === year
+                            ? new Date(booking.check_in).getDate()
+                            : 1)
+                        : null
+                      const showName = booking ? d === firstVisibleDay : false
+                      return (
+                        <td key={d} className="px-0.5 py-1 text-center align-middle">
+                          {booking ? (
+                            <Link href={`/reservations/${booking.id}`} className="cursor-pointer">
+                              <span
+                                className={`block rounded-sm px-0.5 py-0.5 border text-[10px] leading-tight truncate ${
+                                  STATUS_COLORS[booking.statut] ?? "bg-gray-100"
+                                }`}
+                                title={`${booking.guest_nom} — ${booking.statut}`}
+                              >
+                                {showName ? booking.guest_nom.split(" ")[0] : "·"}
+                              </span>
+                            </Link>
+                          ) : null}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })
+            )}
           </tbody>
         </table>
       </div>

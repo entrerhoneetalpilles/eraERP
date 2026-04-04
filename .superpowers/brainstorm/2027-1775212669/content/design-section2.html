@@ -1,0 +1,151 @@
+<h2>Design — Section 2 : Schéma BDD & UI Back-office</h2>
+<p class="subtitle">Modèle de données Prisma + Layout shadcn/ui du back-office</p>
+
+<div class="section">
+  <div class="label">Schéma Prisma — Entités Bloc 1</div>
+  <div class="mockup" style="margin-top:12px">
+    <div class="mockup-header">packages/database/schema.prisma (entités principales)</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:12px;line-height:1.7;overflow-x:auto">
+<pre style="color:#e2e8f0;margin:0">
+<span style="color:#60a5fa">model</span> <span style="color:#4ade80">User</span> {
+  id        String   <span style="color:#f472b6">@id @default(cuid())</span>
+  email     String   <span style="color:#f472b6">@unique</span>
+  role      <span style="color:#facc15">Role</span>     <span style="color:#888">// ADMIN_SI | DIRECTION | GESTIONNAIRE | COMPTABLE | ...</span>
+  createdAt DateTime <span style="color:#f472b6">@default(now())</span>
+}
+
+<span style="color:#60a5fa">model</span> <span style="color:#4ade80">Proprietaire</span> {
+  id          String  <span style="color:#f472b6">@id @default(cuid())</span>
+  type        <span style="color:#facc15">TypeProprietaire</span> <span style="color:#888">// PARTICULIER | SCI | INDIVISION</span>
+  nom         String
+  prenom      String?
+  email       String
+  telephone   String?
+  adresse     Json    <span style="color:#888">// rue, cp, ville, pays</span>
+  biens       <span style="color:#4ade80">Bien[]</span>
+  mandats     <span style="color:#4ade80">Mandat[]</span>
+  compteMandant <span style="color:#4ade80">CompteMandant?</span>
+  createdAt   DateTime <span style="color:#f472b6">@default(now())</span>
+}
+
+<span style="color:#60a5fa">model</span> <span style="color:#4ade80">Bien</span> {
+  id              String  <span style="color:#f472b6">@id @default(cuid())</span>
+  proprietaireId  String
+  proprietaire    <span style="color:#4ade80">Proprietaire</span> <span style="color:#f472b6">@relation(...)</span>
+  type            <span style="color:#facc15">TypeBien</span>  <span style="color:#888">// APPARTEMENT | MAISON | STUDIO | ...</span>
+  adresse         Json
+  surface         Float
+  nbPieces        Int
+  dpe             String?  <span style="color:#888">// A-G</span>
+  loyer           Decimal
+  charges         Decimal
+  photos          String[]
+  mandat          <span style="color:#4ade80">Mandat?</span>
+  baux            <span style="color:#4ade80">Bail[]</span>
+}
+
+<span style="color:#60a5fa">model</span> <span style="color:#4ade80">Mandat</span> {
+  id              String   <span style="color:#f472b6">@id @default(cuid())</span>
+  numero          String   <span style="color:#f472b6">@unique</span>  <span style="color:#888">// Numérotation Hoguet</span>
+  proprietaireId  String
+  bienId          String   <span style="color:#f472b6">@unique</span>
+  dateDebut       DateTime
+  dateFin         DateTime?
+  tauxHonoraires  Decimal  <span style="color:#888">// % du loyer</span>
+  seuilTravaux    Decimal  <span style="color:#888">// Seuil accord proprio pour devis</span>
+  statut          <span style="color:#facc15">StatutMandat</span> <span style="color:#888">// ACTIF | RESILIÉ | SUSPENDU</span>
+  documents       <span style="color:#4ade80">Document[]</span>
+}
+</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Layout Back-office — shadcn/ui</div>
+  <div class="mockup" style="margin-top:12px">
+    <div class="mockup-header">Back-office — Vue Propriétaires</div>
+    <div class="mockup-body" style="padding:0">
+      <div style="display:flex;height:420px">
+        <!-- Sidebar -->
+        <div style="width:200px;background:#0f172a;border-right:1px solid #1e293b;padding:16px;flex-shrink:0">
+          <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:20px;letter-spacing:0.05em">CONCIERGERIE</div>
+          <div style="font-size:12px;color:#94a3b8;margin-bottom:8px;letter-spacing:0.08em">TABLEAU DE BORD</div>
+          <div style="padding:6px 8px;border-radius:6px;background:#1e293b;color:#fff;font-size:13px;margin-bottom:4px">📊 Dashboard</div>
+          <div style="font-size:12px;color:#94a3b8;margin:12px 0 8px;letter-spacing:0.08em">PORTEFEUILLE</div>
+          <div style="padding:6px 8px;border-radius:6px;background:#3b82f6;color:#fff;font-size:13px;margin-bottom:4px">👤 Propriétaires</div>
+          <div style="padding:6px 8px;border-radius:6px;color:#94a3b8;font-size:13px;margin-bottom:4px">🏠 Biens</div>
+          <div style="padding:6px 8px;border-radius:6px;color:#94a3b8;font-size:13px;margin-bottom:4px">📋 Mandats</div>
+          <div style="font-size:12px;color:#94a3b8;margin:12px 0 8px;letter-spacing:0.08em">LOCATAIRES</div>
+          <div style="padding:6px 8px;border-radius:6px;color:#94a3b8;font-size:13px;margin-bottom:4px">👥 Locataires</div>
+          <div style="padding:6px 8px;border-radius:6px;color:#94a3b8;font-size:13px;margin-bottom:4px">📄 Baux</div>
+          <div style="font-size:12px;color:#94a3b8;margin:12px 0 8px;letter-spacing:0.08em">FINANCE</div>
+          <div style="padding:6px 8px;border-radius:6px;color:#94a3b8;font-size:13px;margin-bottom:4px">💶 Quittances</div>
+          <div style="padding:6px 8px;border-radius:6px;color:#94a3b8;font-size:13px;margin-bottom:4px">📊 Comptabilité</div>
+        </div>
+        <!-- Main content -->
+        <div style="flex:1;background:#0f172a;padding:20px;overflow:hidden">
+          <!-- Header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <div>
+              <div style="color:#fff;font-size:18px;font-weight:600">Propriétaires</div>
+              <div style="color:#64748b;font-size:12px">47 propriétaires · 89 biens gérés</div>
+            </div>
+            <div style="background:#3b82f6;color:#fff;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500">+ Nouveau propriétaire</div>
+          </div>
+          <!-- Stats cards -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+            <div style="background:#1e293b;border-radius:8px;padding:14px">
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">PORTEFEUILLE</div>
+              <div style="color:#fff;font-size:22px;font-weight:600;margin-top:4px">47</div>
+              <div style="color:#4ade80;font-size:11px">+3 ce mois</div>
+            </div>
+            <div style="background:#1e293b;border-radius:8px;padding:14px">
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">BIENS GÉRÉS</div>
+              <div style="color:#fff;font-size:22px;font-weight:600;margin-top:4px">89</div>
+              <div style="color:#4ade80;font-size:11px">94% loués</div>
+            </div>
+            <div style="background:#1e293b;border-radius:8px;padding:14px">
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">MANDATS ACTIFS</div>
+              <div style="color:#fff;font-size:22px;font-weight:600;margin-top:4px">82</div>
+              <div style="color:#f59e0b;font-size:11px">7 à renouveler</div>
+            </div>
+          </div>
+          <!-- Table -->
+          <div style="background:#1e293b;border-radius:8px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 80px;gap:0;border-bottom:1px solid #334155;padding:10px 14px">
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">NOM</div>
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">TYPE</div>
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">BIENS</div>
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">SOLDE MANDANT</div>
+              <div style="color:#64748b;font-size:11px;letter-spacing:0.05em">STATUT</div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 80px;padding:10px 14px;border-bottom:1px solid #1e293b;background:#0f172a">
+              <div style="color:#e2e8f0;font-size:13px">Martin, Jean-Pierre</div>
+              <div style="color:#94a3b8;font-size:12px">Particulier</div>
+              <div style="color:#94a3b8;font-size:12px">3</div>
+              <div style="color:#4ade80;font-size:12px">4 820 €</div>
+              <div style="background:#14532d;color:#4ade80;font-size:10px;padding:2px 8px;border-radius:999px;text-align:center">Actif</div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 80px;padding:10px 14px;border-bottom:1px solid #1e293b">
+              <div style="color:#e2e8f0;font-size:13px">SCI Les Lilas</div>
+              <div style="color:#94a3b8;font-size:12px">SCI</div>
+              <div style="color:#94a3b8;font-size:12px">7</div>
+              <div style="color:#4ade80;font-size:12px">12 340 €</div>
+              <div style="background:#14532d;color:#4ade80;font-size:10px;padding:2px 8px;border-radius:999px;text-align:center">Actif</div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 80px;padding:10px 14px">
+              <div style="color:#e2e8f0;font-size:13px">Dubois, Catherine</div>
+              <div style="color:#94a3b8;font-size:12px">Particulier</div>
+              <div style="color:#94a3b8;font-size:12px">1</div>
+              <div style="color:#f59e0b;font-size:12px">0 €</div>
+              <div style="background:#422006;color:#f59e0b;font-size:10px;padding:2px 8px;border-radius:999px;text-align:center">Alerte</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px">Schema BDD + maquette UI validés ? Réponds "ok" dans le terminal pour voir la section 3 (Auth flow + portail propriétaire premium).</p>

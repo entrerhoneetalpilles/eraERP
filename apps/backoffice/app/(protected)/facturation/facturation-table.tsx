@@ -15,7 +15,7 @@ const columns: ColumnDef<InvoiceRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/facturation/${row.original.id}`}
-        className="font-mono text-sm font-medium text-foreground hover:text-primary"
+        className="font-mono text-sm font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.numero_facture}
       </Link>
@@ -27,7 +27,7 @@ const columns: ColumnDef<InvoiceRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/proprietaires/${row.original.owner.id}`}
-        className="text-muted-foreground hover:text-primary"
+        className="text-sm text-muted-foreground hover:text-primary cursor-pointer"
       >
         {row.original.owner.nom}
       </Link>
@@ -42,14 +42,17 @@ const columns: ColumnDef<InvoiceRow>[] = [
   {
     accessorKey: "montant_ht",
     header: "Montant HT",
-    cell: ({ row }) =>
-      row.original.montant_ht.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }),
+    cell: ({ row }) => (
+      <span className="text-sm text-foreground">
+        {row.original.montant_ht.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
+      </span>
+    ),
   },
   {
     accessorKey: "montant_ttc",
     header: "Montant TTC",
     cell: ({ row }) => (
-      <span className="font-semibold">
+      <span className="text-sm font-semibold text-foreground">
         {row.original.montant_ttc.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
       </span>
     ),

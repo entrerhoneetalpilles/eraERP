@@ -23,7 +23,7 @@ const columns: ColumnDef<UserRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/admin/users/${row.original.id}/edit`}
-        className="font-medium text-foreground hover:text-primary"
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.nom}
       </Link>
@@ -33,7 +33,7 @@ const columns: ColumnDef<UserRow>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.email}</span>
+      <span className="text-sm text-muted-foreground">{row.original.email}</span>
     ),
   },
   {
@@ -53,7 +53,7 @@ const columns: ColumnDef<UserRow>[] = [
         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
           row.original.actif
             ? "bg-green-100 text-green-800"
-            : "bg-slate-100 text-slate-600"
+            : "bg-muted text-muted-foreground"
         }`}
       >
         {row.original.actif ? "Actif" : "Inactif"}
@@ -63,8 +63,11 @@ const columns: ColumnDef<UserRow>[] = [
   {
     id: "since",
     header: "Depuis",
-    cell: ({ row }) =>
-      new Date(row.original.createdAt).toLocaleDateString("fr-FR"),
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground tabular-nums">
+        {new Date(row.original.createdAt).toLocaleDateString("fr-FR")}
+      </span>
+    ),
   },
 ]
 

@@ -13,7 +13,10 @@ const columns: ColumnDef<PropertyRow>[] = [
     accessorKey: "nom",
     header: "Bien",
     cell: ({ row }) => (
-      <Link href={`/biens/${row.original.id}`} className="font-medium text-foreground hover:text-primary">
+      <Link
+        href={`/biens/${row.original.id}`}
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
+      >
         {row.original.nom}
       </Link>
     ),
@@ -28,7 +31,10 @@ const columns: ColumnDef<PropertyRow>[] = [
     header: "Propriétaire",
     cell: ({ row }) =>
       row.original.mandate?.owner ? (
-        <Link href={`/proprietaires/${row.original.mandate.owner.id}`} className="text-muted-foreground hover:text-primary">
+        <Link
+          href={`/proprietaires/${row.original.mandate.owner.id}`}
+          className="text-muted-foreground hover:text-primary cursor-pointer"
+        >
           {row.original.mandate.owner.nom}
         </Link>
       ) : (

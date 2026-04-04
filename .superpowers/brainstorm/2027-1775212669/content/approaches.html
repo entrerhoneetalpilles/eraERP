@@ -1,0 +1,57 @@
+<h2>Approches pour le Bloc 1 — Fondations + CRM</h2>
+<p class="subtitle">Architecture validée : Turborepo + NestJS + Next.js. Reste à choisir les outils clés.</p>
+
+<div class="section">
+  <div class="label">ORM & Base de données</div>
+  <div class="options" style="margin-top:12px">
+    <div class="option" data-choice="prisma" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Prisma ⭐ Recommandé</h3>
+        <p>Schema déclaratif, migrations auto, client TypeScript typé à 100%. Standard de l'industrie Next.js/NestJS. Multi-tenant via <code>schema</code> PostgreSQL ou colonne <code>tenantId</code>.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="drizzle" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Drizzle ORM</h3>
+        <p>Plus performant, SQL-first, très léger. Moins mature pour les migrations complexes. Bon choix si performance critique dès le départ.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Authentification</div>
+  <div class="options" style="margin-top:12px">
+    <div class="option" data-choice="better-auth" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Better-Auth + JWT ⭐ Recommandé</h3>
+        <p>Lib auth moderne pour Next.js + NestJS. TOTP/MFA natif, sessions + JWT, OAuth providers (Google/Apple). Hébergé en France possible.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="nextauth" onclick="toggleSelect(this)">
+      <div class="letter">D</div>
+      <div class="content">
+        <h3>NextAuth v5 (Auth.js)</h3>
+        <p>Très répandu, excellent avec Next.js mais plus complexe à intégrer côté NestJS. MFA nécessite un plugin tiers.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Fetching & State côté front</div>
+  <div class="options" style="margin-top:12px">
+    <div class="option" data-choice="tanstack" onclick="toggleSelect(this)">
+      <div class="letter">E</div>
+      <div class="content">
+        <h3>TanStack Query v5 ⭐ Recommandé</h3>
+        <p>Cache, invalidation, optimistic updates. Parfait avec une API REST. Standard pour les back-offices complexes.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px">Ma stack finale recommandée : <strong>Prisma + Better-Auth + TanStack Query</strong>. Réponds "ok" dans le terminal pour valider, ou précise si tu veux changer quelque chose.</p>

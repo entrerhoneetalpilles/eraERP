@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { ownerSchema } from "@/lib/validations/owner"
 import { updateOwner, deleteOwner } from "@/lib/dal/owners"
 
-export async function updateOwnerAction(id: string, formData: FormData) {
+export async function updateOwnerAction(id: string, _prev: unknown, formData: FormData) {
   const raw = {
     type: formData.get("type"),
     nom: formData.get("nom"),

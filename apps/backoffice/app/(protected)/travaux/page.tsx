@@ -9,13 +9,13 @@ export default async function TravauxPage() {
   const workOrders = await getWorkOrders()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Travaux"
         description={`${workOrders.length} ordre${workOrders.length !== 1 ? "s" : ""} de service`}
         actions={
           <Link href="/travaux/new">
-            <Button size="sm">
+            <Button size="sm" className="cursor-pointer">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau travail
             </Button>

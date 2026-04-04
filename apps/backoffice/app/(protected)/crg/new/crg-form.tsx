@@ -1,7 +1,8 @@
 "use client"
 
-import { useActionState } from "react"
+import { useFormState } from "react-dom"
 import Link from "next/link"
+import { Button } from "@conciergerie/ui"
 import { generateCrgAction } from "./actions"
 
 function getDefaultDates() {
@@ -13,72 +14,68 @@ function getDefaultDates() {
 }
 
 export function CrgForm({ owners }: { owners: Array<{ id: string; nom: string }> }) {
-  const [state, formAction] = useActionState(generateCrgAction, null)
+  const [state, formAction] = useFormState(generateCrgAction, null)
   const { firstOfMonth, lastOfMonthStr } = getDefaultDates()
 
   return (
-    <form action={formAction} className="bg-card border rounded-lg p-6 space-y-4">
-      <div>
-        <label htmlFor="owner_id" className="block text-sm font-medium text-foreground mb-1">
-          Propriétaire <span className="text-destructive">*</span>
-        </label>
-        <select
-          id="owner_id"
-          name="owner_id"
-          required
-          className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="">Sélectionner…</option>
-          {owners.map((o) => (
-            <option key={o.id} value={o.id}>{o.nom}</option>
-          ))}
-        </select>
+    <form action={formAction} className="max-w-2xl bg-card rounded-md border border-border overflow-hidden">
+      {/* Section — Propriétaire */}
+      <div className="px-6 py-5 space-y-4">
+        <h2 className="text-sm font-semibold text-foreground">Propriétaire</h2>
+
+        <div className="space-y-2">
+          <label htmlFor="owner_id" className="text-sm font-medium text-foreground">
+            Propriétaire <span className="text-destructive">*</span>
+          </label>
+          <select
+            id="owner_id" name="owner_id" required
+            className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+          >
+            <option value="">Sélectionner…</option>
+            {owners.map((o) => (
+              <option key={o.id} value={o.id}>{o.nom}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="periode_debut" className="block text-sm font-medium text-foreground mb-1">
-          Début de période <span className="text-destructive">*</span>
-        </label>
-        <input
-          id="periode_debut"
-          type="date"
-          name="periode_debut"
-          defaultValue={firstOfMonth}
-          required
-          className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
+      {/* Section — Période */}
+      <div className="px-6 py-5 border-t border-border space-y-4">
+        <h2 className="text-sm font-semibold text-foreground">Période</h2>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="periode_debut" className="text-sm font-medium text-foreground">
+              Début <span className="text-destructive">*</span>
+            </label>
+            <input
+              id="periode_debut" type="date" name="periode_debut"
+              defaultValue={firstOfMonth} required
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="periode_fin" className="text-sm font-medium text-foreground">
+              Fin <span className="text-destructive">*</span>
+            </label>
+            <input
+              id="periode_fin" type="date" name="periode_fin"
+              defaultValue={lastOfMonthStr} required
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        </div>
+
+        {state?.error && <p className="text-xs text-destructive">{state.error}</p>}
       </div>
 
-      <div>
-        <label htmlFor="periode_fin" className="block text-sm font-medium text-foreground mb-1">
-          Fin de période <span className="text-destructive">*</span>
-        </label>
-        <input
-          id="periode_fin"
-          type="date"
-          name="periode_fin"
-          defaultValue={lastOfMonthStr}
-          required
-          className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
-      </div>
-
-      {state?.error && (
-        <p className="text-sm text-destructive">{state.error}</p>
-      )}
-
-      <div className="flex items-center gap-3 pt-2">
-        <button
-          type="submit"
-          className="px-4 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-border bg-muted/30 flex items-center gap-3">
+        <Button type="submit" className="cursor-pointer">
           Générer le CRG
-        </button>
-        <Link
-          href="/crg"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Annuler
+        </Button>
+        <Link href="/crg">
+          <Button type="button" variant="ghost" size="sm" className="cursor-pointer">Annuler</Button>
         </Link>
       </div>
     </form>

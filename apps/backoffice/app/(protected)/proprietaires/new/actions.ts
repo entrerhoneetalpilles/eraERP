@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { ownerSchema } from "@/lib/validations/owner"
 import { createOwner } from "@/lib/dal/owners"
 
-export async function createOwnerAction(formData: FormData) {
+export async function createOwnerAction(_prev: unknown, formData: FormData) {
   const raw = {
     type: formData.get("type"),
     nom: formData.get("nom"),

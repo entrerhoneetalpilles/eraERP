@@ -12,7 +12,7 @@ const columns: ColumnDef<GuestRow>[] = [
     id: "nom",
     header: "Voyageur",
     cell: ({ row }) => (
-      <Link href={`/voyageurs/${row.original.id}`} className="font-medium text-foreground hover:text-primary">
+      <Link href={`/voyageurs/${row.original.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
         {row.original.prenom} {row.original.nom}
       </Link>
     ),
@@ -20,12 +20,16 @@ const columns: ColumnDef<GuestRow>[] = [
   {
     accessorKey: "email",
     header: "Email",
-    cell: ({ row }) => row.original.email ?? "—",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{row.original.email ?? "—"}</span>
+    ),
   },
   {
     accessorKey: "telephone",
     header: "Téléphone",
-    cell: ({ row }) => row.original.telephone ?? "—",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{row.original.telephone ?? "—"}</span>
+    ),
   },
   {
     accessorKey: "nb_sejours",

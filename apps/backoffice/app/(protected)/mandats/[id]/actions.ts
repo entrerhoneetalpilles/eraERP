@@ -5,7 +5,7 @@ import { updateMandateStatut } from "@/lib/dal/mandates"
 
 export async function updateMandateStatutAction(id: string, formData: FormData) {
   const statut = formData.get("statut") as "ACTIF" | "SUSPENDU" | "RESILIE"
-  if (!statut) return { error: "Statut requis" }
+  if (!statut) return
 
   await updateMandateStatut(id, statut)
   revalidatePath(`/mandats/${id}`)

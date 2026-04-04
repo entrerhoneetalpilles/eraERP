@@ -1,0 +1,65 @@
+<h2>Décomposition du projet ERP</h2>
+<p class="subtitle">C'est un grand système — mieux vaut le construire module par module. Par où veux-tu commencer ?</p>
+
+<div class="section">
+  <div class="label">Phase 1 — Lancement (P1)</div>
+  <div class="options" data-multiselect style="margin-top:12px">
+    <div class="option" data-choice="foundation" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Fondations &amp; Architecture</h3>
+        <p>Scaffolding Next.js + API Node.js, auth OAuth2/MFA, base de données PostgreSQL, shadcn UI design system, structure multi-tenant</p>
+      </div>
+    </div>
+    <div class="option" data-choice="crm-biens" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>CRM Propriétaires &amp; Référentiel Biens</h3>
+        <p>Fiche propriétaire, gestion des biens, mandats de gestion, RBAC interne — le cœur métier de base</p>
+      </div>
+    </div>
+    <div class="option" data-choice="locataires-baux" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Locataires, Baux &amp; Quittancement</h3>
+        <p>Gestion des locataires, contrats de bail, appels de loyer, quittances, encaissement SEPA, gestion des impayés</p>
+      </div>
+    </div>
+    <div class="option" data-choice="compta" onclick="toggleSelect(this)">
+      <div class="letter">D</div>
+      <div class="content">
+        <h3>Comptabilité Mandant &amp; Honoraires</h3>
+        <p>Comptes mandants (loi Hoguet), CRG, reversements, facturation honoraires, export FEC</p>
+      </div>
+    </div>
+    <div class="option" data-choice="portail" onclick="toggleSelect(this)">
+      <div class="letter">E</div>
+      <div class="content">
+        <h3>Portail Propriétaire</h3>
+        <p>Interface premium mobile-first, documents, signature électronique, messagerie, dashboard propriétaire</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Phase 2 — ~6 mois</div>
+  <div class="options" data-multiselect style="margin-top:12px">
+    <div class="option" data-choice="travaux" onclick="toggleSelect(this)">
+      <div class="letter">F</div>
+      <div class="content">
+        <h3>Travaux &amp; Prestataires</h3>
+        <p>Ordres de service, devis, suivi d'interventions, imputation au mandant</p>
+      </div>
+    </div>
+    <div class="option" data-choice="reporting" onclick="toggleSelect(this)">
+      <div class="letter">G</div>
+      <div class="content">
+        <h3>Reporting &amp; Dashboards</h3>
+        <p>KPIs direction, rapports propriétaires, exports Excel/PDF, tableaux de bord impayés</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Je recommande de commencer par <strong>A → B → C → D → E</strong> dans cet ordre. Clique pour ajuster si tu veux changer les priorités, puis réponds dans le terminal.</p>

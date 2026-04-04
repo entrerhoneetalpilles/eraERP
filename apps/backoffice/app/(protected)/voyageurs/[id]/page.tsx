@@ -11,24 +11,45 @@ export default async function GuestDetailPage({ params }: { params: { id: string
   return (
     <div className="space-y-6">
       <PageHeader title={`${guest.prenom} ${guest.nom}`} />
-      <div className="bg-white rounded-lg border p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Informations</h2>
-        <div className="space-y-3 text-sm">
-          {guest.email && <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span>{guest.email}</span></div>}
-          {guest.telephone && <div className="flex justify-between"><span className="text-muted-foreground">Téléphone</span><span>{guest.telephone}</span></div>}
-          <div className="flex justify-between"><span className="text-muted-foreground">Langue</span><span className="uppercase">{guest.langue}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Total séjours</span><span className="font-semibold">{guest.nb_sejours}</span></div>
+
+      <div className="bg-card rounded-md border border-border p-5">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Informations</p>
+        <div>
+          {guest.email && (
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Email</span>
+              <span className="text-sm text-foreground font-medium">{guest.email}</span>
+            </div>
+          )}
+          {guest.telephone && (
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Téléphone</span>
+              <span className="text-sm text-foreground font-medium">{guest.telephone}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between py-2 border-b border-border">
+            <span className="text-sm text-muted-foreground">Langue</span>
+            <span className="text-sm text-foreground font-medium uppercase">{guest.langue}</span>
+          </div>
+          <div className="flex items-center justify-between py-2 last:border-0">
+            <span className="text-sm text-muted-foreground">Total séjours</span>
+            <span className="text-sm text-foreground font-semibold">{guest.nb_sejours}</span>
+          </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">Historique des séjours</h2>
+
+      <div className="bg-card rounded-md border border-border p-5">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Historique des séjours</p>
         {guest.bookings.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">Aucun séjour</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Aucun séjour</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-0.5">
             {guest.bookings.map((booking) => (
-              <Link key={booking.id} href={`/reservations/${booking.id}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors">
+              <Link
+                key={booking.id}
+                href={`/reservations/${booking.id}`}
+                className="flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-accent transition-colors duration-100 cursor-pointer"
+              >
                 <div>
                   <p className="text-sm font-medium text-foreground">{booking.property.nom}</p>
                   <p className="text-xs text-muted-foreground">

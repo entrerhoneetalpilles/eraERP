@@ -18,13 +18,13 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
         title={property.nom}
         actions={
           <div className="flex gap-2">
-            <Link href={`/biens/${property.id}/acces`}>
+            <Link href={`/biens/${property.id}/acces`} className="cursor-pointer">
               <Button size="sm" variant="outline">
                 <Key className="w-4 h-4 mr-2" />
                 Accès
               </Button>
             </Link>
-            <Link href={`/biens/${property.id}/edit`}>
+            <Link href={`/biens/${property.id}/edit`} className="cursor-pointer">
               <Button size="sm" variant="outline">
                 <Edit className="w-4 h-4 mr-2" />
                 Modifier
@@ -35,32 +35,32 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg border p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Informations</h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Type</span>
+        <div className="bg-card rounded-md border border-border p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Informations</h2>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Type</span>
               <StatusBadge status={property.type} />
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Statut</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Statut</span>
               <StatusBadge status={property.statut} />
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Superficie</span>
-              <span>{property.superficie} m²</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Superficie</span>
+              <span className="text-sm text-foreground font-medium">{property.superficie} m²</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Chambres</span>
-              <span>{property.nb_chambres}</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Chambres</span>
+              <span className="text-sm text-foreground font-medium">{property.nb_chambres}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Capacité</span>
-              <span>{property.capacite_voyageurs} voyageurs</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Capacité</span>
+              <span className="text-sm text-foreground font-medium">{property.capacite_voyageurs} voyageurs</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Adresse</span>
-              <span className="text-right">
+            <div className="flex items-center justify-between py-2 last:border-0">
+              <span className="text-sm text-muted-foreground">Adresse</span>
+              <span className="text-sm text-foreground font-medium text-right">
                 {adresse?.rue}<br />
                 {adresse?.code_postal} {adresse?.ville}
               </span>
@@ -69,25 +69,28 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
         </div>
 
         {property.mandate && (
-          <div className="bg-white rounded-lg border p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Mandat</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Propriétaire</span>
-                <Link href={`/proprietaires/${property.mandate.owner.id}`} className="text-primary hover:underline">
+          <div className="bg-card rounded-md border border-border p-5">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Mandat</h2>
+            <div>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Propriétaire</span>
+                <Link
+                  href={`/proprietaires/${property.mandate.owner.id}`}
+                  className="text-sm font-medium text-foreground hover:text-primary cursor-pointer"
+                >
                   {property.mandate.owner.nom}
                 </Link>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">N° mandat</span>
-                <span>{property.mandate.numero_mandat}</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">N° mandat</span>
+                <span className="text-sm text-foreground font-medium">{property.mandate.numero_mandat}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Honoraires</span>
-                <span>{property.mandate.taux_honoraires}%</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Honoraires</span>
+                <span className="text-sm text-foreground font-medium">{property.mandate.taux_honoraires}%</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Statut</span>
+              <div className="flex items-center justify-between py-2 last:border-0">
+                <span className="text-sm text-muted-foreground">Statut</span>
                 <StatusBadge status={property.mandate.statut} />
               </div>
             </div>
@@ -95,25 +98,25 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
         )}
       </div>
 
-      <div className="bg-white rounded-lg border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
-            <CalendarDays className="w-4 h-4" />
+      <div className="bg-card rounded-md border border-border p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <CalendarDays className="w-3.5 h-3.5" />
             Réservations récentes
           </h2>
-          <Link href={`/reservations?property=${property.id}`}>
+          <Link href={`/reservations?property=${property.id}`} className="cursor-pointer">
             <Button size="sm" variant="outline">Toutes</Button>
           </Link>
         </div>
         {property.bookings.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">Aucune réservation</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Aucune réservation</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-0.5">
             {property.bookings.map((booking) => (
               <Link
                 key={booking.id}
                 href={`/reservations/${booking.id}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
+                className="flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-accent transition-colors duration-100 cursor-pointer"
               >
                 <div>
                   <p className="text-sm font-medium text-foreground">

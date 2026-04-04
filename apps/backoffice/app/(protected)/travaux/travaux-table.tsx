@@ -15,7 +15,7 @@ const columns: ColumnDef<WorkOrderRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/travaux/${row.original.id}`}
-        className="font-medium text-foreground hover:text-primary"
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.titre}
       </Link>
@@ -27,7 +27,7 @@ const columns: ColumnDef<WorkOrderRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/biens/${row.original.property.id}`}
-        className="text-muted-foreground hover:text-primary"
+        className="text-sm text-muted-foreground hover:text-primary cursor-pointer"
       >
         {row.original.property.nom}
       </Link>
@@ -37,7 +37,7 @@ const columns: ColumnDef<WorkOrderRow>[] = [
     accessorKey: "type",
     header: "Type",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.type}</span>
+      <span className="text-sm text-muted-foreground">{row.original.type}</span>
     ),
   },
   {
@@ -57,19 +57,22 @@ const columns: ColumnDef<WorkOrderRow>[] = [
       row.original.contractor ? (
         <Link
           href={`/prestataires/${row.original.contractor.id}`}
-          className="text-muted-foreground hover:text-primary"
+          className="text-sm text-muted-foreground hover:text-primary cursor-pointer"
         >
           {row.original.contractor.nom}
         </Link>
       ) : (
-        <span className="text-muted-foreground italic">Non assigné</span>
+        <span className="text-sm text-muted-foreground italic">Non assigné</span>
       ),
   },
   {
     id: "date",
     header: "Créé le",
-    cell: ({ row }) =>
-      new Date(row.original.createdAt).toLocaleDateString("fr-FR"),
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground tabular-nums">
+        {new Date(row.original.createdAt).toLocaleDateString("fr-FR")}
+      </span>
+    ),
   },
 ]
 

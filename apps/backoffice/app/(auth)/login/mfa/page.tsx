@@ -48,10 +48,10 @@ export default function MfaPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30">
-      <div className="w-full max-w-sm space-y-8 p-8 bg-card border rounded-lg shadow-sm">
-        <div className="text-center space-y-2">
-          <h1 className="text-xl font-semibold text-foreground">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
             Vérification en deux étapes
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -59,24 +59,24 @@ export default function MfaPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="code">Code de vérification</Label>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="code" className="text-sm font-medium">Code de vérification</Label>
             <Input
               id="code"
               type="text"
               inputMode="numeric"
               maxLength={6}
               placeholder="000000"
-              className="text-center text-2xl tracking-widest"
+              className="text-center text-2xl tracking-widest h-12"
               {...register("code")}
             />
             {errors.code && (
-              <p className="text-sm text-destructive">{errors.code.message}</p>
+              <p className="text-xs text-destructive mt-1">{errors.code.message}</p>
             )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
             {isLoading ? "Vérification…" : "Vérifier"}
           </Button>
         </form>

@@ -16,7 +16,7 @@ export function SuspendMandateButton({ id, statut }: Props) {
   return (
     <form action={action}>
       <input type="hidden" name="statut" value={statut === "ACTIF" ? "SUSPENDU" : "ACTIF"} />
-      <Button type="submit" variant="outline" size="sm">
+      <Button type="submit" variant="outline" size="sm" className="cursor-pointer">
         {statut === "ACTIF" ? "Suspendre" : "Réactiver"}
       </Button>
     </form>

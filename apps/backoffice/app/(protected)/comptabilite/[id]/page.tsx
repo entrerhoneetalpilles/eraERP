@@ -29,7 +29,7 @@ export default async function CompteDetailPage({
         actions={
           <Link
             href="/comptabilite"
-            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             Retour
@@ -39,8 +39,8 @@ export default async function CompteDetailPage({
 
       {/* Soldes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-card border rounded-lg p-5">
-          <p className="text-sm text-muted-foreground">Solde courant</p>
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Solde courant</p>
           <p
             className={`text-2xl font-semibold mt-1 ${
               account.solde_courant >= 0 ? "text-green-700" : "text-red-600"
@@ -52,8 +52,8 @@ export default async function CompteDetailPage({
             })}
           </p>
         </div>
-        <div className="bg-card border rounded-lg p-5">
-          <p className="text-sm text-muted-foreground">Séquestre</p>
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Séquestre</p>
           <p className="text-2xl font-semibold mt-1 text-foreground">
             {account.solde_sequestre.toLocaleString("fr-FR", {
               style: "currency",
@@ -61,8 +61,8 @@ export default async function CompteDetailPage({
             })}
           </p>
         </div>
-        <div className="bg-card border rounded-lg p-5">
-          <p className="text-sm text-muted-foreground">Nb transactions</p>
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Nb transactions</p>
           <p className="text-2xl font-semibold mt-1 text-foreground">
             {account.transactions.length}
           </p>
@@ -70,12 +70,12 @@ export default async function CompteDetailPage({
       </div>
 
       {/* Transactions */}
-      <div className="bg-card border rounded-lg p-6">
-        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+      <div className="bg-card rounded-md border border-border p-5">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           Dernières transactions
-        </h2>
+        </p>
         {account.transactions.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">Aucune transaction</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Aucune transaction</p>
         ) : (
           <div className="divide-y divide-border">
             {account.transactions.map((tx) => (
@@ -111,10 +111,10 @@ export default async function CompteDetailPage({
 
       {/* Rapports CRG */}
       {account.reports.length > 0 && (
-        <div className="bg-card border rounded-lg p-6">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Comptes rendus de gestion (CRG)
-          </h2>
+          </p>
           <div className="divide-y divide-border">
             {account.reports.map((report) => (
               <div key={report.id} className="flex items-center justify-between py-3 text-sm">

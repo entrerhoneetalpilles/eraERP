@@ -17,99 +17,99 @@ export default async function MandateDetailPage({ params }: { params: { id: stri
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg border p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Parties
           </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Propriétaire</span>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Propriétaire</span>
               <Link
                 href={`/proprietaires/${mandate.owner.id}`}
-                className="text-primary hover:underline"
+                className="text-sm font-medium text-foreground hover:text-primary cursor-pointer"
               >
                 {mandate.owner.nom}
               </Link>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Bien</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Bien</span>
               <Link
                 href={`/biens/${mandate.property.id}`}
-                className="text-primary hover:underline"
+                className="text-sm font-medium text-foreground hover:text-primary cursor-pointer"
               >
                 {mandate.property.nom}
               </Link>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Statut</span>
+            <div className="flex items-center justify-between py-2 last:border-0">
+              <span className="text-sm text-muted-foreground">Statut</span>
               <StatusBadge status={mandate.statut} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Conditions financières
           </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Taux honoraires gestion</span>
-              <span className="font-semibold">{mandate.taux_honoraires}%</span>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Taux honoraires gestion</span>
+              <span className="text-sm font-semibold text-foreground">{mandate.taux_honoraires}%</span>
             </div>
             {mandate.honoraires_location != null && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Honoraires location</span>
-                <span>{mandate.honoraires_location}%</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Honoraires location</span>
+                <span className="text-sm text-foreground font-medium">{mandate.honoraires_location}%</span>
               </div>
             )}
             {mandate.taux_horaire_ht != null && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Taux horaire HT</span>
-                <span>{mandate.taux_horaire_ht} €/h</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Taux horaire HT</span>
+                <span className="text-sm text-foreground font-medium">{mandate.taux_horaire_ht} €/h</span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Seuil validation devis</span>
-              <span>{mandate.seuil_validation_devis} €</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Seuil validation devis</span>
+              <span className="text-sm text-foreground font-medium">{mandate.seuil_validation_devis} €</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Reconduction tacite</span>
-              <span>{mandate.reconduction_tacite ? "Oui" : "Non"}</span>
+            <div className="flex items-center justify-between py-2 last:border-0">
+              <span className="text-sm text-muted-foreground">Reconduction tacite</span>
+              <span className="text-sm text-foreground font-medium">{mandate.reconduction_tacite ? "Oui" : "Non"}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+      <div className="bg-card rounded-md border border-border p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           Durée
         </h2>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Date de début</span>
-            <span>{new Date(mandate.date_debut).toLocaleDateString("fr-FR")}</span>
+        <div>
+          <div className="flex items-center justify-between py-2 border-b border-border">
+            <span className="text-sm text-muted-foreground">Date de début</span>
+            <span className="text-sm text-foreground font-medium">{new Date(mandate.date_debut).toLocaleDateString("fr-FR")}</span>
           </div>
           {mandate.date_fin && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Date de fin</span>
-              <span>{new Date(mandate.date_fin).toLocaleDateString("fr-FR")}</span>
+            <div className="flex items-center justify-between py-2 last:border-0">
+              <span className="text-sm text-muted-foreground">Date de fin</span>
+              <span className="text-sm text-foreground font-medium">{new Date(mandate.date_fin).toLocaleDateString("fr-FR")}</span>
             </div>
           )}
         </div>
       </div>
 
       {mandate.avenants.length > 0 && (
-        <div className="bg-white rounded-lg border p-6">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+        <div className="bg-card rounded-md border border-border p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Avenants
           </h2>
-          <div className="space-y-2">
+          <div>
             {mandate.avenants.map((avenant) => (
               <div
                 key={avenant.id}
                 className="flex justify-between items-center text-sm py-2 border-b border-border last:border-0"
               >
-                <span className="font-medium">Avenant n°{avenant.numero}</span>
+                <span className="font-medium text-foreground">Avenant n°{avenant.numero}</span>
                 <span className="text-muted-foreground">
                   {new Date(avenant.date).toLocaleDateString("fr-FR")}
                 </span>

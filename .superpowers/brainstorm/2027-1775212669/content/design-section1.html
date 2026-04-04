@@ -1,0 +1,97 @@
+<h2>Design — Section 1 : Structure Monorepo & Architecture</h2>
+<p class="subtitle">Bloc 1 : Fondations + CRM Propriétaires + Référentiel Biens</p>
+
+<div class="section">
+  <div class="label">Structure Turborepo</div>
+  <div class="mockup" style="margin-top:12px">
+    <div class="mockup-header">📁 conciergerie/ (monorepo)</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:13px;line-height:1.8">
+      <div style="color:#888">apps/</div>
+      <div style="padding-left:20px">
+        <span style="color:#4ade80">backoffice/</span> <span style="color:#888">— Next.js 15 · Interface interne (gestionnaires, comptables, direction)</span><br>
+        <span style="color:#60a5fa">portail/</span> <span style="color:#888">— Next.js 15 · Espace propriétaire premium (SSR, mobile-first)</span><br>
+        <span style="color:#f472b6">api/</span> <span style="color:#888">— NestJS · REST API OpenAPI 3.0 · Backend métier</span>
+      </div>
+      <div style="color:#888;margin-top:8px">packages/</div>
+      <div style="padding-left:20px">
+        <span style="color:#facc15">database/</span> <span style="color:#888">— Prisma schema + client + migrations PostgreSQL</span><br>
+        <span style="color:#facc15">types/</span> <span style="color:#888">— DTOs et types partagés (front ↔ API)</span><br>
+        <span style="color:#facc15">ui/</span> <span style="color:#888">— Composants shadcn/ui partagés + design tokens</span><br>
+        <span style="color:#facc15">config/</span> <span style="color:#888">— ESLint, TypeScript, Tailwind configs partagées</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Flux de données</div>
+  <div class="mockup" style="margin-top:12px">
+    <div class="mockup-header">Architecture Request Flow</div>
+    <div class="mockup-body" style="text-align:center;padding:20px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+        <div style="background:#1e293b;border:1px solid #4ade80;border-radius:8px;padding:12px 16px;color:#4ade80;font-size:13px">
+          <div style="font-weight:bold">Back-office</div>
+          <div style="color:#888;font-size:11px">Next.js 15<br>TanStack Query</div>
+        </div>
+        <div style="color:#888;font-size:20px">→</div>
+        <div style="background:#1e293b;border:1px solid #f472b6;border-radius:8px;padding:12px 16px;color:#f472b6;font-size:13px">
+          <div style="font-weight:bold">API NestJS</div>
+          <div style="color:#888;font-size:11px">REST + OpenAPI<br>Guards RBAC<br>Better-Auth JWT</div>
+        </div>
+        <div style="color:#888;font-size:20px">→</div>
+        <div style="background:#1e293b;border:1px solid #facc15;border-radius:8px;padding:12px 16px;color:#facc15;font-size:13px">
+          <div style="font-weight:bold">PostgreSQL</div>
+          <div style="color:#888;font-size:11px">Prisma ORM<br>Multi-tenant</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <div style="background:#1e293b;border:1px solid #60a5fa;border-radius:8px;padding:12px 16px;color:#60a5fa;font-size:13px">
+          <div style="font-weight:bold">Portail</div>
+          <div style="color:#888;font-size:11px">Next.js 15<br>SSR + PWA</div>
+        </div>
+        <div style="color:#888;font-size:20px">→</div>
+        <div style="background:#1e293b;border:1px solid #f472b6;border-radius:8px;padding:12px 16px;color:#f472b6;font-size:13px">
+          <div style="font-weight:bold">API NestJS</div>
+          <div style="color:#888;font-size:11px">Même API<br>Scope propriétaire</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Modules NestJS — Bloc 1</div>
+  <div class="mockup" style="margin-top:12px">
+    <div class="mockup-header">apps/api/src/modules/</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:13px">
+        <div style="background:#1e293b;border-radius:6px;padding:10px">
+          <div style="color:#f472b6;font-weight:bold">auth/</div>
+          <div style="color:#888;font-size:11px;margin-top:4px">Login, JWT, MFA TOTP, refresh tokens, guards</div>
+        </div>
+        <div style="background:#1e293b;border-radius:6px;padding:10px">
+          <div style="color:#f472b6;font-weight:bold">users/</div>
+          <div style="color:#888;font-size:11px;margin-top:4px">Utilisateurs internes, RBAC (6 profils), permissions</div>
+        </div>
+        <div style="background:#1e293b;border-radius:6px;padding:10px">
+          <div style="color:#4ade80;font-weight:bold">proprietaires/</div>
+          <div style="color:#888;font-size:11px;margin-top:4px">CRM : fiche propriétaire, contacts, historique</div>
+        </div>
+        <div style="background:#1e293b;border-radius:6px;padding:10px">
+          <div style="color:#4ade80;font-weight:bold">biens/</div>
+          <div style="color:#888;font-size:11px;margin-top:4px">Référentiel biens, caractéristiques, photos, DPE</div>
+        </div>
+        <div style="background:#1e293b;border-radius:6px;padding:10px">
+          <div style="color:#4ade80;font-weight:bold">mandats/</div>
+          <div style="color:#888;font-size:11px;margin-top:4px">Mandats de gestion, conditions, renouvellements</div>
+        </div>
+        <div style="background:#1e293b;border-radius:6px;padding:10px">
+          <div style="color:#60a5fa;font-weight:bold">storage/</div>
+          <div style="color:#888;font-size:11px;margin-top:4px">Upload S3-compatible (OVH), documents, photos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px">Est-ce que cette structure te convient ? Réponds dans le terminal ("ok" ou ajustements).</p>

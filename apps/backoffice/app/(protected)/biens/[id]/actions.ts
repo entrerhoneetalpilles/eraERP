@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { propertySchema } from "@/lib/validations/property"
 import { updateProperty, upsertPropertyAccess } from "@/lib/dal/properties"
 
-export async function updatePropertyAction(id: string, formData: FormData) {
+export async function updatePropertyAction(id: string, _prev: unknown, formData: FormData) {
   const raw = {
     nom: formData.get("nom"),
     type: formData.get("type"),
@@ -32,7 +32,7 @@ export async function updatePropertyAction(id: string, formData: FormData) {
   redirect(`/biens/${id}`)
 }
 
-export async function updatePropertyAccessAction(property_id: string, formData: FormData) {
+export async function updatePropertyAccessAction(property_id: string, _prev: unknown, formData: FormData) {
   const data = {
     type_acces: formData.get("type_acces") as "BOITE_CLES" | "CODE" | "AGENT" | "SERRURE_CONNECTEE",
     code_acces: (formData.get("code_acces") as string) || undefined,

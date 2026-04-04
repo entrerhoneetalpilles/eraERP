@@ -15,7 +15,7 @@ const columns: ColumnDef<MandateRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/mandats/${row.original.id}`}
-        className="font-mono text-sm text-foreground hover:text-primary"
+        className="font-mono text-sm font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.numero_mandat}
       </Link>
@@ -27,7 +27,7 @@ const columns: ColumnDef<MandateRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/proprietaires/${row.original.owner.id}`}
-        className="text-foreground hover:text-primary"
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.owner.nom}
       </Link>
@@ -39,7 +39,7 @@ const columns: ColumnDef<MandateRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/biens/${row.original.property.id}`}
-        className="text-foreground hover:text-primary"
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.property.nom}
       </Link>

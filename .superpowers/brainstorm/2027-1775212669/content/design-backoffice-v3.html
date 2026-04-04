@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back-office — Short-term rental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #ffffff; color: #09090b; font-size: 14px; }
+
+  /* ---- Layout ---- */
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    width: 232px; flex-shrink: 0;
+    border-right: 1px solid hsl(240 5.9% 90%);
+    background: hsl(0 0% 100%);
+    display: flex; flex-direction: column;
+  }
+  .sidebar-header {
+    height: 56px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px;
+    border-bottom: 1px solid hsl(240 5.9% 90%);
+    flex-shrink: 0;
+  }
+  .brand-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: hsl(240 5.9% 10%);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-icon svg { width: 14px; height: 14px; color: white; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .brand-name { font-size: 13.5px; font-weight: 600; color: hsl(240 5.9% 10%); letter-spacing: -0.01em; line-height: 1.2; }
+  .brand-type { font-size: 11px; color: hsl(240 3.8% 46.1%); font-weight: 400; }
+
+  .sidebar-nav { flex: 1; padding: 8px; overflow-y: auto; }
+
+  .nav-label {
+    font-size: 10.5px; font-weight: 600;
+    color: hsl(240 3.8% 60%);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 10px 8px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    color: hsl(240 3.8% 46.1%);
+    cursor: pointer; margin-bottom: 1px; user-select: none;
+  }
+  .nav-item:hover { background: hsl(240 4.8% 95.9%); color: hsl(240 5.9% 10%); }
+  .nav-item.active { background: hsl(240 4.8% 95.9%); color: hsl(240 5.9% 10%); font-weight: 600; }
+  .nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid hsl(240 5.9% 90%);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: hsl(240 5.9% 10%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: white; flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+  .user-name { font-size: 12.5px; font-weight: 600; }
+  .user-role { font-size: 11px; color: hsl(240 3.8% 46.1%); }
+
+  /* ---- Main ---- */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: hsl(0 0% 100%); }
+
+  .topbar {
+    height: 56px; flex-shrink: 0;
+    border-bottom: 1px solid hsl(240 5.9% 90%);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 6px; }
+  .topbar-crumb { font-size: 13px; color: hsl(240 3.8% 46.1%); }
+  .topbar-crumb-sep { color: hsl(240 3.8% 70%); }
+  .topbar-crumb-active { font-size: 13px; font-weight: 500; color: hsl(240 5.9% 10%); }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+  /* Buttons — shadcn style */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 6px; font-size: 13px; font-weight: 500;
+    padding: 0 14px; height: 34px; cursor: pointer;
+    font-family: inherit; transition: background 0.1s, box-shadow 0.1s;
+    white-space: nowrap;
+  }
+  .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-outline {
+    background: transparent; color: hsl(240 5.9% 10%);
+    border: 1px solid hsl(240 5.9% 90%);
+  }
+  .btn-outline:hover { background: hsl(240 4.8% 95.9%); }
+  .btn-default {
+    background: hsl(240 5.9% 10%); color: white; border: none;
+  }
+  .btn-default:hover { background: hsl(240 5.9% 20%); }
+
+  /* Content */
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.025em; }
+  .page-desc { font-size: 13px; color: hsl(240 3.8% 46.1%); margin-top: 2px; }
+
+  /* Cards */
+  .card {
+    border: 1px solid hsl(240 5.9% 90%);
+    border-radius: 8px;
+    background: hsl(0 0% 100%);
+  }
+  .card-header { padding: 16px 20px 0; }
+  .card-title { font-size: 13.5px; font-weight: 600; }
+  .card-desc { font-size: 12.5px; color: hsl(240 3.8% 46.1%); margin-top: 2px; }
+  .card-content { padding: 16px 20px; }
+
+  /* KPI grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi-value { font-size: 26px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin: 6px 0 4px; }
+  .kpi-delta { display: flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 500; }
+  .kpi-delta.green { color: hsl(142 76% 36%); }
+  .kpi-delta.amber { color: hsl(38 92% 50%); }
+  .kpi-delta.muted { color: hsl(240 3.8% 46.1%); }
+  .kpi-delta svg { width: 12px; height: 12px; }
+
+  /* Grid 2 cols */
+  .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+
+  /* Table */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; font-size: 11.5px; font-weight: 600;
+    color: hsl(240 3.8% 46.1%); letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 10px 16px; border-bottom: 1px solid hsl(240 5.9% 90%);
+    background: hsl(240 4.8% 98%);
+  }
+  .data-table td {
+    padding: 11px 16px; border-bottom: 1px solid hsl(240 5.9% 95%);
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: hsl(240 4.8% 98%); }
+  .cell-main { font-size: 13px; font-weight: 500; }
+  .cell-sub { font-size: 11.5px; color: hsl(240 3.8% 46.1%); margin-top: 1px; }
+  .cell-muted { font-size: 13px; color: hsl(240 3.8% 46.1%); }
+  .cell-amount { font-size: 13.5px; font-weight: 600; }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11.5px; font-weight: 500; white-space: nowrap;
+  }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .badge-success { background: hsl(142 76% 95%); color: hsl(142 76% 30%); }
+  .badge-warning { background: hsl(38 92% 95%); color: hsl(38 80% 40%); }
+  .badge-info    { background: hsl(221 83% 95%); color: hsl(221 83% 43%); }
+  .badge-muted   { background: hsl(240 4.8% 95.9%); color: hsl(240 3.8% 46.1%); }
+
+  /* Channels */
+  .channel-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600;
+    border: 1px solid;
+  }
+  .ch-airbnb { background: #fff1ef; color: #ff5a5f; border-color: #ffc9c7; }
+  .ch-booking { background: #eef4ff; color: #003580; border-color: #c5d8ff; }
+  .ch-direct  { background: hsl(240 4.8% 95.9%); color: hsl(240 3.8% 46.1%); border-color: hsl(240 5.9% 90%); }
+
+  /* Mini calendar strip */
+  .cal-strip { display: flex; gap: 3px; }
+  .cal-day {
+    width: 28px; text-align: center;
+    font-size: 10px; border-radius: 4px; overflow: hidden;
+  }
+  .cal-day-label { color: hsl(240 3.8% 46.1%); font-weight: 500; padding: 2px 0; }
+  .cal-day-num { padding: 3px 2px; font-size: 11px; font-weight: 600; }
+  .cal-free  .cal-day-num { background: hsl(142 76% 95%); color: hsl(142 76% 30%); }
+  .cal-busy  .cal-day-num { background: hsl(240 5.9% 10%); color: white; }
+  .cal-check .cal-day-num { background: hsl(38 92% 95%); color: hsl(38 80% 40%); }
+
+  /* Action btn small */
+  .icon-btn {
+    width: 30px; height: 30px; border-radius: 6px;
+    border: 1px solid hsl(240 5.9% 90%); background: transparent;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; color: hsl(240 3.8% 46.1%);
+  }
+  .icon-btn svg { width: 14px; height: 14px; }
+
+  /* Search */
+  .search-wrap { position: relative; }
+  .search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: hsl(240 3.8% 46.1%); }
+  .search-input {
+    width: 240px; height: 34px;
+    border: 1px solid hsl(240 5.9% 90%); border-radius: 6px;
+    padding: 0 12px 0 30px; font-size: 13px; font-family: inherit;
+    color: hsl(240 5.9% 10%); background: transparent; outline: none;
+  }
+  .search-input::placeholder { color: hsl(240 3.8% 60%); }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .toolbar-left { display: flex; align-items: center; gap: 8px; }
+
+  /* Table footer */
+  .table-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; border-top: 1px solid hsl(240 5.9% 90%);
+    background: hsl(240 4.8% 98%);
+  }
+  .tfoot-info { font-size: 12px; color: hsl(240 3.8% 46.1%); }
+  .pagination { display: flex; gap: 3px; }
+  .page-btn {
+    width: 30px; height: 30px; border-radius: 6px;
+    border: 1px solid hsl(240 5.9% 90%); background: transparent;
+    font-size: 12.5px; font-family: inherit; font-weight: 500;
+    color: hsl(240 3.8% 46.1%); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .page-btn.active { background: hsl(240 5.9% 10%); color: white; border-color: hsl(240 5.9% 10%); }
+
+  /* Separator */
+  .sep { height: 1px; background: hsl(240 5.9% 90%); margin: 0; }
+
+  /* Upcoming stays panel */
+  .stay-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid hsl(240 5.9% 95%); }
+  .stay-item:last-child { border-bottom: none; }
+  .stay-dates { width: 68px; flex-shrink: 0; text-align: center; }
+  .stay-date-main { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+  .stay-date-month { font-size: 11px; color: hsl(240 3.8% 46.1%); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stay-info { flex: 1; min-width: 0; }
+  .stay-guest { font-size: 13px; font-weight: 500; }
+  .stay-meta { font-size: 11.5px; color: hsl(240 3.8% 46.1%); margin-top: 2px; }
+  .stay-amount { font-size: 13.5px; font-weight: 600; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Conciergerie</div>
+        <div class="brand-type">Location courte durée</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Vue d'ensemble</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+
+      <div class="nav-label">Portefeuille</div>
+      <div class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Propriétaires
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Biens
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Mandats
+      </div>
+
+      <div class="nav-label">Réservations</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendrier
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Réservations
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Voyageurs
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Channel Manager
+      </div>
+
+      <div class="nav-label">Finance</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Revenus
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Comptabilité
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Reporting
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">SB</div>
+      <div style="flex:1;min-width:0">
+        <div class="user-name">Sophie Bernard</div>
+        <div class="user-role">Gestionnaire</div>
+      </div>
+      <button class="icon-btn" style="border:none;background:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-crumb">Portefeuille</span>
+        <span class="topbar-crumb-sep">/</span>
+        <span class="topbar-crumb-active">Propriétaires</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-outline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exporter
+        </button>
+        <button class="btn btn-default">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nouveau propriétaire
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Propriétaires</div>
+          <div class="page-desc">47 propriétaires · 89 logements gérés · Dernière sync il y a 2 min</div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="card">
+          <div class="card-content">
+            <div class="card-desc">Portefeuille</div>
+            <div class="kpi-value">47</div>
+            <div class="kpi-delta green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              +3 ce mois
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content">
+            <div class="card-desc">Taux d'occupation</div>
+            <div class="kpi-value">87%</div>
+            <div class="kpi-delta green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              +4 pts vs mois dernier
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content">
+            <div class="card-desc">RevPAR moyen</div>
+            <div class="kpi-value">142€</div>
+            <div class="kpi-delta green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              +12€ vs mois dernier
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content">
+            <div class="card-desc">Reversements à venir</div>
+            <div class="kpi-value">38 400€</div>
+            <div class="kpi-delta amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              7 mandats à renouveler
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-col grid -->
+      <div class="grid-2">
+
+        <!-- Table -->
+        <div class="card" style="overflow:hidden">
+          <div style="padding:14px 16px 0">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <div class="search-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input class="search-input" placeholder="Rechercher…" />
+                </div>
+                <button class="btn btn-outline" style="height:34px;font-size:12.5px">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  Filtres
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Propriétaire</th>
+                <th>Logements</th>
+                <th>Canaux</th>
+                <th>Taux occ.</th>
+                <th>Statut</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="cell-main">Martin, Jean-Pierre</div>
+                  <div class="cell-sub">jean-pierre.martin@gmail.com</div>
+                </td>
+                <td class="cell-muted">3</td>
+                <td>
+                  <span class="channel-pill ch-airbnb">Airbnb</span>
+                </td>
+                <td><span style="font-size:13px;font-weight:600;color:hsl(142 76% 30%)">91%</span></td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>Actif</span></td>
+                <td><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="cell-main">SCI Les Lilas</div>
+                  <div class="cell-sub">contact@scileslias.fr</div>
+                </td>
+                <td class="cell-muted">7</td>
+                <td style="display:flex;gap:4px;flex-wrap:wrap;padding-top:11px">
+                  <span class="channel-pill ch-airbnb">Airbnb</span>
+                  <span class="channel-pill ch-booking">Booking</span>
+                </td>
+                <td><span style="font-size:13px;font-weight:600;color:hsl(142 76% 30%)">84%</span></td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>Actif</span></td>
+                <td><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="cell-main">Dubois, Catherine</div>
+                  <div class="cell-sub">c.dubois@orange.fr</div>
+                </td>
+                <td class="cell-muted">1</td>
+                <td>
+                  <span class="channel-pill ch-direct">Direct</span>
+                </td>
+                <td><span style="font-size:13px;font-weight:600;color:hsl(38 80% 40%)">62%</span></td>
+                <td><span class="badge badge-warning"><span class="badge-dot"></span>Alerte</span></td>
+                <td><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="cell-main">Indivision Moreau</div>
+                  <div class="cell-sub">moreau.famille@wanadoo.fr</div>
+                </td>
+                <td class="cell-muted">2</td>
+                <td style="display:flex;gap:4px;flex-wrap:wrap;padding-top:11px">
+                  <span class="channel-pill ch-airbnb">Airbnb</span>
+                  <span class="channel-pill ch-booking">Booking</span>
+                </td>
+                <td><span style="font-size:13px;font-weight:600;color:hsl(142 76% 30%)">88%</span></td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>Actif</span></td>
+                <td><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="cell-main">Leroy, François</div>
+                  <div class="cell-sub">f.leroy@outlook.com</div>
+                </td>
+                <td class="cell-muted">1</td>
+                <td>
+                  <span class="channel-pill ch-airbnb">Airbnb</span>
+                </td>
+                <td><span style="font-size:13px;font-weight:600;color:hsl(240 3.8% 46.1%)">—</span></td>
+                <td><span class="badge badge-info"><span class="badge-dot"></span>En intégration</span></td>
+                <td><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="table-footer">
+            <div class="tfoot-info">1–5 sur 47 propriétaires</div>
+            <div class="pagination">
+              <button class="page-btn">‹</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">›</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar panel: upcoming -->
+        <div class="card" style="overflow:hidden">
+          <div class="card-header">
+            <div class="card-title">Prochains séjours</div>
+            <div class="card-desc">Check-ins dans les 7 jours</div>
+          </div>
+          <div class="card-content">
+            <div class="stay-item">
+              <div class="stay-dates">
+                <div class="stay-date-main">04</div>
+                <div class="stay-date-month">Avr</div>
+              </div>
+              <div class="stay-info">
+                <div class="stay-guest">Emma Leclerc</div>
+                <div class="stay-meta">Studio Marais · 3 nuits · <span class="channel-pill ch-airbnb" style="font-size:10px;padding:1px 5px">Airbnb</span></div>
+              </div>
+              <div class="stay-amount">486€</div>
+            </div>
+            <div class="stay-item">
+              <div class="stay-dates">
+                <div class="stay-date-main">05</div>
+                <div class="stay-date-month">Avr</div>
+              </div>
+              <div class="stay-info">
+                <div class="stay-guest">James & Sarah W.</div>
+                <div class="stay-meta">T2 Bastille · 5 nuits · <span class="channel-pill ch-booking" style="font-size:10px;padding:1px 5px">Booking</span></div>
+              </div>
+              <div class="stay-amount">970€</div>
+            </div>
+            <div class="stay-item">
+              <div class="stay-dates">
+                <div class="stay-date-main">07</div>
+                <div class="stay-date-month">Avr</div>
+              </div>
+              <div class="stay-info">
+                <div class="stay-guest">Marc Fontaine</div>
+                <div class="stay-meta">Loft Nation · 2 nuits · <span class="channel-pill ch-direct" style="font-size:10px;padding:1px 5px">Direct</span></div>
+              </div>
+              <div class="stay-amount">360€</div>
+            </div>
+            <div class="stay-item">
+              <div class="stay-dates">
+                <div class="stay-date-main">08</div>
+                <div class="stay-date-month">Avr</div>
+              </div>
+              <div class="stay-info">
+                <div class="stay-guest">Liu Yang</div>
+                <div class="stay-meta">Studio Marais · 7 nuits · <span class="channel-pill ch-airbnb" style="font-size:10px;padding:1px 5px">Airbnb</span></div>
+              </div>
+              <div class="stay-amount">1 134€</div>
+            </div>
+            <div style="margin-top:12px">
+              <button class="btn btn-outline" style="width:100%;justify-content:center;height:32px;font-size:12.5px">
+                Voir toutes les réservations
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

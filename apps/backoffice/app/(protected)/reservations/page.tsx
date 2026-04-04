@@ -9,12 +9,12 @@ export default async function ReservationsPage() {
   const bookings = await getBookings()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Réservations"
         description={`${bookings.length} réservation${bookings.length !== 1 ? "s" : ""}`}
         actions={
-          <Link href="/reservations/new">
+          <Link href="/reservations/new" className="cursor-pointer">
             <Button size="sm">
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle réservation

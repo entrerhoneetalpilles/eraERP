@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useFormState } from "react-dom"
 import Link from "next/link"
 import { PageHeader } from "@/components/ui/page-header"
 import { Button, Input, Label } from "@conciergerie/ui"
@@ -10,15 +10,15 @@ import { ArrowLeft } from "lucide-react"
 const initialState = { error: null as any }
 
 export default function NewFacturePage() {
-  const [state, formAction, isPending] = useActionState(createFactureAction, initialState)
+  const [state, formAction, isPending] = useFormState(createFactureAction, initialState)
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Nouvelle facture d'honoraires"
         actions={
           <Link href="/facturation">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="cursor-pointer">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour
             </Button>
@@ -26,58 +26,69 @@ export default function NewFacturePage() {
         }
       />
 
-      <form action={formAction} className="max-w-lg space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="owner_id">ID Propriétaire</Label>
-          <Input id="owner_id" name="owner_id" placeholder="cuid du propriétaire" />
-          {state?.error?.owner_id && (
-            <p className="text-sm text-destructive">{state.error.owner_id[0]}</p>
-          )}
-        </div>
+      <form action={formAction} className="max-w-2xl bg-card rounded-md border border-border overflow-hidden">
+        {/* Section — Destinataire */}
+        <div className="px-6 py-5 space-y-4">
+          <h2 className="text-sm font-semibold text-foreground">Destinataire</h2>
 
-        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="periode_debut">Début de période</Label>
-            <Input id="periode_debut" name="periode_debut" type="date" />
-            {state?.error?.periode_debut && (
-              <p className="text-sm text-destructive">{state.error.periode_debut[0]}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="periode_fin">Fin de période</Label>
-            <Input id="periode_fin" name="periode_fin" type="date" />
-            {state?.error?.periode_fin && (
-              <p className="text-sm text-destructive">{state.error.periode_fin[0]}</p>
-            )}
+            <Label htmlFor="owner_id" className="text-sm font-medium">ID Propriétaire</Label>
+            <Input id="owner_id" name="owner_id" placeholder="Identifiant du propriétaire" className="h-10" />
+            {state?.error?.owner_id && <p className="text-xs text-destructive">{state.error.owner_id[0]}</p>}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="montant_ht">Montant HT (€)</Label>
-            <Input id="montant_ht" name="montant_ht" type="number" step="0.01" placeholder="350.00" />
-            {state?.error?.montant_ht && (
-              <p className="text-sm text-destructive">{state.error.montant_ht[0]}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tva_rate">Taux TVA</Label>
-            <select
-              id="tva_rate"
-              name="tva_rate"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              defaultValue="0.20"
-            >
-              <option value="0">0% (exonéré)</option>
-              <option value="0.10">10%</option>
-              <option value="0.20">20%</option>
-            </select>
+        {/* Section — Période */}
+        <div className="px-6 py-5 border-t border-border space-y-4">
+          <h2 className="text-sm font-semibold text-foreground">Période</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="periode_debut" className="text-sm font-medium">Début</Label>
+              <Input id="periode_debut" name="periode_debut" type="date" className="h-10" />
+              {state?.error?.periode_debut && <p className="text-xs text-destructive">{state.error.periode_debut[0]}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="periode_fin" className="text-sm font-medium">Fin</Label>
+              <Input id="periode_fin" name="periode_fin" type="date" className="h-10" />
+              {state?.error?.periode_fin && <p className="text-xs text-destructive">{state.error.periode_fin[0]}</p>}
+            </div>
           </div>
         </div>
 
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Création…" : "Créer la facture"}
-        </Button>
+        {/* Section — Montants */}
+        <div className="px-6 py-5 border-t border-border space-y-4">
+          <h2 className="text-sm font-semibold text-foreground">Montants</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="montant_ht" className="text-sm font-medium">Montant HT (€)</Label>
+              <Input id="montant_ht" name="montant_ht" type="number" step="0.01" placeholder="350.00" className="h-10" />
+              {state?.error?.montant_ht && <p className="text-xs text-destructive">{state.error.montant_ht[0]}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tva_rate" className="text-sm font-medium">Taux TVA</Label>
+              <select
+                id="tva_rate" name="tva_rate" defaultValue="0.20"
+                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+              >
+                <option value="0">0% (exonéré)</option>
+                <option value="0.10">10%</option>
+                <option value="0.20">20%</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-border bg-muted/30 flex items-center gap-3">
+          <Button type="submit" disabled={isPending} className="cursor-pointer">
+            {isPending ? "Création…" : "Créer la facture"}
+          </Button>
+          <Link href="/facturation">
+            <Button type="button" variant="ghost" size="sm" className="cursor-pointer">Annuler</Button>
+          </Link>
+        </div>
       </form>
     </div>
   )

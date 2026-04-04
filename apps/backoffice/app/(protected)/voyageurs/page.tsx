@@ -6,7 +6,7 @@ export default async function VoyageursPage() {
   const guests = await getGuests()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Voyageurs"
         description={`${guests.length} voyageur${guests.length !== 1 ? "s" : ""}`}

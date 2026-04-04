@@ -9,12 +9,12 @@ export default async function BiensPage() {
   const properties = await getProperties()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Biens"
         description={`${properties.length} bien${properties.length !== 1 ? "s" : ""}`}
         actions={
-          <Link href="/biens/new">
+          <Link href="/biens/new" className="cursor-pointer">
             <Button size="sm">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau bien

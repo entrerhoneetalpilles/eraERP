@@ -9,12 +9,12 @@ export default async function ProprietairesPage() {
   const owners = await getOwners()
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Propriétaires"
         description={`${owners.length} propriétaire${owners.length !== 1 ? "s" : ""}`}
         actions={
-          <Link href="/proprietaires/new">
+          <Link href="/proprietaires/new" className="cursor-pointer">
             <Button size="sm">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau propriétaire

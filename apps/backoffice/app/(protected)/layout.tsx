@@ -19,11 +19,11 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-background">
       <Sidebar />
       <Header />
-      <main className="pl-64 pt-16">
-        <div className="p-6">{children}</div>
+      <main className="pl-64 pt-14 min-h-screen">
+        <div className="p-6 max-w-[1600px]">{children}</div>
       </main>
     </div>
   )

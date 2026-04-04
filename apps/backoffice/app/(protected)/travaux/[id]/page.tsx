@@ -52,7 +52,7 @@ export default async function WorkOrderDetailPage({
               >
                 <button
                   type="submit"
-                  className="px-3 py-1.5 text-sm rounded-md border border-input bg-background hover:bg-muted transition-colors"
+                  className="px-3 py-1.5 text-sm rounded-md border border-border bg-background hover:bg-accent transition-colors duration-100 cursor-pointer"
                 >
                   {action.label}
                 </button>
@@ -63,39 +63,39 @@ export default async function WorkOrderDetailPage({
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Détails
-          </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Bien</span>
-              <Link href={`/biens/${wo.property.id}`} className="text-primary hover:underline">
+          </p>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Bien</span>
+              <Link href={`/biens/${wo.property.id}`} className="text-sm font-medium text-primary hover:underline cursor-pointer">
                 {wo.property.nom}
               </Link>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Type</span>
-              <span className="text-foreground">{wo.type}</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Type</span>
+              <span className="text-sm text-foreground font-medium">{wo.type}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Urgence</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Urgence</span>
               <StatusBadge status={wo.urgence} />
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Statut</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Statut</span>
               <StatusBadge status={wo.statut} />
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Imputable à</span>
-              <span className="text-foreground">
+            <div className={`flex items-center justify-between py-2 ${wo.contractor ? "border-b border-border" : ""}`}>
+              <span className="text-sm text-muted-foreground">Imputable à</span>
+              <span className="text-sm text-foreground font-medium">
                 {wo.imputable_a === "PROPRIETAIRE" ? "Propriétaire" : "Société"}
               </span>
             </div>
             {wo.contractor && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Prestataire</span>
-                <Link href={`/prestataires/${wo.contractor.id}`} className="text-primary hover:underline">
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-muted-foreground">Prestataire</span>
+                <Link href={`/prestataires/${wo.contractor.id}`} className="text-sm font-medium text-primary hover:underline cursor-pointer">
                   {wo.contractor.nom}
                 </Link>
               </div>
@@ -103,16 +103,16 @@ export default async function WorkOrderDetailPage({
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Description
-          </h2>
+          </p>
           <p className="text-sm text-foreground whitespace-pre-wrap">{wo.description}</p>
           {wo.notes && (
             <>
-              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide pt-4 border-t">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mt-5 mb-3 pt-4 border-t border-border">
                 Notes
-              </h2>
+              </p>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{wo.notes}</p>
             </>
           )}
@@ -128,17 +128,19 @@ export default async function WorkOrderDetailPage({
         />
       )}
       {wo.montant_devis != null && wo.statut !== "EN_ATTENTE_DEVIS" && (
-        <div className="bg-card border rounded-lg p-6">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">Devis</h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Montant HT</span>
-              <span className="font-semibold">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            Devis
+          </p>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
+              <span className="text-sm text-muted-foreground">Montant HT</span>
+              <span className="text-sm text-foreground font-semibold tabular-nums">
                 {wo.montant_devis.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
               </span>
             </div>
             {wo.notes_devis && (
-              <p className="text-muted-foreground text-xs pt-1">{wo.notes_devis}</p>
+              <p className="text-sm text-muted-foreground pt-2">{wo.notes_devis}</p>
             )}
           </div>
         </div>

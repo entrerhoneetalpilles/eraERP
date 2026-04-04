@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { bookingSchema } from "@/lib/validations/booking"
 import { createBooking } from "@/lib/dal/bookings"
 
-export async function createBookingAction(formData: FormData) {
+export async function createBookingAction(_prev: unknown, formData: FormData) {
   const raw = {
     property_id: formData.get("property_id"),
     guest_id: formData.get("guest_id"),

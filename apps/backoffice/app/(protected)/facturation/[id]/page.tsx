@@ -18,7 +18,7 @@ export default async function FactureDetailPage({
       <PageHeader
         title={invoice.numero_facture}
         actions={
-          <Link href="/facturation" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+          <Link href="/facturation" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
             Retour
           </Link>
@@ -26,54 +26,54 @@ export default async function FactureDetailPage({
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Facture
-          </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Propriétaire</span>
-              <Link href={`/proprietaires/${invoice.owner.id}`} className="text-primary hover:underline">
+          </p>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Propriétaire</span>
+              <Link href={`/proprietaires/${invoice.owner.id}`} className="text-sm font-medium text-foreground hover:text-primary cursor-pointer">
                 {invoice.owner.nom}
               </Link>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Période</span>
-              <span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Période</span>
+              <span className="text-sm text-foreground font-medium">
                 {new Date(invoice.periode_debut).toLocaleDateString("fr-FR")} →{" "}
                 {new Date(invoice.periode_fin).toLocaleDateString("fr-FR")}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Statut</span>
+            <div className="flex items-center justify-between py-2 last:border-0">
+              <span className="text-sm text-muted-foreground">Statut</span>
               <StatusBadge status={invoice.statut} />
             </div>
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Montants
-          </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Montant HT</span>
-              <span>
+          </p>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Montant HT</span>
+              <span className="text-sm text-foreground font-medium">
                 {invoice.montant_ht.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">TVA ({(invoice.tva_rate * 100).toFixed(0)}%)</span>
-              <span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">TVA ({(invoice.tva_rate * 100).toFixed(0)}%)</span>
+              <span className="text-sm text-foreground font-medium">
                 {(invoice.montant_ttc - invoice.montant_ht).toLocaleString("fr-FR", {
                   style: "currency",
                   currency: "EUR",
                 })}
               </span>
             </div>
-            <div className="flex justify-between font-semibold border-t pt-3">
-              <span className="text-foreground">Total TTC</span>
-              <span className="text-foreground">
+            <div className="flex items-center justify-between py-2 border-t border-border mt-1 last:border-0">
+              <span className="text-sm font-semibold text-foreground">Total TTC</span>
+              <span className="text-sm font-semibold text-foreground">
                 {invoice.montant_ttc.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
               </span>
             </div>
@@ -82,10 +82,10 @@ export default async function FactureDetailPage({
       </div>
 
       {invoice.timeEntries.length > 0 && (
-        <div className="bg-card border rounded-lg p-6">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Temps passé
-          </h2>
+          </p>
           <div className="divide-y divide-border">
             {invoice.timeEntries.map((entry) => (
               <div key={entry.id} className="flex items-center justify-between py-3 text-sm">
@@ -96,7 +96,7 @@ export default async function FactureDetailPage({
                 <span className="text-muted-foreground ml-4">
                   {entry.nb_heures}h × {entry.taux_horaire}€/h
                 </span>
-                <span className="font-semibold ml-4">
+                <span className="font-semibold ml-4 text-foreground">
                   {entry.montant_ht.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
                 </span>
               </div>

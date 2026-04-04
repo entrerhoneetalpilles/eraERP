@@ -26,8 +26,12 @@ export function BookingStatusActions({ id, statut }: Props) {
         return (
           <form key={next} action={action}>
             <input type="hidden" name="statut" value={next} />
-            <Button type="submit" size="sm" variant={next === "CANCELLED" ? "outline" : "default"}
-              className={next !== "CANCELLED" ? "" : ""}>
+            <Button
+              type="submit"
+              size="sm"
+              variant={next === "CANCELLED" ? "outline" : "default"}
+              className="cursor-pointer"
+            >
               {label}
             </Button>
           </form>

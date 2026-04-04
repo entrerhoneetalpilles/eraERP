@@ -7,7 +7,7 @@ export default async function MenagePage() {
   const pending = tasks.filter((t) => t.statut !== "TERMINEE" && t.statut !== "PROBLEME").length
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Ménage"
         description={`${pending} tâche${pending !== 1 ? "s" : ""} en attente`}

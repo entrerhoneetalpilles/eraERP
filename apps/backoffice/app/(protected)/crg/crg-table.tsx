@@ -14,7 +14,7 @@ const columns: ColumnDef<CrgRow>[] = [
   {
     header: "Propriétaire",
     cell: ({ row }) => (
-      <Link href={`/proprietaires/${row.original.account.owner.id}`} className="text-primary hover:underline">
+      <Link href={`/proprietaires/${row.original.account.owner.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
         {row.original.account.owner.nom}
       </Link>
     ),
@@ -33,32 +33,40 @@ const columns: ColumnDef<CrgRow>[] = [
   {
     accessorKey: "revenus_sejours",
     header: "Revenus",
-    cell: ({ row }) => fmt(row.original.revenus_sejours),
+    cell: ({ row }) => (
+      <span className="text-sm text-foreground">{fmt(row.original.revenus_sejours)}</span>
+    ),
   },
   {
     accessorKey: "honoraires_deduits",
     header: "Honoraires",
-    cell: ({ row }) => fmt(row.original.honoraires_deduits),
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{fmt(row.original.honoraires_deduits)}</span>
+    ),
   },
   {
     accessorKey: "charges_deduites",
     header: "Charges",
-    cell: ({ row }) => fmt(row.original.charges_deduites),
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{fmt(row.original.charges_deduites)}</span>
+    ),
   },
   {
     accessorKey: "montant_reverse",
     header: "Reversé",
     cell: ({ row }) => (
-      <span className="font-semibold">{fmt(row.original.montant_reverse)}</span>
+      <span className="text-sm font-semibold text-foreground">{fmt(row.original.montant_reverse)}</span>
     ),
   },
   {
     header: "Virement",
     cell: ({ row }) =>
       row.original.date_virement ? (
-        new Date(row.original.date_virement).toLocaleDateString("fr-FR")
+        <span className="text-sm text-foreground">
+          {new Date(row.original.date_virement).toLocaleDateString("fr-FR")}
+        </span>
       ) : (
-        <span className="text-muted-foreground text-xs">En attente</span>
+        <span className="text-xs text-muted-foreground">En attente</span>
       ),
   },
 ]

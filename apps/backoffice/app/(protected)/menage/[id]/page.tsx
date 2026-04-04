@@ -46,7 +46,7 @@ export default async function CleaningTaskDetailPage({
                 >
                   <button
                     type="submit"
-                    className="px-3 py-1.5 text-sm rounded-md border border-input bg-background hover:bg-muted transition-colors"
+                    className="px-3 py-1.5 text-sm rounded-md border border-border bg-background hover:bg-accent transition-colors duration-100 cursor-pointer"
                   >
                     {action.label}
                   </button>
@@ -58,18 +58,18 @@ export default async function CleaningTaskDetailPage({
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Détails</h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Bien</span>
-              <Link href={`/biens/${task.property.id}`} className="text-primary hover:underline">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Détails</p>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Bien</span>
+              <Link href={`/biens/${task.property.id}`} className="text-sm font-medium text-foreground hover:text-primary cursor-pointer">
                 {task.property.nom}
               </Link>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Date prévue</span>
-              <span className="text-foreground">
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Date prévue</span>
+              <span className="text-sm text-foreground font-medium">
                 {new Date(task.date_prevue).toLocaleDateString("fr-FR", {
                   weekday: "long",
                   day: "numeric",
@@ -79,67 +79,69 @@ export default async function CleaningTaskDetailPage({
               </span>
             </div>
             {task.date_realisation && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Réalisé le</span>
-                <span className="text-foreground">
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Réalisé le</span>
+                <span className="text-sm text-foreground font-medium">
                   {new Date(task.date_realisation).toLocaleDateString("fr-FR")}
                 </span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Statut</span>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Statut</span>
               <StatusBadge status={task.statut} />
             </div>
             {task.contractor ? (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Prestataire</span>
-                <Link href={`/prestataires/${task.contractor.id}`} className="text-primary hover:underline">
+              <div className="flex items-center justify-between py-2 last:border-0">
+                <span className="text-sm text-muted-foreground">Prestataire</span>
+                <Link href={`/prestataires/${task.contractor.id}`} className="text-sm font-medium text-foreground hover:text-primary cursor-pointer">
                   {task.contractor.nom}
                 </Link>
               </div>
             ) : (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Prestataire</span>
-                <span className="text-muted-foreground text-xs">Non assigné</span>
+              <div className="flex items-center justify-between py-2 last:border-0">
+                <span className="text-sm text-muted-foreground">Prestataire</span>
+                <span className="text-sm text-muted-foreground">Non assigné</span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-card border rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Séjour lié</h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Voyageur</span>
-              <span className="text-foreground">
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Séjour lié</p>
+          <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Voyageur</span>
+              <span className="text-sm text-foreground font-medium">
                 {task.booking.guest.prenom} {task.booking.guest.nom}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Check-in</span>
-              <span className="text-foreground">
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Check-in</span>
+              <span className="text-sm text-foreground font-medium">
                 {new Date(task.booking.check_in).toLocaleDateString("fr-FR")}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Check-out</span>
-              <span className="text-foreground">
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">Check-out</span>
+              <span className="text-sm text-foreground font-medium">
                 {new Date(task.booking.check_out).toLocaleDateString("fr-FR")}
               </span>
             </div>
-            <Link
-              href={`/reservations/${task.booking.id}`}
-              className="inline-block text-xs text-primary hover:underline pt-1"
-            >
-              Voir la réservation
-            </Link>
+            <div className="py-2">
+              <Link
+                href={`/reservations/${task.booking.id}`}
+                className="text-sm font-medium text-foreground hover:text-primary cursor-pointer"
+              >
+                Voir la réservation
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
       {task.notes && (
-        <div className="bg-card border rounded-lg p-6">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-2">Notes</h2>
+        <div className="bg-card rounded-md border border-border p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Notes</p>
           <p className="text-sm text-foreground whitespace-pre-wrap">{task.notes}</p>
         </div>
       )}

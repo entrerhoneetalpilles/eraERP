@@ -11,13 +11,13 @@ import {
   CalendarRange,
   UserCheck,
   Settings,
-  ChevronRight,
   Wallet,
   Receipt,
   Wrench,
   HardHat,
   SprayCan,
   FileBarChart2,
+  KeyRound,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -66,23 +66,26 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 flex flex-col">
-      {/* Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-700">
-        <div>
-          <p className="text-white font-semibold text-sm leading-tight">
+    <aside className="fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-[hsl(var(--sidebar-bg))] border-r border-border">
+      {/* Brand */}
+      <div className="h-14 flex items-center gap-2.5 px-4 border-b border-border shrink-0">
+        <div className="w-6 h-6 rounded-sm bg-[hsl(var(--primary))] flex items-center justify-center shrink-0">
+          <KeyRound className="w-3.5 h-3.5 text-white" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[hsl(var(--sidebar-text-active))] font-semibold text-sm leading-tight truncate">
             Entre Rhône et Alpilles
           </p>
-          <p className="text-slate-400 text-xs">Conciergerie — Back-office</p>
+          <p className="text-[hsl(var(--sidebar-label))] text-[11px] leading-tight">Back-office</p>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+      <nav className="flex-1 px-2 py-3 overflow-y-auto scrollbar-thin">
         {NAV_SECTIONS.map((section) => (
-          <div key={section.label ?? "main"}>
+          <div key={section.label ?? "main"} className="mb-1">
             {section.label && (
-              <p className="px-3 mb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <p className="text-[10px] font-medium uppercase tracking-widest text-[hsl(var(--sidebar-label))] px-3 py-1 mt-4">
                 {section.label}
               </p>
             )}
@@ -97,15 +100,19 @@ export function Sidebar() {
                     key={href}
                     href={href}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                      "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm transition-colors duration-100 cursor-pointer",
                       active
-                        ? "bg-slate-700 text-white"
-                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                        ? "bg-[hsl(var(--sidebar-active))] text-[hsl(var(--sidebar-text-active))] font-medium"
+                        : "text-[hsl(var(--sidebar-text))] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text-active))]"
                     )}
                   >
-                    <Icon className="w-4 h-4 shrink-0" />
+                    <Icon
+                      className={cn(
+                        "w-4 h-4 shrink-0",
+                        active ? "opacity-100" : "opacity-70"
+                      )}
+                    />
                     <span>{label}</span>
-                    {active && <ChevronRight className="w-3 h-3 ml-auto opacity-50" />}
                   </Link>
                 )
               })}
@@ -114,18 +121,23 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 py-3 border-t border-slate-700">
+      {/* Footer: Admin */}
+      <div className="px-2 py-2 border-t border-border shrink-0">
         <Link
           href="/admin"
           className={cn(
-            "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+            "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm transition-all duration-150 cursor-pointer",
             pathname.startsWith("/admin")
-              ? "bg-slate-700 text-white"
-              : "text-slate-400 hover:text-white hover:bg-slate-800"
+              ? "bg-[hsl(var(--sidebar-active))] text-[hsl(var(--sidebar-text-active))] font-medium"
+              : "text-[hsl(var(--sidebar-text))] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text-active))]"
           )}
         >
-          <Settings className="w-4 h-4" />
+          <Settings
+            className={cn(
+              "w-4 h-4 shrink-0",
+              pathname.startsWith("/admin") ? "opacity-100" : "opacity-70"
+            )}
+          />
           <span>Administration</span>
         </Link>
       </div>

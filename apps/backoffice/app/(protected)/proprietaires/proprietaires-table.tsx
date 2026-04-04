@@ -15,7 +15,7 @@ const columns: ColumnDef<OwnerRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/proprietaires/${row.original.id}`}
-        className="font-medium text-foreground hover:text-primary"
+        className="font-medium text-foreground hover:text-primary cursor-pointer"
       >
         {row.original.nom}
       </Link>
@@ -53,7 +53,7 @@ const columns: ColumnDef<OwnerRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/proprietaires/${row.original.id}`}
-        className="text-sm text-primary hover:underline"
+        className="text-sm text-primary hover:underline cursor-pointer"
       >
         Voir
       </Link>
