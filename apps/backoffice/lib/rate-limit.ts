@@ -3,8 +3,9 @@ import { Redis } from "@upstash/redis"
 import { NextRequest, NextResponse } from "next/server"
 
 const isRedisConfigured =
-  process.env.UPSTASH_REDIS_REST_URL &&
-  process.env.UPSTASH_REDIS_REST_TOKEN
+  process.env.UPSTASH_REDIS_REST_URL?.startsWith("https://") &&
+  process.env.UPSTASH_REDIS_REST_TOKEN?.length &&
+  process.env.UPSTASH_REDIS_REST_TOKEN !== "xxxx"
 
 const ratelimit = isRedisConfigured
   ? new Ratelimit({
