@@ -8,8 +8,10 @@ export default async function PlanningPage({
   searchParams: { year?: string; month?: string }
 }) {
   const now = new Date()
-  const year = searchParams.year ? parseInt(searchParams.year, 10) : now.getFullYear()
-  const month = searchParams.month ? parseInt(searchParams.month, 10) : now.getMonth()
+  const rawYear = parseInt(searchParams.year ?? "", 10)
+  const rawMonth = parseInt(searchParams.month ?? "", 10)
+  const year = isNaN(rawYear) ? now.getFullYear() : rawYear
+  const month = isNaN(rawMonth) ? now.getMonth() : rawMonth
 
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0, 23, 59, 59)
