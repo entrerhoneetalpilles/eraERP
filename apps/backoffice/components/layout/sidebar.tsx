@@ -16,6 +16,7 @@ import {
   Receipt,
   Wrench,
   HardHat,
+  SprayCan,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -39,6 +40,7 @@ const NAV_SECTIONS = [
     items: [
       { href: "/reservations", label: "Réservations", icon: CalendarDays },
       { href: "/planning", label: "Planning", icon: CalendarRange },
+      { href: "/menage", label: "Ménage", icon: SprayCan },
       { href: "/voyageurs", label: "Voyageurs", icon: UserCheck },
     ],
   },
