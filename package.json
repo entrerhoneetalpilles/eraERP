@@ -18,5 +18,10 @@
     "@types/node": "^20.0.0",
     "typescript": "^5.5.0"
   },
-  "packageManager": "pnpm@9.15.0"
+  "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "overrides": {
+      "@auth/core": "0.41.1"
+    }
+  }
 }
