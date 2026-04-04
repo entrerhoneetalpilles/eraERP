@@ -11,7 +11,7 @@ export default async function PlanningPage({
   const rawYear = parseInt(searchParams.year ?? "", 10)
   const rawMonth = parseInt(searchParams.month ?? "", 10)
   const year = isNaN(rawYear) ? now.getFullYear() : rawYear
-  const month = isNaN(rawMonth) ? now.getMonth() : rawMonth
+  const month = isNaN(rawMonth) ? now.getMonth() : Math.min(11, Math.max(0, rawMonth))
 
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0, 23, 59, 59)

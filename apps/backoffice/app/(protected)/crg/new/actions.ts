@@ -27,10 +27,12 @@ export async function generateCrgAction(_prev: unknown, formData: FormData) {
   }
 
   try {
+    const periodeFin = new Date(parsed.data.periode_fin)
+    periodeFin.setHours(23, 59, 59, 999)
     await generateCrg({
       owner_id: parsed.data.owner_id,
       periode_debut: new Date(parsed.data.periode_debut),
-      periode_fin: new Date(parsed.data.periode_fin),
+      periode_fin: periodeFin,
     })
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Erreur lors de la génération" }

@@ -9,7 +9,11 @@ export async function updateBookingStatutAction(id: string, formData: FormData) 
   if (!statut) return
   await updateBookingStatut(id, statut)
   if (statut === "CHECKEDOUT") {
-    await autoCreateCleaningTask(id)
+    try {
+      await autoCreateCleaningTask(id)
+    } catch (e) {
+      console.error("[autoCreateCleaningTask] Failed for booking", id, e)
+    }
   }
   revalidatePath(`/reservations/${id}`)
   revalidatePath("/reservations")
