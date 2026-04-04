@@ -48,10 +48,10 @@ export default function MfaPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-calcaire-100">
-      <div className="w-full max-w-sm space-y-8 p-8 bg-card rounded-xl shadow-card">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30">
+      <div className="w-full max-w-sm space-y-8 p-8 bg-card border rounded-lg shadow-sm">
         <div className="text-center space-y-2">
-          <h1 className="text-xl font-semibold text-garrigue-900">
+          <h1 className="text-xl font-semibold text-foreground">
             Vérification en deux étapes
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -76,11 +76,7 @@ export default function MfaPage() {
             )}
           </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-olivier-500 hover:bg-olivier-600"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Vérification…" : "Vérifier"}
           </Button>
         </form>
