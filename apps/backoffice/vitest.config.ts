@@ -14,6 +14,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "."),
       "@conciergerie/types": path.resolve(__dirname, "../../packages/types/src/index.ts"),
       "@conciergerie/db": path.resolve(__dirname, "../../packages/db/src/index.ts"),
+      "@conciergerie/ui": path.resolve(__dirname, "../../packages/ui/src/index.ts"),
     },
   },
 })
