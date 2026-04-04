@@ -1,9 +1,10 @@
+import type { ReactNode } from "react"
 import { cn } from "@conciergerie/ui"
 
 interface PageHeaderProps {
   title: string
   description?: string
-  actions?: React.ReactNode
+  actions?: ReactNode
   className?: string
 }
 
