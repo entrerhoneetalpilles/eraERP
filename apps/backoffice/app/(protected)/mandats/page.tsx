@@ -16,7 +16,7 @@ const columns: ColumnDef<MandateRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/mandats/${row.original.id}`}
-        className="font-mono text-sm text-garrigue-900 hover:text-olivier-600"
+        className="font-mono text-sm text-foreground hover:text-primary"
       >
         {row.original.numero_mandat}
       </Link>
@@ -28,7 +28,7 @@ const columns: ColumnDef<MandateRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/proprietaires/${row.original.owner.id}`}
-        className="text-garrigue-700 hover:text-olivier-600"
+        className="text-foreground hover:text-primary"
       >
         {row.original.owner.nom}
       </Link>
@@ -40,7 +40,7 @@ const columns: ColumnDef<MandateRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/biens/${row.original.property.id}`}
-        className="text-garrigue-700 hover:text-olivier-600"
+        className="text-foreground hover:text-primary"
       >
         {row.original.property.nom}
       </Link>
@@ -74,7 +74,7 @@ export default async function MandatsPage() {
         description={`${mandates.length} mandat${mandates.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/mandats/new">
-            <Button size="sm" className="bg-olivier-500 hover:bg-olivier-600">
+            <Button size="sm" className="">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau mandat
             </Button>

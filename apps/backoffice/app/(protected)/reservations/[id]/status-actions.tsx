@@ -27,7 +27,7 @@ export function BookingStatusActions({ id, statut }: Props) {
           <form key={next} action={action}>
             <input type="hidden" name="statut" value={next} />
             <Button type="submit" size="sm" variant={next === "CANCELLED" ? "outline" : "default"}
-              className={next !== "CANCELLED" ? "bg-olivier-500 hover:bg-olivier-600" : ""}>
+              className={next !== "CANCELLED" ? "" : ""}>
               {label}
             </Button>
           </form>

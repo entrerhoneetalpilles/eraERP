@@ -40,8 +40,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-garrigue-900">Tableau de bord</h1>
-        <p className="text-sm text-garrigue-500 mt-1">
+        <h1 className="text-2xl font-semibold text-foreground">Tableau de bord</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           {new Date().toLocaleDateString("fr-FR", {
             weekday: "long",
             year: "numeric",
@@ -57,15 +57,15 @@ export default async function DashboardPage() {
           <Link
             key={label}
             href={href}
-            className="bg-white rounded-xl border border-garrigue-100 p-5 hover:shadow-soft transition-shadow"
+            className="bg-white rounded-lg border p-5 hover:shadow-sm transition-shadow"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-garrigue-500">{label}</p>
-                <p className="text-2xl font-semibold text-garrigue-900 mt-1">{value}</p>
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="text-2xl font-semibold text-foreground mt-1">{value}</p>
               </div>
-              <div className="p-2 bg-calcaire-100 rounded-lg">
-                <Icon className="w-5 h-5 text-garrigue-600" />
+              <div className="p-2 bg-muted/30 rounded-lg">
+                <Icon className="w-5 h-5 text-muted-foreground" />
               </div>
             </div>
           </Link>
@@ -74,8 +74,8 @@ export default async function DashboardPage() {
 
       {/* Check-ins à venir */}
       {stats.upcomingCheckIns.length > 0 && (
-        <div className="bg-white rounded-xl border border-garrigue-100 p-6">
-          <h2 className="text-sm font-semibold text-garrigue-700 uppercase tracking-wide mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-lg border p-6">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
             <CalendarDays className="w-4 h-4" />
             Check-ins à venir (7 jours)
           </h2>
@@ -84,18 +84,18 @@ export default async function DashboardPage() {
               <Link
                 key={booking.id}
                 href={`/reservations/${booking.id}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-garrigue-50 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
               >
                 <div>
-                  <p className="text-sm font-medium text-garrigue-900">
+                  <p className="text-sm font-medium text-foreground">
                     {booking.guest.prenom} {booking.guest.nom}
                   </p>
-                  <p className="text-xs text-garrigue-500">
+                  <p className="text-xs text-muted-foreground">
                     {booking.property.nom} — {booking.nb_nuits} nuit{booking.nb_nuits > 1 ? "s" : ""}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-garrigue-700">
+                  <p className="text-sm font-medium text-foreground">
                     {new Date(booking.check_in).toLocaleDateString("fr-FR", {
                       weekday: "short",
                       day: "numeric",

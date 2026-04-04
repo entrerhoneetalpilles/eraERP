@@ -69,7 +69,7 @@ export default function PropertyAccessPage({ params }: { params: Promise<{ id: s
             placeholder="Poubelles, volets, etc."
           />
         </div>
-        <Button type="submit" disabled={isPending} className="bg-olivier-500 hover:bg-olivier-600">
+        <Button type="submit" disabled={isPending} className="">
           {isPending ? "Enregistrement…" : "Enregistrer"}
         </Button>
       </form>

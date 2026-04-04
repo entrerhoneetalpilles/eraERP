@@ -73,8 +73,8 @@ export default function NewOwnerPage() {
         </div>
 
         {/* Adresse */}
-        <fieldset className="border border-garrigue-100 rounded-lg p-4 space-y-4">
-          <legend className="text-sm font-medium text-garrigue-700 px-1">Adresse</legend>
+        <fieldset className="border rounded-lg p-4 space-y-4">
+          <legend className="text-sm font-medium text-foreground px-1">Adresse</legend>
           <div className="space-y-2">
             <Label htmlFor="adresse.rue">Rue</Label>
             <Input id="adresse.rue" name="adresse.rue" placeholder="12 rue de la Paix" />
@@ -110,7 +110,7 @@ export default function NewOwnerPage() {
           />
         </div>
 
-        <Button type="submit" disabled={isPending} className="bg-olivier-500 hover:bg-olivier-600">
+        <Button type="submit" disabled={isPending} className="">
           {isPending ? "Enregistrement..." : "Créer le propriétaire"}
         </Button>
       </form>

@@ -11,7 +11,7 @@ const columns: ColumnDef<GuestRow>[] = [
     id: "nom",
     header: "Voyageur",
     cell: ({ row }) => (
-      <Link href={`/voyageurs/${row.original.id}`} className="font-medium text-garrigue-900 hover:text-olivier-600">
+      <Link href={`/voyageurs/${row.original.id}`} className="font-medium text-foreground hover:text-primary">
         {row.original.prenom} {row.original.nom}
       </Link>
     ),

@@ -16,7 +16,7 @@ const columns: ColumnDef<OwnerRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/proprietaires/${row.original.id}`}
-        className="font-medium text-garrigue-900 hover:text-olivier-600"
+        className="font-medium text-foreground hover:text-primary"
       >
         {row.original.nom}
       </Link>
@@ -31,7 +31,7 @@ const columns: ColumnDef<OwnerRow>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
-      <span className="text-garrigue-600">{row.original.email}</span>
+      <span className="text-muted-foreground">{row.original.email}</span>
     ),
   },
   {
@@ -43,7 +43,7 @@ const columns: ColumnDef<OwnerRow>[] = [
     id: "biens",
     header: "Biens",
     cell: ({ row }) => (
-      <span className="text-garrigue-500">
+      <span className="text-muted-foreground">
         {row.original._count.mandates} bien{row.original._count.mandates !== 1 ? "s" : ""}
       </span>
     ),
@@ -54,7 +54,7 @@ const columns: ColumnDef<OwnerRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/proprietaires/${row.original.id}`}
-        className="text-sm text-olivier-600 hover:underline"
+        className="text-sm text-primary hover:underline"
       >
         Voir
       </Link>
@@ -72,7 +72,7 @@ export default async function ProprietairesPage() {
         description={`${owners.length} propriétaire${owners.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/proprietaires/new">
-            <Button size="sm" className="bg-olivier-500 hover:bg-olivier-600">
+            <Button size="sm" className="">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau propriétaire
             </Button>

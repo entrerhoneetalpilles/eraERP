@@ -14,7 +14,7 @@ const columns: ColumnDef<BookingRow>[] = [
     id: "voyageur",
     header: "Voyageur",
     cell: ({ row }) => (
-      <Link href={`/voyageurs/${row.original.guest.id}`} className="text-garrigue-900 hover:text-olivier-600">
+      <Link href={`/voyageurs/${row.original.guest.id}`} className="text-foreground hover:text-primary">
         {row.original.guest.prenom} {row.original.guest.nom}
       </Link>
     ),
@@ -23,7 +23,7 @@ const columns: ColumnDef<BookingRow>[] = [
     id: "bien",
     header: "Bien",
     cell: ({ row }) => (
-      <Link href={`/biens/${row.original.property.id}`} className="text-garrigue-700 hover:text-olivier-600">
+      <Link href={`/biens/${row.original.property.id}`} className="text-foreground hover:text-primary">
         {row.original.property.nom}
       </Link>
     ),
@@ -55,7 +55,7 @@ const columns: ColumnDef<BookingRow>[] = [
   {
     id: "platform",
     header: "Canal",
-    cell: ({ row }) => <span className="text-xs text-garrigue-500">{row.original.platform}</span>,
+    cell: ({ row }) => <span className="text-xs text-muted-foreground">{row.original.platform}</span>,
   },
 ]
 
@@ -68,7 +68,7 @@ export default async function ReservationsPage() {
         description={`${bookings.length} réservation${bookings.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/reservations/new">
-            <Button size="sm" className="bg-olivier-500 hover:bg-olivier-600">
+            <Button size="sm" className="">
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle réservation
             </Button>

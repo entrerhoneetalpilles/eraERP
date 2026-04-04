@@ -146,7 +146,7 @@ export function NewMandateForm({ owners, properties, nextNumber, defaultOwnerId 
           <Label htmlFor="reconduction_tacite">Reconduction tacite</Label>
         </div>
 
-        <Button type="submit" disabled={isPending} className="bg-olivier-500 hover:bg-olivier-600">
+        <Button type="submit" disabled={isPending} className="">
           {isPending ? "Enregistrement…" : "Créer le mandat"}
         </Button>
       </form>

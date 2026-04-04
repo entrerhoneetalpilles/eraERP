@@ -96,7 +96,7 @@ export function NewBookingForm({ properties, guests }: Props) {
           <Label htmlFor="notes_internes">Notes internes</Label>
           <textarea id="notes_internes" name="notes_internes" rows={2} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none" />
         </div>
-        <Button type="submit" disabled={isPending} className="bg-olivier-500 hover:bg-olivier-600">
+        <Button type="submit" disabled={isPending} className="">
           {isPending ? "Enregistrement…" : "Créer la réservation"}
         </Button>
       </form>

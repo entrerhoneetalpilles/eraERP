@@ -32,36 +32,36 @@ export default async function OwnerDetailPage({
 
       {/* Info card */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-garrigue-100 p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-garrigue-700 uppercase tracking-wide">
+        <div className="bg-white rounded-lg border p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
             Informations
           </h2>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-garrigue-500">Type</span>
+              <span className="text-muted-foreground">Type</span>
               <StatusBadge status={owner.type} />
             </div>
             <div className="flex justify-between">
-              <span className="text-garrigue-500">Email</span>
-              <span className="text-garrigue-800">{owner.email}</span>
+              <span className="text-muted-foreground">Email</span>
+              <span className="text-foreground">{owner.email}</span>
             </div>
             {owner.telephone && (
               <div className="flex justify-between">
-                <span className="text-garrigue-500">Téléphone</span>
-                <span className="text-garrigue-800">{owner.telephone}</span>
+                <span className="text-muted-foreground">Téléphone</span>
+                <span className="text-foreground">{owner.telephone}</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-garrigue-500">Adresse</span>
-              <span className="text-garrigue-800 text-right">
+              <span className="text-muted-foreground">Adresse</span>
+              <span className="text-foreground text-right">
                 {adresse?.rue}<br />
                 {adresse?.code_postal} {adresse?.ville}
               </span>
             </div>
             {owner.rib_iban && (
               <div className="flex justify-between">
-                <span className="text-garrigue-500">IBAN</span>
-                <span className="font-mono text-xs text-garrigue-600">{owner.rib_iban}</span>
+                <span className="text-muted-foreground">IBAN</span>
+                <span className="font-mono text-xs text-muted-foreground">{owner.rib_iban}</span>
               </div>
             )}
           </div>
@@ -69,14 +69,14 @@ export default async function OwnerDetailPage({
 
         {/* Compte mandant */}
         {owner.mandantAccount && (
-          <div className="bg-white rounded-xl border border-garrigue-100 p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-garrigue-700 uppercase tracking-wide">
+          <div className="bg-white rounded-lg border p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
               Compte mandant
             </h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-garrigue-500">Solde courant</span>
-                <span className="font-semibold text-garrigue-900">
+                <span className="text-muted-foreground">Solde courant</span>
+                <span className="font-semibold text-foreground">
                   {owner.mandantAccount.solde_courant.toLocaleString("fr-FR", {
                     style: "currency",
                     currency: "EUR",
@@ -89,9 +89,9 @@ export default async function OwnerDetailPage({
       </div>
 
       {/* Mandats */}
-      <div className="bg-white rounded-xl border border-garrigue-100 p-6">
+      <div className="bg-white rounded-lg border p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-garrigue-700 uppercase tracking-wide flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
             <Building2 className="w-4 h-4" />
             Mandats ({owner.mandates.length})
           </h2>
@@ -100,20 +100,20 @@ export default async function OwnerDetailPage({
           </Link>
         </div>
         {owner.mandates.length === 0 ? (
-          <p className="text-sm text-garrigue-400 text-center py-6">Aucun mandat</p>
+          <p className="text-sm text-muted-foreground text-center py-6">Aucun mandat</p>
         ) : (
           <div className="space-y-2">
             {owner.mandates.map((mandate) => (
               <Link
                 key={mandate.id}
                 href={`/mandats/${mandate.id}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-garrigue-50 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
               >
                 <div>
-                  <p className="text-sm font-medium text-garrigue-900">
+                  <p className="text-sm font-medium text-foreground">
                     {mandate.property.nom}
                   </p>
-                  <p className="text-xs text-garrigue-500">
+                  <p className="text-xs text-muted-foreground">
                     Mandat n° {mandate.numero_mandat}
                   </p>
                 </div>
@@ -126,12 +126,12 @@ export default async function OwnerDetailPage({
 
       {/* Notes */}
       {owner.notes && (
-        <div className="bg-white rounded-xl border border-garrigue-100 p-6">
-          <h2 className="text-sm font-semibold text-garrigue-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+        <div className="bg-white rounded-lg border p-6">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Notes internes
           </h2>
-          <p className="text-sm text-garrigue-700 whitespace-pre-wrap">{owner.notes}</p>
+          <p className="text-sm text-foreground whitespace-pre-wrap">{owner.notes}</p>
         </div>
       )}
     </div>

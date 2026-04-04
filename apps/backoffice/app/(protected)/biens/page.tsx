@@ -14,7 +14,7 @@ const columns: ColumnDef<PropertyRow>[] = [
     accessorKey: "nom",
     header: "Bien",
     cell: ({ row }) => (
-      <Link href={`/biens/${row.original.id}`} className="font-medium text-garrigue-900 hover:text-olivier-600">
+      <Link href={`/biens/${row.original.id}`} className="font-medium text-foreground hover:text-primary">
         {row.original.nom}
       </Link>
     ),
@@ -29,11 +29,11 @@ const columns: ColumnDef<PropertyRow>[] = [
     header: "Propriétaire",
     cell: ({ row }) =>
       row.original.mandate?.owner ? (
-        <Link href={`/proprietaires/${row.original.mandate.owner.id}`} className="text-garrigue-600 hover:text-olivier-600">
+        <Link href={`/proprietaires/${row.original.mandate.owner.id}`} className="text-muted-foreground hover:text-primary">
           {row.original.mandate.owner.nom}
         </Link>
       ) : (
-        <span className="text-garrigue-400 italic">Sans mandat</span>
+        <span className="text-muted-foreground italic">Sans mandat</span>
       ),
   },
   {
@@ -63,7 +63,7 @@ export default async function BiensPage() {
         description={`${properties.length} bien${properties.length !== 1 ? "s" : ""}`}
         actions={
           <Link href="/biens/new">
-            <Button size="sm" className="bg-olivier-500 hover:bg-olivier-600">
+            <Button size="sm" className="">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau bien
             </Button>
