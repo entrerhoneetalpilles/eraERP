@@ -22,6 +22,8 @@
     "@auth/prisma-adapter": "^2.7.0",
     "bcryptjs": "^2.4.3",
     "otplib": "^12.0.1",
+    "@hookform/resolvers": "^3.9.0",
+    "react-hook-form": "^7.53.0",
     "zod": "^3.23.0",
     "framer-motion": "^11.5.0",
     "sonner": "^1.5.0",
