@@ -6,12 +6,11 @@ export function computeCrgAmounts(
   charges: Array<{ montant: number }>,
   taux_honoraires: number
 ) {
-  const revenus_sejours = bookings.reduce((sum, b) => sum + b.revenu_net_proprietaire, 0)
-  const honoraires_deduits = Math.round(revenus_sejours * taux_honoraires * 100) / 100
-  const charges_deduites = Math.abs(
-    charges.reduce((sum, c) => sum + c.montant, 0)
-  )
-  const montant_reverse = Math.max(0, revenus_sejours - honoraires_deduits - charges_deduites)
+  const round2 = (n: number) => Math.round(n * 100) / 100
+  const revenus_sejours = round2(bookings.reduce((sum, b) => sum + b.revenu_net_proprietaire, 0))
+  const honoraires_deduits = round2(revenus_sejours * taux_honoraires)
+  const charges_deduites = round2(Math.abs(charges.reduce((sum, c) => sum + c.montant, 0)))
+  const montant_reverse = Math.max(0, round2(revenus_sejours - honoraires_deduits - charges_deduites))
   return { revenus_sejours, honoraires_deduits, charges_deduites, montant_reverse }
 }
 
@@ -36,6 +35,16 @@ export async function generateCrg(data: {
     where: { owner_id: data.owner_id },
   })
   if (!account) throw new Error("Compte mandant introuvable")
+
+  // Guard against double generation for the same period
+  const existing = await db.managementReport.findFirst({
+    where: {
+      mandant_account_id: account.id,
+      periode_debut: data.periode_debut,
+      periode_fin: data.periode_fin,
+    },
+  })
+  if (existing) throw new Error("Un CRG existe déjà pour cette période")
 
   // 2. Get mandate to find taux_honoraires
   const mandate = await db.mandate.findFirst({
