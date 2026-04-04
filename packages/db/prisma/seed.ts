@@ -1,3 +1,8 @@
+import { config } from "dotenv"
+import { resolve } from "path"
+// Load root .env (monorepo root, two levels up from packages/db/prisma/)
+config({ path: resolve(__dirname, "../../../.env") })
+
 import { PrismaClient, UserRole } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
