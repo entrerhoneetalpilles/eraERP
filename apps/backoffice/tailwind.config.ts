@@ -10,30 +10,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        garrigue: {
-          DEFAULT: "#8C7566",
-          50: "#f9f6f4",
-          100: "#ede7e2",
-          500: "#8C7566",
-          900: "#3d2e24",
-        },
-        lavande: {
-          DEFAULT: "#A79BBE",
-          500: "#A79BBE",
-        },
-        argile: {
-          DEFAULT: "#D6B8A8",
-          300: "#D6B8A8",
-        },
-        calcaire: {
-          DEFAULT: "#F4EFEA",
-          100: "#F4EFEA",
-        },
-        olivier: {
-          DEFAULT: "#9BA88D",
-          500: "#9BA88D",
-          600: "#6b7660",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -69,17 +45,16 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-playfair)", "Georgia", "serif"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        lg: "12px",
-        md: "10px",
-        sm: "6px",
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        soft: "0 2px 20px rgba(140, 117, 102, 0.08)",
-        card: "0 4px 30px rgba(140, 117, 102, 0.10)",
+        soft: "0 2px 8px 0 rgb(0 0 0 / 0.06)",
+        card: "0 1px 3px 0 rgb(0 0 0 / 0.1)",
       },
     },
   },
