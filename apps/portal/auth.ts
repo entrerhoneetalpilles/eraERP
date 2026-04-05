@@ -57,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id!
         token.ownerId = (user as any).ownerId
         token.mfaRequired = (user as any).mfaRequired
         token.mfaVerified = (user as any).mfaVerified ?? false
@@ -98,7 +98,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module "@auth/core/jwt" {
   interface JWT {
     id: string
     ownerId: string | null

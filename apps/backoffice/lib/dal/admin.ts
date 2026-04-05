@@ -1,4 +1,4 @@
-import { db } from "@conciergerie/db"
+import { db, UserRole } from "@conciergerie/db"
 import bcrypt from "bcryptjs"
 
 export async function getUsers() {
@@ -32,7 +32,7 @@ export async function getUserById(id: string) {
 export async function createUser(data: {
   email: string
   nom: string
-  role: "ADMIN" | "GESTIONNAIRE" | "COMPTABLE" | "TRAVAUX" | "SERVICES" | "DIRECTION"
+  role: UserRole
   password: string
 }) {
   const password_hash = await bcrypt.hash(data.password, 12)
@@ -51,7 +51,7 @@ export async function updateUser(
   id: string,
   data: Partial<{
     nom: string
-    role: string
+    role: UserRole
     actif: boolean
   }>
 ) {

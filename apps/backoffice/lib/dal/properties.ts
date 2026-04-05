@@ -1,4 +1,4 @@
-import { db } from "@conciergerie/db"
+import { db, Prisma } from "@conciergerie/db"
 
 export async function getProperties() {
   return db.property.findMany({
@@ -34,7 +34,7 @@ export async function createProperty(data: {
   superficie: number
   nb_chambres: number
   capacite_voyageurs: number
-  adresse: Record<string, unknown>
+  adresse: Prisma.InputJsonValue
   amenities?: string[]
   statut?: "ACTIF" | "INACTIF" | "TRAVAUX"
 }) {
@@ -49,7 +49,7 @@ export async function updateProperty(
     superficie: number
     nb_chambres: number
     capacite_voyageurs: number
-    adresse: Record<string, unknown>
+    adresse: Prisma.InputJsonValue
     amenities: string[]
     statut: "ACTIF" | "INACTIF" | "TRAVAUX"
   }>

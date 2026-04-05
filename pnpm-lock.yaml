@@ -26,6 +26,9 @@ importers:
 
   apps/backoffice:
     dependencies:
+      '@auth/core':
+        specifier: 0.41.1
+        version: 0.41.1
       '@auth/prisma-adapter':
         specifier: ^2.7.0
         version: 2.11.1(@prisma/client@5.22.0(prisma@5.22.0))
@@ -92,6 +95,9 @@ importers:
       sonner:
         specifier: ^1.5.0
         version: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.19)
       zod:
         specifier: ^3.23.0
         version: 3.25.76
@@ -141,6 +147,9 @@ importers:
 
   apps/portal:
     dependencies:
+      '@auth/core':
+        specifier: 0.41.1
+        version: 0.41.1
       '@auth/prisma-adapter':
         specifier: ^2.7.0
         version: 2.11.1(@prisma/client@5.22.0(prisma@5.22.0))
@@ -198,6 +207,9 @@ importers:
       sonner:
         specifier: ^1.5.0
         version: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.19)
       zod:
         specifier: ^3.23.0
         version: 3.25.76

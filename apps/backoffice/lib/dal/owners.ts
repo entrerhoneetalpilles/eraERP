@@ -1,4 +1,4 @@
-import { db } from "@conciergerie/db"
+import { db, Prisma } from "@conciergerie/db"
 
 export async function getOwners() {
   return db.owner.findMany({
@@ -28,13 +28,12 @@ export async function createOwner(data: {
   nom: string
   email: string
   telephone?: string
-  adresse: Record<string, unknown>
+  adresse: Prisma.InputJsonValue
   rib_iban?: string
   nif?: string
   notes?: string
 }) {
   const owner = await db.owner.create({ data })
-  // Créer automatiquement le compte mandant
   await db.mandantAccount.create({
     data: { owner_id: owner.id },
   })
@@ -48,7 +47,7 @@ export async function updateOwner(
     nom: string
     email: string
     telephone: string
-    adresse: Record<string, unknown>
+    adresse: Prisma.InputJsonValue
     rib_iban: string
     nif: string
     notes: string
