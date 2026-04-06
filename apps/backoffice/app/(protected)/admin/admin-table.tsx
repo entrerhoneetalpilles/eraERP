@@ -81,3 +81,4 @@ export function AdminTable({ data }: { data: UserRow[] }) {
     />
   )
 }
+

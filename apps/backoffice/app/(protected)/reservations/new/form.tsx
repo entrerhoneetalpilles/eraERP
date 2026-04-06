@@ -148,3 +148,4 @@ export function NewBookingForm({ properties, guests }: Props) {
     </div>
   )
 }
+

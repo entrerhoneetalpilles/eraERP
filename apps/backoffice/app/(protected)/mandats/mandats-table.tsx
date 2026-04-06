@@ -73,3 +73,4 @@ export function MandatsTable({ data }: { data: MandateRow[] }) {
     />
   )
 }
+

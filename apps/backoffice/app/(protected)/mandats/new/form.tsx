@@ -134,3 +134,4 @@ export function NewMandateForm({ owners, properties, nextNumber, defaultOwnerId 
     </div>
   )
 }
+

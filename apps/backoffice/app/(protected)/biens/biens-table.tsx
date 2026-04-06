@@ -68,3 +68,4 @@ export function BiensTable({ data }: { data: PropertyRow[] }) {
     />
   )
 }
+

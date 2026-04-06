@@ -119,7 +119,7 @@ export function PlanningGrid({
               </tr>
             ) : (
               properties.map((prop) => {
-                const propBookings = bookings.filter((b) => b.property_id === prop.id)
+                const propBookings = bookings.filter((b: any) => b.property_id === prop.id)
                 return (
                   <tr key={prop.id} className="border-b border-border last:border-0 hover:bg-accent transition-colors duration-100">
                     <td className="sticky left-0 bg-card hover:bg-accent border-r border-border px-3 py-2 text-sm truncate max-w-[10rem]">
@@ -168,3 +168,4 @@ export function PlanningGrid({
     </div>
   )
 }
+

@@ -38,7 +38,7 @@ export default async function PlanningPage({
     }),
   ])
 
-  const slots = bookings.map((b) => ({
+  const slots = bookings.map((b: any) => ({
     id: b.id,
     property_id: b.property_id,
     property_nom: b.property.nom,
@@ -63,3 +63,4 @@ export default async function PlanningPage({
     </div>
   )
 }
+

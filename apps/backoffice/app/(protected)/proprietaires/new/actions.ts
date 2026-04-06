@@ -32,3 +32,4 @@ export async function createOwnerAction(_prev: unknown, formData: FormData) {
   revalidatePath("/proprietaires")
   redirect(`/proprietaires/${owner.id}`)
 }
+

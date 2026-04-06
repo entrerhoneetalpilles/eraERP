@@ -74,3 +74,4 @@ const columns: ColumnDef<CrgRow>[] = [
 export function CrgTable({ data }: { data: CrgRow[] }) {
   return <DataTable columns={columns} data={data} />
 }
+

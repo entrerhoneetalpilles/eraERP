@@ -28,3 +28,4 @@ export async function createPropertyAction(_prev: unknown, formData: FormData) {
   await createProperty(parsed.data)
   redirect("/biens")
 }
+

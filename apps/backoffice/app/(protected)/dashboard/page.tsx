@@ -97,7 +97,7 @@ export default async function DashboardPage() {
           iconBg="bg-emerald-50"
           empty="Aucune arrivée"
         >
-          {stats.todayArrivals.map((b) => (
+          {stats.todayArrivals.map((b: any) => (
             <BookingRow
               key={b.id}
               href={`/reservations/${b.id}`}
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
           iconBg="bg-orange-50"
           empty="Aucun départ"
         >
-          {stats.todayDepartures.map((b) => (
+          {stats.todayDepartures.map((b: any) => (
             <BookingRow
               key={b.id}
               href={`/reservations/${b.id}`}
@@ -275,3 +275,4 @@ function BookingRow({
     </Link>
   )
 }
+

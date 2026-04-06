@@ -74,3 +74,4 @@ export function FacturationTable({ data }: { data: InvoiceRow[] }) {
     />
   )
 }
+

@@ -38,3 +38,4 @@ export async function createMandateAction(_prev: unknown, formData: FormData) {
 export async function getNextMandateNumberAction() {
   return getNextMandateNumber()
 }
+

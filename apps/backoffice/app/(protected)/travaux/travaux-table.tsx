@@ -86,3 +86,4 @@ export function TravauxTable({ data }: { data: WorkOrderRow[] }) {
     />
   )
 }
+

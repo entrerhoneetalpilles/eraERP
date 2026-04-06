@@ -52,3 +52,4 @@ export function VoyageursTable({ data }: { data: GuestRow[] }) {
     />
   )
 }
+

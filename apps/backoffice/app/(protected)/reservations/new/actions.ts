@@ -35,3 +35,4 @@ export async function createBookingAction(_prev: unknown, formData: FormData) {
   revalidatePath("/reservations")
   redirect(`/reservations/${booking.id}`)
 }
+

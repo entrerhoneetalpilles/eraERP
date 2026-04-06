@@ -37,3 +37,4 @@ export async function createUserAction(_prev: unknown, formData: FormData) {
   revalidatePath("/admin")
   redirect("/admin")
 }
+

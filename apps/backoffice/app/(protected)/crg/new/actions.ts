@@ -40,3 +40,4 @@ export async function generateCrgAction(_prev: unknown, formData: FormData) {
 
   redirect("/crg")
 }
+

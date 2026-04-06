@@ -71,3 +71,4 @@ export function ProprietairesTable({ data }: { data: OwnerRow[] }) {
     />
   )
 }
+

@@ -7,3 +7,4 @@ export default async function NewReservationPage() {
   const activeProperties = properties.filter((p) => p.statut === "ACTIF")
   return <NewBookingForm properties={activeProperties} guests={guests} />
 }
+
