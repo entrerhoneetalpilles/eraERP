@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@auth/core": "0.41.1",
-    "@auth/prisma-adapter": "^2.7.0",
     "@conciergerie/db": "workspace:*",
     "@conciergerie/email": "workspace:*",
     "@conciergerie/storage": "workspace:*",
