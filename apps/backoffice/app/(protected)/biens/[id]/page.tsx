@@ -6,11 +6,24 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { Button } from "@conciergerie/ui"
 import { Edit, CalendarDays, Key } from "lucide-react"
 
+type BookingItem = {
+  id: string
+  check_in: Date
+  check_out: Date
+  nb_nuits: number
+  statut: string
+  revenu_net_proprietaire: number
+  guest: {
+    prenom: string
+    nom: string
+  }
+}
+
 export default async function PropertyDetailPage({ params }: { params: { id: string } }) {
   const property = await getPropertyById(params.id)
   if (!property) notFound()
 
-  const adresse = property.adresse as any // Prisma Json field
+  const adresse = property.adresse as any
 
   return (
     <div className="space-y-6">
@@ -112,7 +125,7 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
           <p className="text-sm text-muted-foreground text-center py-8">Aucune réservation</p>
         ) : (
           <div className="space-y-0.5">
-            {property.bookings.map((booking) => (
+            {property.bookings.map((booking: BookingItem) => (
               <Link
                 key={booking.id}
                 href={`/reservations/${booking.id}`}
