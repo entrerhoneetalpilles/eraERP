@@ -5,6 +5,15 @@ import { PageHeader } from "@/components/ui/page-header"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { ArrowLeft } from "lucide-react"
 
+type TransactionItem = {
+  id: string
+  date: Date
+  libelle: string
+  type: string
+  statut: string
+  montant: number
+}
+
 const TX_TYPE_LABELS: Record<string, string> = {
   REVENU_SEJOUR: "Revenu séjour",
   HONORAIRES: "Honoraires",
@@ -41,31 +50,19 @@ export default async function CompteDetailPage({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-card rounded-md border border-border p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Solde courant</p>
-          <p
-            className={`text-2xl font-semibold mt-1 ${
-              account.solde_courant >= 0 ? "text-green-700" : "text-red-600"
-            }`}
-          >
-            {account.solde_courant.toLocaleString("fr-FR", {
-              style: "currency",
-              currency: "EUR",
-            })}
+          <p className={`text-2xl font-semibold mt-1 ${account.solde_courant >= 0 ? "text-green-700" : "text-red-600"}`}>
+            {account.solde_courant.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
           </p>
         </div>
         <div className="bg-card rounded-md border border-border p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Séquestre</p>
           <p className="text-2xl font-semibold mt-1 text-foreground">
-            {account.solde_sequestre.toLocaleString("fr-FR", {
-              style: "currency",
-              currency: "EUR",
-            })}
+            {account.solde_sequestre.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
           </p>
         </div>
         <div className="bg-card rounded-md border border-border p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Nb transactions</p>
-          <p className="text-2xl font-semibold mt-1 text-foreground">
-            {account.transactions.length}
-          </p>
+          <p className="text-2xl font-semibold mt-1 text-foreground">{account.transactions.length}</p>
         </div>
       </div>
 
@@ -78,7 +75,7 @@ export default async function CompteDetailPage({
           <p className="text-sm text-muted-foreground text-center py-8">Aucune transaction</p>
         ) : (
           <div className="divide-y divide-border">
-            {account.transactions.map((tx) => (
+            {account.transactions.map((tx: TransactionItem) => (
               <div key={tx.id} className="flex items-center justify-between py-3 text-sm">
                 <div className="flex items-center gap-4">
                   <span className="text-muted-foreground w-24 shrink-0">
@@ -91,16 +88,9 @@ export default async function CompteDetailPage({
                     {TX_TYPE_LABELS[tx.type] ?? tx.type}
                   </span>
                   <StatusBadge status={tx.statut} />
-                  <span
-                    className={`font-semibold w-28 text-right ${
-                      tx.montant >= 0 ? "text-green-700" : "text-red-600"
-                    }`}
-                  >
+                  <span className={`font-semibold w-28 text-right ${tx.montant >= 0 ? "text-green-700" : "text-red-600"}`}>
                     {tx.montant >= 0 ? "+" : ""}
-                    {tx.montant.toLocaleString("fr-FR", {
-                      style: "currency",
-                      currency: "EUR",
-                    })}
+                    {tx.montant.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
                   </span>
                 </div>
               </div>
@@ -119,31 +109,16 @@ export default async function CompteDetailPage({
             {account.reports.map((report) => (
               <div key={report.id} className="flex items-center justify-between py-3 text-sm">
                 <span className="text-muted-foreground">
-                  {new Date(report.periode_debut).toLocaleDateString("fr-FR", {
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {new Date(report.periode_debut).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
                 </span>
                 <span className="text-foreground">
-                  Revenus :{" "}
-                  {report.revenus_sejours.toLocaleString("fr-FR", {
-                    style: "currency",
-                    currency: "EUR",
-                  })}
+                  Revenus : {report.revenus_sejours.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
                 </span>
                 <span className="text-muted-foreground">
-                  Honoraires :{" "}
-                  {report.honoraires_deduits.toLocaleString("fr-FR", {
-                    style: "currency",
-                    currency: "EUR",
-                  })}
+                  Honoraires : {report.honoraires_deduits.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
                 </span>
                 <span className="font-semibold text-foreground">
-                  Reversé :{" "}
-                  {report.montant_reverse.toLocaleString("fr-FR", {
-                    style: "currency",
-                    currency: "EUR",
-                  })}
+                  Reversé : {report.montant_reverse.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
                 </span>
               </div>
             ))}
