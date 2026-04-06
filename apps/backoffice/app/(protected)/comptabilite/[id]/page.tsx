@@ -14,6 +14,16 @@ type TransactionItem = {
   montant: number
 }
 
+type ReportItem = {
+  id: string
+  periode_debut: Date
+  periode_fin: Date
+  revenus_sejours: number
+  honoraires_deduits: number
+  charges_deduites: number
+  montant_reverse: number
+}
+
 const TX_TYPE_LABELS: Record<string, string> = {
   REVENU_SEJOUR: "Revenu séjour",
   HONORAIRES: "Honoraires",
@@ -106,7 +116,7 @@ export default async function CompteDetailPage({
             Comptes rendus de gestion (CRG)
           </p>
           <div className="divide-y divide-border">
-            {account.reports.map((report) => (
+            {account.reports.map((report: ReportItem) => (
               <div key={report.id} className="flex items-center justify-between py-3 text-sm">
                 <span className="text-muted-foreground">
                   {new Date(report.periode_debut).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
