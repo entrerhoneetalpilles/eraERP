@@ -18,6 +18,7 @@ import {
   SprayCan,
   FileBarChart2,
   KeyRound,
+  Mail,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -43,6 +44,12 @@ const NAV_SECTIONS = [
       { href: "/planning", label: "Planning", icon: CalendarRange },
       { href: "/menage", label: "Ménage", icon: SprayCan },
       { href: "/voyageurs", label: "Voyageurs", icon: UserCheck },
+    ],
+  },
+  {
+    label: "Communication",
+    items: [
+      { href: "/mails", label: "Messagerie", icon: Mail },
     ],
   },
   {

@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { workorderSchema } from "@/lib/validations/workorder"
 import { createWorkOrder } from "@/lib/dal/travaux"
+import { db } from "@conciergerie/db"
+import { sendDevisDemandEmail } from "@conciergerie/email"
+import { logEmail } from "@/lib/dal/email-log"
 
 export async function createWorkOrderAction(
   _prev: unknown,
@@ -29,8 +32,36 @@ export async function createWorkOrderAction(
     return { error: parsed.error.flatten().fieldErrors }
   }
 
-  await createWorkOrder(session.user.email, parsed.data)
+  const workOrder = await createWorkOrder(session.user.email, parsed.data)
+
+  // Email au prestataire si assigné
+  if (workOrder.contractor_id) {
+    try {
+      const [contractor, property] = await Promise.all([
+        db.contractor.findUnique({ where: { id: workOrder.contractor_id }, select: { nom: true, email: true } }),
+        db.property.findUnique({ where: { id: workOrder.property_id }, select: { nom: true } }),
+      ])
+      if (contractor?.email && property) {
+        const result = await sendDevisDemandEmail({
+          to: contractor.email,
+          contractorName: contractor.nom,
+          propertyName: property.nom,
+          titreOrdre: workOrder.titre,
+          description: workOrder.description ?? "",
+          urgence: workOrder.urgence,
+        })
+        await logEmail({
+          to: contractor.email,
+          subject: `Demande de devis — ${workOrder.titre}`,
+          template: "devis-demande",
+          resend_id: (result as any)?.id,
+        })
+      }
+    } catch (e) {
+      console.error("[Email] Erreur devis-demande:", e)
+    }
+  }
+
   revalidatePath("/travaux")
   redirect("/travaux")
 }
-

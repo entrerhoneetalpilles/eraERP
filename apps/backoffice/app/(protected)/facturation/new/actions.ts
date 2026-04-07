@@ -4,6 +4,9 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { factureSchema, computeMontantTTC } from "@/lib/validations/facture"
 import { createFeeInvoice } from "@/lib/dal/facturation"
+import { getOwnerById } from "@/lib/dal/owners"
+import { sendFactureEmail } from "@conciergerie/email"
+import { logEmail } from "@/lib/dal/email-log"
 
 export async function createFactureAction(
   _prev: unknown,
@@ -25,7 +28,7 @@ export async function createFactureAction(
   const { owner_id, periode_debut, periode_fin, montant_ht, tva_rate } = parsed.data
   const montant_ttc = computeMontantTTC(montant_ht, tva_rate)
 
-  await createFeeInvoice({
+  const invoice = await createFeeInvoice({
     owner_id,
     periode_debut: new Date(periode_debut),
     periode_fin: new Date(periode_fin),
@@ -34,7 +37,32 @@ export async function createFactureAction(
     montant_ttc,
   })
 
+  // Email au propriétaire
+  try {
+    const owner = await getOwnerById(owner_id)
+    if (owner?.email) {
+      const periodeLabel = `${new Date(periode_debut).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })} — ${new Date(periode_fin).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}`
+      const result = await sendFactureEmail({
+        to: owner.email,
+        ownerName: owner.nom,
+        numeroFacture: invoice.numero_facture,
+        periode: periodeLabel,
+        montantHT: montant_ht.toFixed(2),
+        montantTTC: montant_ttc.toFixed(2),
+        portalUrl: `${process.env.NEXT_PUBLIC_PORTAL_URL ?? "https://portal.entrerhonenalpilles.fr"}/documents`,
+      })
+      await logEmail({
+        to: owner.email,
+        subject: `Facture d'honoraires n° ${invoice.numero_facture}`,
+        template: "facture",
+        resend_id: (result as any)?.id,
+        owner_id: owner.id,
+      })
+    }
+  } catch (e) {
+    console.error("[Email] Erreur facture:", e)
+  }
+
   revalidatePath("/facturation")
   redirect("/facturation")
 }
-

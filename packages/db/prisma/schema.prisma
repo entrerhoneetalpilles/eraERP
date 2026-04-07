@@ -1,6 +1,5 @@
 generator client {
   provider      = "prisma-client-js"
-  output        = "../../../node_modules/.prisma/client"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -857,14 +856,21 @@ model Review {
 // ─── MESSAGERIE ────────────────────────────────────────────────
 
 model MessageThread {
-  id          String   @id @default(cuid())
-  owner_id    String
-  property_id String?
-  subject     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  owner_id      String?
+  property_id   String?
+  subject       String
+  contact_type  String   @default("autre")
+  guest_id      String?
+  contractor_id String?
+  folder        String   @default("inbox")
+  resend_id     String?
+  to_email      String?
+  to_name       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  owner    Owner     @relation(fields: [owner_id], references: [id])
+  owner    Owner?    @relation(fields: [owner_id], references: [id])
   property Property? @relation(fields: [property_id], references: [id])
   messages Message[]
 
@@ -889,6 +895,23 @@ model Message {
 enum AuthorType {
   USER
   OWNER
+}
+
+// ─── EMAIL LOG ─────────────────────────────────────────────────
+
+model EmailLog {
+  id         String   @id @default(cuid())
+  resend_id  String?
+  to         String
+  subject    String
+  template   String
+  status     String   @default("sent")
+  error      String?
+  owner_id   String?
+  booking_id String?
+  createdAt  DateTime @default(now())
+
+  @@map("email_logs")
 }
 
 // ─── NOTIFICATIONS ─────────────────────────────────────────────
