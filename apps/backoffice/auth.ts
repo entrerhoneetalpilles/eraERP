@@ -20,22 +20,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials) {
-        const parsed = credentialsSchema.safeParse(credentials)
-        if (!parsed.success) return null
+        try {
+          const parsed = credentialsSchema.safeParse(credentials)
+          if (!parsed.success) {
+            console.error("[auth] invalid credentials shape", parsed.error.flatten())
+            return null
+          }
 
-        const user = await db.user.findUnique({
-          where: { email: parsed.data.email },
-        })
+          const user = await db.user.findUnique({
+            where: { email: parsed.data.email },
+          })
 
-        if (!user || !user.actif) return null
+          if (!user) {
+            console.error("[auth] user not found:", parsed.data.email)
+            return null
+          }
+          if (!user.actif) {
+            console.error("[auth] user inactive:", parsed.data.email)
+            return null
+          }
 
-        const valid = await bcrypt.compare(parsed.data.password, user.password_hash)
-        if (!valid) return null
+          const valid = await bcrypt.compare(parsed.data.password, user.password_hash)
+          if (!valid) {
+            console.error("[auth] wrong password for:", parsed.data.email)
+            return null
+          }
 
-        await db.user.update({
-          where: { id: user.id },
-          data: { derniere_connexion: new Date() },
-        })
+          await db.user.update({
+            where: { id: user.id },
+            data: { derniere_connexion: new Date() },
+          })
 
         return {
           id: user.id,
@@ -44,6 +58,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: user.role,
           mfaRequired: user.mfa_active,
           mfaVerified: false,
+        }
+        } catch (e) {
+          console.error("[auth] authorize exception:", e)
+          return null
         }
       },
     }),
