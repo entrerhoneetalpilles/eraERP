@@ -47,6 +47,7 @@ export async function createThread(data: {
     property_id?: string
     to_email?: string
     to_name?: string
+    resend_id?: string
     firstMessage: { contenu: string; author_id: string }
 }) {
     const { firstMessage, owner_id, property_id, ...rest } = data
