@@ -66,9 +66,6 @@ export async function POST(req: NextRequest) {
     }
 
     const webhookData = payload.data ?? payload
-
-    // Le payload webhook Resend ne contient pas html/text — il faut les récupérer
-    // via l'API Resend en utilisant l'email_id
     const emailId: string = webhookData.email_id ?? webhookData.id
 
     let from: string = webhookData.from ?? ''
@@ -77,6 +74,7 @@ export async function POST(req: NextRequest) {
     let textContent = ''
     let resendEmailData: any = null
 
+    // Le payload webhook ne contient pas html/text — les récupérer via l'API Resend
     if (emailId && process.env.RESEND_API_KEY) {
       try {
         const fullEmail = await getEmailById(emailId)
@@ -86,9 +84,10 @@ export async function POST(req: NextRequest) {
           subject = (fullEmail as any).subject ?? subject
           htmlContent = String((fullEmail as any).html ?? '').trim()
           textContent = String((fullEmail as any).text ?? '').trim()
-          console.log('[Webhook Resend] Email récupéré | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars | PJ:', ((fullEmail as any).attachments ?? []).length)
+          console.log('[Webhook] Email récupéré | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars | PJ:', ((fullEmail as any).attachments ?? []).length)
+        }
       } catch (e) {
-        console.error('[Webhook Resend] Impossible de récupérer le contenu via API:', e)
+        console.error('[Webhook] Impossible de récupérer le contenu via API:', e)
       }
     }
 
@@ -98,11 +97,10 @@ export async function POST(req: NextRequest) {
       textContent = String(webhookData.text ?? webhookData.plain_text ?? webhookData.text_body ?? '').trim()
     }
 
-    console.log('[Webhook Resend] from:', from, '| subject:', subject,
-      '| html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
+    console.log('[Webhook] from:', from, '| subject:', subject)
 
     if (!from) {
-      console.error('[Webhook Resend] Payload invalide:', JSON.stringify(payload).slice(0, 300))
+      console.error('[Webhook] Payload invalide:', JSON.stringify(payload).slice(0, 300))
       return NextResponse.json({ error: 'Missing from field' }, { status: 400 })
     }
 
