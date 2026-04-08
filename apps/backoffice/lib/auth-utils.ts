@@ -2,10 +2,10 @@ import { UserRole } from "@conciergerie/types"
 
 export const ROLE_ROUTES: Record<UserRole, string[]> = {
   [UserRole.ADMIN]: ["/"],
-  [UserRole.DIRECTION]: ["/dashboard", "/proprietaires", "/biens", "/reservations", "/comptabilite", "/facturation", "/reporting"],
-  [UserRole.GESTIONNAIRE]: ["/dashboard", "/proprietaires", "/biens", "/reservations", "/voyageurs", "/travaux", "/prestataires", "/services"],
+  [UserRole.DIRECTION]: ["/dashboard", "/proprietaires", "/biens", "/reservations", "/comptabilite", "/facturation", "/reporting", "/mails"],
+  [UserRole.GESTIONNAIRE]: ["/dashboard", "/proprietaires", "/biens", "/reservations", "/voyageurs", "/travaux", "/prestataires", "/services", "/mails"],
   [UserRole.COMPTABLE]: ["/dashboard", "/comptabilite", "/facturation", "/reporting"],
-  [UserRole.SERVICES]: ["/dashboard", "/services", "/voyageurs"],
+  [UserRole.SERVICES]: ["/dashboard", "/services", "/voyageurs", "/mails"],
   [UserRole.TRAVAUX]: ["/dashboard", "/travaux", "/prestataires", "/biens"],
 }
 
