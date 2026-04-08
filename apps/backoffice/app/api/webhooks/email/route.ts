@@ -3,15 +3,28 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { createThread } from '@/lib/dal/emails'
 import { db } from '@conciergerie/db'
 
-function verifyResendSignature(payload: string, signature: string, secret: string): boolean {
-  const hmac = createHmac('sha256', secret)
-  hmac.update(payload)
-  const expected = hmac.digest('hex')
+function verifyResendSignature(
+  payload: string,
+  headers: { id: string; timestamp: string; signature: string },
+  secret: string
+): boolean {
   try {
-    return timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
-  } catch {
-    return false
-  }
+    // Resend utilise Svix — secret base64 préfixé "whsec_"
+    const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64')
+    // Contenu signé : "{svix-id}.{svix-timestamp}.{raw-body}"
+    const toSign = `${headers.id}.${headers.timestamp}.${payload}`
+    const hmac = createHmac('sha256', secretBytes)
+    hmac.update(toSign)
+    const computed = hmac.digest('base64')
+    // svix-signature peut contenir plusieurs sigs : "v1,<base64> v1,<base64>"
+    return headers.signature.split(' ').some((sig) => {
+      const [version, sigValue] = sig.split(',')
+      if (version !== 'v1') return false
+      try {
+        return timingSafeEqual(Buffer.from(sigValue, 'base64'), Buffer.from(computed, 'base64'))
+      } catch { return false }
+    })
+  } catch { return false }
 }
 
 async function resolveContactType(fromEmail: string): Promise<{
@@ -38,8 +51,10 @@ export async function POST(req: NextRequest) {
     const webhookSecret = process.env.RESEND_WEBHOOK_SECRET
 
     if (webhookSecret) {
-      const signature = req.headers.get('svix-signature') ?? req.headers.get('resend-signature') ?? ''
-      if (!verifyResendSignature(rawBody, signature, webhookSecret)) {
+      const svixId = req.headers.get('svix-id') ?? ''
+      const svixTimestamp = req.headers.get('svix-timestamp') ?? ''
+      const svixSignature = req.headers.get('svix-signature') ?? ''
+      if (!verifyResendSignature(rawBody, { id: svixId, timestamp: svixTimestamp, signature: svixSignature }, webhookSecret)) {
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
       }
     }
