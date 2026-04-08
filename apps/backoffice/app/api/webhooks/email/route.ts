@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { getEmailById } from '@conciergerie/email'
 import { createThread } from '@/lib/dal/emails'
 import { createDocument } from '@/lib/dal/documents'
 import { uploadFile, buildStorageKey } from '@conciergerie/storage'
@@ -61,12 +60,6 @@ export async function POST(req: NextRequest) {
 
     const payload = JSON.parse(rawBody)
 
-    // LOG COMPLET pour diagnostiquer la structure Resend
-    console.log('[Webhook] payload.type:', payload.type)
-    console.log('[Webhook] payload keys:', Object.keys(payload).join(', '))
-    if (payload.data) console.log('[Webhook] payload.data keys:', Object.keys(payload.data).join(', '))
-    console.log('[Webhook] rawBody (500 chars):', rawBody.slice(0, 500))
-
     if (payload.type && payload.type !== 'email.received') {
       return NextResponse.json({ success: true })
     }
@@ -76,62 +69,41 @@ export async function POST(req: NextRequest) {
 
     let from: string = webhookData.from ?? ''
     let subject: string = webhookData.subject ?? ''
-    let htmlContent = ''
-    let textContent = ''
-    let resendEmailData: any = null
+    // Certains emails ont le contenu directement dans le payload webhook
+    let htmlContent = String(webhookData.html ?? webhookData.html_body ?? '').trim()
+    let textContent = String(webhookData.text ?? webhookData.plain_text ?? webhookData.text_body ?? '').trim()
+    let resendEmailData: any = webhookData
 
-    // Le payload webhook ne contient pas html/text — les récupérer via l'API Resend
-    if (emailId && process.env.RESEND_API_KEY) {
-      try {
-        // Essai 1 : SDK Resend
-        const fullEmail = await getEmailById(emailId)
-        console.log('[Webhook] getEmailById result keys:', fullEmail ? Object.keys(fullEmail).join(', ') : 'null')
-        if (fullEmail) {
-          resendEmailData = fullEmail
-          from = (fullEmail as any).from ?? from
-          subject = (fullEmail as any).subject ?? subject
-          htmlContent = String((fullEmail as any).html ?? '').trim()
-          textContent = String((fullEmail as any).text ?? '').trim()
-          console.log('[Webhook] SDK | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
-        }
-      } catch (e) {
-        console.error('[Webhook] SDK getEmailById a échoué:', String(e))
-      }
-
-      // Essai 2 : fetch direct si SDK n'a pas retourné de contenu
-      if (!htmlContent && !textContent) {
+    // Si le contenu est absent du payload, le récupérer via l'API Resend
+    // Nécessite RESEND_FULL_API_KEY (clé avec permissions lecture, pas seulement envoi)
+    if (!htmlContent && !textContent && emailId) {
+      const readKey = process.env.RESEND_FULL_API_KEY
+      if (readKey) {
         try {
           const res = await fetch(`https://api.resend.com/emails/${emailId}`, {
-            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+            headers: { Authorization: `Bearer ${readKey}` },
           })
           const json = await res.json()
-          console.log('[Webhook] fetch direct status:', res.status, '| keys:', Object.keys(json).join(', '))
+          console.log('[Webhook] API fetch status:', res.status, '| html:', String(json.html ?? '').length, '| text:', String(json.text ?? '').length)
           if (json.html || json.text) {
             resendEmailData = json
             from = json.from ?? from
             subject = json.subject ?? subject
             htmlContent = String(json.html ?? '').trim()
             textContent = String(json.text ?? '').trim()
-            console.log('[Webhook] fetch direct | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
-          } else {
-            console.log('[Webhook] fetch direct réponse complète:', JSON.stringify(json).slice(0, 500))
           }
         } catch (e) {
-          console.error('[Webhook] fetch direct a échoué:', String(e))
+          console.error('[Webhook] API fetch échouée:', String(e))
         }
+      } else {
+        console.warn('[Webhook] RESEND_FULL_API_KEY non définie — contenu indisponible pour email', emailId)
       }
     }
 
-    // Fallback sur les champs du payload si l'API n'a rien donné
-    if (!htmlContent && !textContent) {
-      htmlContent = String(webhookData.html ?? webhookData.html_body ?? '').trim()
-      textContent = String(webhookData.text ?? webhookData.plain_text ?? webhookData.text_body ?? '').trim()
-    }
-
-    console.log('[Webhook] from:', from, '| subject:', subject)
+    console.log('[Webhook] from:', from, '| subject:', subject, '| html:', htmlContent.length, '| text:', textContent.length)
 
     if (!from) {
-      console.error('[Webhook] Payload invalide:', JSON.stringify(payload).slice(0, 300))
+      console.error('[Webhook] Payload invalide — champ from manquant')
       return NextResponse.json({ error: 'Missing from field' }, { status: 400 })
     }
 
