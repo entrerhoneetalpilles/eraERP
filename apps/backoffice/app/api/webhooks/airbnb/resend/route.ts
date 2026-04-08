@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
     const fromEmail = fromEmailMatch ? fromEmailMatch[1] : from
     const fromName = fromEmailMatch ? from.replace(/<.+>/, '').trim() : from
 
+    // Convention inbox : to_email/to_name = expéditeur (pas le destinataire)
     await createThread({
       subject: subject || 'Sans objet',
       contact_type,
@@ -65,10 +66,8 @@ export async function POST(req: NextRequest) {
       owner_id,
       guest_id,
       contractor_id,
-      to_email: Array.isArray(to) ? to[0] : to ?? 'contact@entre-rhone-alpilles.fr',
-      to_name: 'Entre Rhône et Alpilles',
-      from_email: fromEmail,
-      from_name: fromName || fromEmail,
+      to_email: fromEmail,
+      to_name: fromName || fromEmail,
       firstMessage: {
         contenu: html || text || 'Message sans contenu',
         author_id: fromEmail,

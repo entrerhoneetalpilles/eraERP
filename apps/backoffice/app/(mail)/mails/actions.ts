@@ -16,17 +16,18 @@ import type { Mail, MailFolder, ContactType, MailMessage } from './mail-data'
 function mapThread(t: any): Mail {
   const isInbox = t.folder === 'inbox' || !t.folder
 
-  // Pour inbox: from = expéditeur (from_name/from_email ou owner)
-  // Pour sent/autres: from = conciergerie, to = destinataire
+  // Convention :
+  //   inbox  → to_name/to_email = expéditeur (qui a écrit), from = conciergerie
+  //   sent   → to_name/to_email = destinataire, from = conciergerie
   const fromName = isInbox
-    ? (t.from_name ?? t.owner?.nom ?? t.from_email ?? 'Contact')
+    ? (t.to_name ?? t.owner?.nom ?? 'Contact')
     : 'Entre Rhône et Alpilles'
   const fromEmail = isInbox
-    ? (t.from_email ?? t.owner?.email ?? '')
+    ? (t.to_email ?? t.owner?.email ?? '')
     : 'contact@entre-rhone-alpilles.fr'
 
   const toName = isInbox ? 'Entre Rhône et Alpilles' : (t.to_name ?? t.owner?.nom ?? 'Contact')
-  const toEmail = isInbox ? (t.to_email ?? '') : (t.to_email ?? t.owner?.email ?? '')
+  const toEmail = isInbox ? 'contact@entre-rhone-alpilles.fr' : (t.to_email ?? t.owner?.email ?? '')
 
   // Unread: messages OWNER non lus (inbox) ou tous non lus (sent)
   const unreadMessages = isInbox

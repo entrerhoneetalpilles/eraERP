@@ -867,8 +867,6 @@ model MessageThread {
   resend_id     String?
   to_email      String?
   to_name       String?
-  from_email    String?
-  from_name     String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

@@ -19,14 +19,15 @@ export default async function MailsPage({
 
     const mails: MailType[] = (threads as any[]).map((t) => {
         const isInbox = t.folder === 'inbox' || !t.folder
+        // inbox : to_name/to_email = expéditeur | sent : to_name/to_email = destinataire
         const fromName = isInbox
-            ? (t.from_name ?? t.owner?.nom ?? t.from_email ?? 'Contact')
+            ? (t.to_name ?? t.owner?.nom ?? 'Contact')
             : 'Entre Rhône et Alpilles'
         const fromEmail = isInbox
-            ? (t.from_email ?? t.owner?.email ?? '')
+            ? (t.to_email ?? t.owner?.email ?? '')
             : 'contact@entre-rhone-alpilles.fr'
         const toName = isInbox ? 'Entre Rhône et Alpilles' : (t.to_name ?? t.owner?.nom ?? 'Contact')
-        const toEmail = isInbox ? (t.to_email ?? '') : (t.to_email ?? t.owner?.email ?? '')
+        const toEmail = isInbox ? 'contact@entre-rhone-alpilles.fr' : (t.to_email ?? t.owner?.email ?? '')
         const unreadMessages = isInbox
             ? (t.messages ?? []).filter((m: any) => m.author_type === 'OWNER' && m.lu_at === null)
             : (t.messages ?? []).filter((m: any) => m.lu_at === null)

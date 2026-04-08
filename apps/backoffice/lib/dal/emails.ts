@@ -59,8 +59,6 @@ export async function createThread(data: {
     property_id?: string
     to_email?: string
     to_name?: string
-    from_email?: string
-    from_name?: string
     resend_id?: string
     firstMessage: { contenu: string; author_id: string; author_type?: 'USER' | 'OWNER' }
 }) {
