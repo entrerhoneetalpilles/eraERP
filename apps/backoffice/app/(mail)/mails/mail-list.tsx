@@ -5,7 +5,6 @@ import { cn } from '@conciergerie/ui'
 import { Input } from '@conciergerie/ui'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -84,10 +83,11 @@ export function MailList({
                 'border-b px-3 py-1.5 flex items-center gap-2 shrink-0 transition-all',
                 someSelected ? 'bg-primary/5' : 'bg-transparent'
             )}>
-                <Checkbox
+                <input
+                    type="checkbox"
                     checked={allSelected}
-                    onCheckedChange={(checked) => checked ? onSelectAll() : onClearSelection()}
-                    className="shrink-0"
+                    onChange={(e) => e.target.checked ? onSelectAll() : onClearSelection()}
+                    className="shrink-0 h-4 w-4 rounded border-border accent-primary cursor-pointer"
                 />
                 {someSelected ? (
                     <>
@@ -184,10 +184,12 @@ export function MailList({
                                     )}
                                     onClick={(e) => { e.stopPropagation(); handleCheckbox(mail.id, e) }}
                                 >
-                                    <Checkbox
+                                    <input
+                                        type="checkbox"
                                         checked={bulkSelected.has(mail.id)}
-                                        onCheckedChange={() => onToggleBulk(mail.id)}
+                                        onChange={() => onToggleBulk(mail.id)}
                                         onClick={(e) => e.stopPropagation()}
+                                        className="h-4 w-4 rounded border-border accent-primary cursor-pointer"
                                     />
                                 </div>
 
