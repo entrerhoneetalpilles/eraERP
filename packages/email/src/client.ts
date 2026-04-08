@@ -25,11 +25,12 @@ interface SendEmailOptions {
   subject: string
   html: string
   replyTo?: string
+  from?: string
 }
 
 export function buildEmailPayload(options: SendEmailOptions): EmailPayload {
   return {
-    from: FROM_EMAIL,
+    from: options.from ?? FROM_EMAIL,
     to: typeof options.to === "string" ? [options.to] : options.to,
     subject: options.subject,
     html: options.html,

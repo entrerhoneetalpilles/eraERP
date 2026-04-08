@@ -81,9 +81,14 @@ export async function sendMailAction(data: {
   const session = await auth()
   if (!session?.user) throw new Error('Non autorisé')
 
+  const userEmail = session.user.email!
+  const userName = session.user.name ?? 'Entre Rhône et Alpilles'
+  const fromHeader = `${userName} - Entre Rhône et Alpilles <${userEmail}>`
+
   await sendEmail({
     to: data.to,
     subject: data.subject,
+    from: fromHeader,
     html: `<div style="font-family:sans-serif;line-height:1.6;color:#1a1a1a;max-width:600px">
       <div style="white-space:pre-wrap;font-size:14px">${data.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
       <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb" />
@@ -91,7 +96,7 @@ export async function sendMailAction(data: {
         Entre Rhône et Alpilles · Conciergerie haut de gamme
       </p>
     </div>`,
-    replyTo: 'contact@entrerhonenalpilles.fr',
+    replyTo: userEmail,
   })
 
   if (data.replyToThreadId) {
