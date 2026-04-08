@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { ownerSchema } from "@/lib/validations/owner"
-import { updateOwner, deleteOwner } from "@/lib/dal/owners"
+import { updateOwner, deleteOwner, createOrResetOwnerPortalAccess } from "@/lib/dal/owners"
 
 export async function updateOwnerAction(id: string, _prev: unknown, formData: FormData) {
   const raw = {
@@ -35,7 +35,26 @@ export async function updateOwnerAction(id: string, _prev: unknown, formData: Fo
 }
 
 export async function deleteOwnerAction(id: string) {
-  await deleteOwner(id)
+  try {
+    await deleteOwner(id)
+  } catch (e: any) {
+    return { error: e.message ?? "Suppression impossible" }
+  }
   revalidatePath("/proprietaires")
   redirect("/proprietaires")
+}
+
+export async function createPortalAccessAction(ownerId: string): Promise<{
+  tempPassword?: string
+  email?: string
+  action?: "created" | "reset"
+  error?: string
+}> {
+  try {
+    const result = await createOrResetOwnerPortalAccess(ownerId)
+    revalidatePath(`/proprietaires/${ownerId}`)
+    return result
+  } catch (e: any) {
+    return { error: e.message ?? "Erreur lors de la création de l'accès portail" }
+  }
 }

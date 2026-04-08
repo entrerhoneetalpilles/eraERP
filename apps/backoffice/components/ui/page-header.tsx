@@ -3,7 +3,7 @@ import { cn } from "@conciergerie/ui"
 
 interface PageHeaderProps {
   title: string
-  description?: string
+  description?: ReactNode
   actions?: ReactNode
   className?: string
 }
@@ -14,7 +14,7 @@ export function PageHeader({ title, description, actions, className }: PageHeade
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">{title}</h1>
         {description && (
-          <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+          <div className="text-sm text-muted-foreground mt-1">{description}</div>
         )}
       </div>
       {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}

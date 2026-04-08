@@ -30,13 +30,17 @@ const columns: ColumnDef<OwnerRow>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.email}</span>
+      <a href={`mailto:${row.original.email}`} className="text-sm text-muted-foreground hover:text-primary">
+        {row.original.email}
+      </a>
     ),
   },
   {
     accessorKey: "telephone",
     header: "Téléphone",
-    cell: ({ row }) => row.original.telephone ?? "—",
+    cell: ({ row }) => row.original.telephone
+      ? <a href={`tel:${row.original.telephone}`} className="text-sm text-muted-foreground">{row.original.telephone}</a>
+      : <span className="text-muted-foreground">—</span>,
   },
   {
     id: "biens",
@@ -46,6 +50,19 @@ const columns: ColumnDef<OwnerRow>[] = [
         {row.original._count.mandates} bien{row.original._count.mandates !== 1 ? "s" : ""}
       </span>
     ),
+  },
+  {
+    id: "solde",
+    header: "Solde mandant",
+    cell: ({ row }) => {
+      const solde = row.original.mandantAccount?.solde_courant
+      if (solde === undefined || solde === null) return <span className="text-muted-foreground">—</span>
+      return (
+        <span className={`text-sm font-medium tabular-nums ${solde < 0 ? "text-destructive" : "text-foreground"}`}>
+          {solde.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
+        </span>
+      )
+    },
   },
   {
     id: "actions",
@@ -90,12 +107,17 @@ export function ProprietairesTable({ data }: { data: OwnerRow[] }) {
                 <StatusBadge status={row.type} />
               </div>
               <p className="text-xs text-muted-foreground">{row.email}</p>
-              {row.telephone && (
-                <p className="text-xs text-muted-foreground">{row.telephone}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                {row._count.mandates} bien{row._count.mandates !== 1 ? "s" : ""}
-              </p>
+              {row.telephone && <p className="text-xs text-muted-foreground">{row.telephone}</p>}
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  {row._count.mandates} bien{row._count.mandates !== 1 ? "s" : ""}
+                </p>
+                {row.mandantAccount && (
+                  <span className={`text-xs font-medium tabular-nums ${row.mandantAccount.solde_courant < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                    {row.mandantAccount.solde_courant.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
+                  </span>
+                )}
+              </div>
             </Link>
           ))
         )}
@@ -103,4 +125,3 @@ export function ProprietairesTable({ data }: { data: OwnerRow[] }) {
     </>
   )
 }
-
