@@ -122,7 +122,7 @@ function MessageCard({
                 </div>
                 <div className="shrink-0 flex items-center gap-2">
                     <Tooltip>
-                        <TooltipTrigger asChild>
+                        <TooltipTrigger>
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 {formatDistanceToNow(date, { addSuffix: true, locale: fr })}
                             </span>
@@ -278,7 +278,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                 {/* ── Toolbar ── */}
                 <div className="flex items-center gap-0.5 border-b px-2 py-1.5 shrink-0 bg-card">
                     <Tooltip>
-                        <TooltipTrigger asChild>
+                        <TooltipTrigger>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onReply}>
                                 <Reply className="h-4 w-4" />
                             </Button>
@@ -287,7 +287,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                     </Tooltip>
 
                     <Tooltip>
-                        <TooltipTrigger asChild>
+                        <TooltipTrigger>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleForwardClick}>
                                 <Forward className="h-4 w-4" />
                             </Button>
@@ -298,7 +298,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                     <Separator orientation="vertical" className="mx-1 h-5" />
 
                     <Tooltip>
-                        <TooltipTrigger asChild>
+                        <TooltipTrigger>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleArchive}>
                                 <Archive className="h-4 w-4" />
                             </Button>
@@ -307,7 +307,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                     </Tooltip>
 
                     <Tooltip>
-                        <TooltipTrigger asChild>
+                        <TooltipTrigger>
                             <Button
                                 variant="ghost" size="icon"
                                 className="h-8 w-8 hover:text-destructive hover:bg-destructive/10"
