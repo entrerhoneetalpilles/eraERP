@@ -61,6 +61,12 @@ export async function POST(req: NextRequest) {
 
     const payload = JSON.parse(rawBody)
 
+    // LOG COMPLET pour diagnostiquer la structure Resend
+    console.log('[Webhook] payload.type:', payload.type)
+    console.log('[Webhook] payload keys:', Object.keys(payload).join(', '))
+    if (payload.data) console.log('[Webhook] payload.data keys:', Object.keys(payload.data).join(', '))
+    console.log('[Webhook] rawBody (500 chars):', rawBody.slice(0, 500))
+
     if (payload.type && payload.type !== 'email.received') {
       return NextResponse.json({ success: true })
     }
@@ -77,17 +83,42 @@ export async function POST(req: NextRequest) {
     // Le payload webhook ne contient pas html/text — les récupérer via l'API Resend
     if (emailId && process.env.RESEND_API_KEY) {
       try {
+        // Essai 1 : SDK Resend
         const fullEmail = await getEmailById(emailId)
+        console.log('[Webhook] getEmailById result keys:', fullEmail ? Object.keys(fullEmail).join(', ') : 'null')
         if (fullEmail) {
           resendEmailData = fullEmail
           from = (fullEmail as any).from ?? from
           subject = (fullEmail as any).subject ?? subject
           htmlContent = String((fullEmail as any).html ?? '').trim()
           textContent = String((fullEmail as any).text ?? '').trim()
-          console.log('[Webhook] Email récupéré | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars | PJ:', ((fullEmail as any).attachments ?? []).length)
+          console.log('[Webhook] SDK | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
         }
       } catch (e) {
-        console.error('[Webhook] Impossible de récupérer le contenu via API:', e)
+        console.error('[Webhook] SDK getEmailById a échoué:', String(e))
+      }
+
+      // Essai 2 : fetch direct si SDK n'a pas retourné de contenu
+      if (!htmlContent && !textContent) {
+        try {
+          const res = await fetch(`https://api.resend.com/emails/${emailId}`, {
+            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+          })
+          const json = await res.json()
+          console.log('[Webhook] fetch direct status:', res.status, '| keys:', Object.keys(json).join(', '))
+          if (json.html || json.text) {
+            resendEmailData = json
+            from = json.from ?? from
+            subject = json.subject ?? subject
+            htmlContent = String(json.html ?? '').trim()
+            textContent = String(json.text ?? '').trim()
+            console.log('[Webhook] fetch direct | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
+          } else {
+            console.log('[Webhook] fetch direct réponse complète:', JSON.stringify(json).slice(0, 500))
+          }
+        } catch (e) {
+          console.error('[Webhook] fetch direct a échoué:', String(e))
+        }
       }
     }
 
