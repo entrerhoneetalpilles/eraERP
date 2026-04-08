@@ -61,6 +61,12 @@ export async function POST(req: NextRequest) {
 
     const payload = JSON.parse(rawBody)
 
+    // Ignorer tous les événements sauf les emails entrants
+    if (payload.type && payload.type !== 'email.received') {
+      console.log('[Webhook Resend] Événement ignoré:', payload.type)
+      return NextResponse.json({ success: true })
+    }
+
     // Resend inbound emails are wrapped in payload.data
     // Format: { type: "email.received", data: { from, to, subject, html, text, message_id } }
     const emailData = payload.data ?? payload

@@ -75,17 +75,16 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
 
     async function moveTo(id: string, target: MailFolder) {
         const mail = mails.find((m) => m.id === id)
+        // Retirer optimistiquement de la liste sans changer de dossier
         setMails((prev) => prev.filter((m) => m.id !== id))
-        if (selectedId === id) setSelectedId(null)
+        if (selectedId === id) setSelectedId(mails.find((m) => m.id !== id)?.id ?? null)
 
         if (mail?.folder === 'trash' && target === 'trash') {
             await deleteThreadAction(id)
         } else {
             await moveThreadAction(id, target)
         }
-        if (target !== folder) {
-            setFolderState(target)
-        }
+        // Ne pas changer de dossier automatiquement — l'utilisateur reste où il est
     }
 
     // Reload a single thread after reply (live message update)
