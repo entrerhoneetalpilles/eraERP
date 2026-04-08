@@ -150,8 +150,32 @@ function MessageCard({
 
             {/* Corps du message */}
             {expanded && (
-                <div className="px-4 pb-4 pt-2 border-t border-border/50">
+                <div className="px-4 pb-4 pt-2 border-t border-border/50 space-y-3">
                     <EmailBody content={message.contenu} />
+                    {message.attachments && message.attachments.length > 0 && (
+                        <div className="pt-2 border-t border-border/40">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">
+                                {message.attachments.length} pièce{message.attachments.length > 1 ? 's' : ''} jointe{message.attachments.length > 1 ? 's' : ''}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {message.attachments.map((att) => (
+                                    <a
+                                        key={att.name}
+                                        href={(att as any).url ?? '#'}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs hover:bg-muted transition-colors"
+                                    >
+                                        <Paperclip className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                        <div>
+                                            <p className="font-medium text-foreground">{att.name}</p>
+                                            {att.size && <p className="text-muted-foreground">{att.size}</p>}
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -389,28 +413,6 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                         ))}
                     </div>
 
-                    {/* Pièces jointes */}
-                    {mail.attachments && mail.attachments.length > 0 && (
-                        <div className="px-6 pb-4">
-                            <p className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                Pièces jointes ({mail.attachments.length})
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                                {mail.attachments.map((att) => (
-                                    <div
-                                        key={att.name}
-                                        className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 cursor-pointer hover:bg-muted transition-colors"
-                                    >
-                                        <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
-                                        <div>
-                                            <p className="font-medium text-xs">{att.name}</p>
-                                            <p className="text-xs text-muted-foreground">{att.size}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </ScrollArea>
 
                 {/* ── Zone réponse rapide ── */}

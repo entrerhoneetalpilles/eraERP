@@ -113,7 +113,10 @@ export async function getThreadById(threadId: string) {
   return db.messageThread.findUnique({
     where: { id: threadId },
     include: {
-      messages: { orderBy: { createdAt: "asc" } },
+      messages: {
+        orderBy: { createdAt: 'asc' },
+        include: { attachments: true },
+      },
       owner: { select: { id: true, nom: true, email: true } },
     },
   })

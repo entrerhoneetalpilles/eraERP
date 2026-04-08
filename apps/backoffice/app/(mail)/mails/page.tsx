@@ -3,6 +3,12 @@ import { getThreads } from '@/lib/dal/emails'
 import { MailClient } from './mail-client'
 import type { Mail as MailType, MailFolder, MailMessage } from './mail-data'
 
+function formatSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} o`
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`
+    return `${(bytes / 1024 / 1024).toFixed(1)} Mo`
+}
+
 export default async function MailsPage({
     searchParams,
 }: {
@@ -17,7 +23,6 @@ export default async function MailsPage({
 
     const mails: MailType[] = (threads as any[]).map((t) => {
         const isInbox = t.folder === 'inbox' || !t.folder
-        // inbox : to_name/to_email = expéditeur | sent : to_name/to_email = destinataire
         const fromName = isInbox
             ? (t.to_name ?? t.owner?.nom ?? 'Contact')
             : 'Entre Rhône et Alpilles'
@@ -29,13 +34,14 @@ export default async function MailsPage({
         const unreadMessages = isInbox
             ? (t.messages ?? []).filter((m: any) => m.author_type === 'OWNER' && m.lu_at === null)
             : (t.messages ?? []).filter((m: any) => m.lu_at === null)
+
         return {
             id: t.id,
             from: { name: fromName, email: fromEmail },
             to: [{ name: toName, email: toEmail }],
             subject: t.subject,
             body: t.messages?.at(-1)?.contenu ?? '',
-            preview: (t.messages?.at(-1)?.contenu ?? '').slice(0, 120),
+            preview: (t.messages?.at(-1)?.contenu ?? '').replace(/<[^>]*>/g, '').slice(0, 120),
             date: t.updatedAt.toISOString(),
             read: unreadMessages.length === 0,
             folder: t.folder ?? 'inbox',
@@ -46,6 +52,11 @@ export default async function MailsPage({
                 contenu: m.contenu,
                 author_type: m.author_type,
                 createdAt: m.createdAt.toISOString(),
+                attachments: (m.attachments ?? []).map((a: any) => ({
+                    name: a.nom,
+                    size: a.taille ? formatSize(a.taille) : '',
+                    url: a.url_storage,
+                })),
             })),
         }
     })

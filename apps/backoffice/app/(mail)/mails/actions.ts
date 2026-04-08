@@ -1,5 +1,11 @@
 'use server'
 
+function formatAttachmentSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`
+  return `${(bytes / 1024 / 1024).toFixed(1)} Mo`
+}
+
 import { auth } from '@/auth'
 import { sendEmail } from '@conciergerie/email'
 import {
@@ -52,6 +58,11 @@ function mapThread(t: any): Mail {
       contenu: m.contenu,
       author_type: m.author_type,
       createdAt: m.createdAt.toISOString(),
+      attachments: (m.attachments ?? []).map((a: any) => ({
+        name: a.nom,
+        size: a.taille ? formatAttachmentSize(a.taille) : '',
+        url: a.url_storage,
+      })),
     })),
   }
 }

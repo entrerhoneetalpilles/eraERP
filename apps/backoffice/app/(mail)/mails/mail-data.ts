@@ -16,6 +16,7 @@ export interface MailMessage {
     contenu: string
     author_type: 'USER' | 'OWNER' | 'SYSTEM'
     createdAt: string
+    attachments?: MailAttachment[]
 }
 
 export interface Mail {

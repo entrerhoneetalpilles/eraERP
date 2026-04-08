@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { Resend } from 'resend'
 import { createThread } from '@/lib/dal/emails'
+import { createDocument } from '@/lib/dal/documents'
+import { uploadFile, buildStorageKey } from '@conciergerie/storage'
 import { db } from '@conciergerie/db'
 
 function verifyResendSignature(
@@ -73,6 +75,7 @@ export async function POST(req: NextRequest) {
     let subject: string = webhookData.subject ?? ''
     let htmlContent = ''
     let textContent = ''
+    let resendEmailData: any = null
 
     if (emailId && process.env.RESEND_API_KEY) {
       try {
@@ -81,11 +84,12 @@ export async function POST(req: NextRequest) {
         if (error) {
           console.error('[Webhook Resend] Erreur récupération email:', error)
         } else if (fullEmail) {
+          resendEmailData = fullEmail
           from = (fullEmail as any).from ?? from
           subject = (fullEmail as any).subject ?? subject
           htmlContent = String((fullEmail as any).html ?? '').trim()
           textContent = String((fullEmail as any).text ?? '').trim()
-          console.log('[Webhook Resend] Email récupéré via API | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
+          console.log('[Webhook Resend] Email récupéré | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars | PJ:', ((fullEmail as any).attachments ?? []).length)
         }
       } catch (e) {
         console.error('[Webhook Resend] Impossible de récupérer le contenu via API:', e)
@@ -115,7 +119,7 @@ export async function POST(req: NextRequest) {
     const contenu = htmlContent || textContent || '(aucun contenu)'
     const messageId = webhookData.message_id ?? emailId
 
-    await createThread({
+    const thread = await createThread({
       subject: subject || 'Sans objet',
       contact_type,
       folder: 'inbox',
@@ -131,6 +135,45 @@ export async function POST(req: NextRequest) {
       },
       resend_id: messageId,
     })
+
+    // Sauvegarder les pièces jointes en storage + Document
+    const resendAttachments: any[] = resendEmailData?.attachments ?? []
+    if (resendAttachments.length > 0) {
+      const msgId = (thread as any).messages?.[0]?.id
+      for (const att of resendAttachments) {
+        try {
+          const filename = att.filename ?? att.name ?? 'fichier'
+          const contentType = att.content_type ?? att.contentType ?? 'application/octet-stream'
+          const rawContent = att.content ?? att.data ?? ''
+          if (!rawContent) continue
+
+          const buffer = Buffer.from(rawContent, 'base64')
+          const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+          const key = buildStorageKey({
+            entityType: 'message',
+            entityId: msgId ?? 'unknown',
+            folder: 'attachments',
+            fileName: `${Date.now()}-${safeName}`,
+          })
+          const url = await uploadFile({ key, body: buffer, contentType })
+
+          await createDocument({
+            nom: filename,
+            type: 'AUTRE',
+            url_storage: url,
+            mime_type: contentType,
+            taille: buffer.byteLength,
+            entity_type: 'message',
+            entity_id: msgId ?? thread.id,
+            uploaded_by: fromEmail,
+            owner_id,
+          })
+          console.log('[Webhook] PJ sauvegardée:', filename)
+        } catch (e) {
+          console.error('[Webhook] Erreur sauvegarde PJ:', att.filename, e)
+        }
+      }
+    }
 
     console.log(`[Webhook] Thread créé : "${subject}" from ${fromEmail} (${contact_type})`)
     return NextResponse.json({ success: true })
