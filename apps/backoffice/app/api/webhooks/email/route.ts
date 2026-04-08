@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
+import { simpleParser } from 'mailparser'
 import { createThread } from '@/lib/dal/emails'
 import { createDocument } from '@/lib/dal/documents'
 import { uploadFile, buildStorageKey } from '@conciergerie/storage'
@@ -56,12 +57,41 @@ interface NormalizedEmail {
   attachments: Array<{ filename: string; content: string; contentType: string }>
 }
 
+async function parseRawMime(rawBase64: string, fallbackFrom: string): Promise<NormalizedEmail | null> {
+  const buffer = Buffer.from(rawBase64, 'base64')
+  const parsed = await simpleParser(buffer)
+
+  const fromAddr = parsed.from?.value?.[0]
+  const from = fromAddr
+    ? (fromAddr.name ? `${fromAddr.name} <${fromAddr.address}>` : (fromAddr.address ?? fallbackFrom))
+    : fallbackFrom
+
+  const attachments = (parsed.attachments ?? [])
+    .filter((a) => a.contentDisposition === 'attachment' || a.filename)
+    .map((a) => ({
+      filename: a.filename ?? 'fichier',
+      content: a.content.toString('base64'),
+      contentType: a.contentType ?? 'application/octet-stream',
+    }))
+
+  return {
+    from,
+    subject: parsed.subject ?? '',
+    html: String(parsed.html || '').trim(),
+    text: String(parsed.text || '').trim(),
+    messageId: String(parsed.messageId || ''),
+    attachments,
+  }
+}
+
 function normalizePayload(payload: any): NormalizedEmail | null {
-  // Format Postmark (HtmlBody / TextBody en PascalCase)
+  // Format Cloudflare Worker (raw MIME base64)
+  if (payload.raw) return null // handled separately (async)
+
+  // Format Postmark-compatible (HtmlBody / TextBody)
   if (payload.HtmlBody !== undefined || payload.TextBody !== undefined) {
-    const from = payload.From ?? ''
     return {
-      from,
+      from: payload.From ?? '',
       subject: payload.Subject ?? '',
       html: String(payload.HtmlBody ?? '').trim(),
       text: String(payload.TextBody ?? '').trim(),
@@ -125,7 +155,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    const email = normalizePayload(payload)
+    // Format Cloudflare Worker : MIME brut encodé en base64
+    let email: NormalizedEmail | null = null
+    if (payload.raw) {
+      email = await parseRawMime(payload.raw, payload.from ?? '')
+    } else {
+      email = normalizePayload(payload)
+    }
+
     if (!email?.from) {
       console.error('[Webhook] Payload invalide ou champ from manquant')
       return NextResponse.json({ error: 'Missing from field' }, { status: 400 })
