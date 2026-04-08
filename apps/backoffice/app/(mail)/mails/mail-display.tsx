@@ -17,8 +17,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import {
     Reply, Forward, Archive, Trash2, MoreVertical,
-    Paperclip, User, Home, Wrench, Send, ChevronDown, ChevronUp,
-    MailOpen, Mail as MailIcon, MoveRight,
+    Paperclip, Send, ChevronDown, ChevronUp,
+    Mail as MailIcon, MoveRight,
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -27,14 +27,7 @@ import { sendMailAction } from './actions'
 import type { Mail, MailFolder, MailMessage } from './mail-data'
 import { cn } from '@conciergerie/ui'
 
-const CONTACT_ICONS = {
-    proprietaire: Home,
-    voyageur: User,
-    prestataire: Wrench,
-    autre: User,
-}
-
-// ── Rendu HTML sécurisé dans iframe sandboxée ──────────────────────────────
+// ── HTML sécurisé dans iframe sandboxée ───────────────────────────────────
 
 function EmailBody({ content }: { content: string }) {
     const [height, setHeight] = useState(200)
@@ -44,7 +37,7 @@ function EmailBody({ content }: { content: string }) {
         const iframe = e.currentTarget
         try {
             const body = iframe.contentDocument?.body
-            if (body) setHeight(Math.max(body.scrollHeight + 32, 100))
+            if (body) setHeight(Math.max(body.scrollHeight + 32, 80))
         } catch {}
     }, [])
 
@@ -53,7 +46,7 @@ function EmailBody({ content }: { content: string }) {
             * { box-sizing: border-box; }
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                    font-size: 14px; line-height: 1.6; color: #1a1a1a;
-                   margin: 0; padding: 8px; word-break: break-word; }
+                   margin: 0; padding: 0 0 8px 0; word-break: break-word; }
             a { color: #2563eb; }
             img { max-width: 100%; height: auto; }
             blockquote { border-left: 3px solid #e5e7eb; margin: 8px 0; padding-left: 12px; color: #6b7280; }
@@ -63,7 +56,7 @@ function EmailBody({ content }: { content: string }) {
             <iframe
                 srcDoc={srcDoc}
                 sandbox="allow-same-origin"
-                className="w-full border-0 rounded"
+                className="w-full border-0"
                 style={{ height }}
                 onLoad={handleLoad}
                 title="Contenu du message"
@@ -71,7 +64,98 @@ function EmailBody({ content }: { content: string }) {
         )
     }
 
-    return <div className="whitespace-pre-wrap text-sm leading-relaxed">{content}</div>
+    return <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{content}</div>
+}
+
+// ── Carte message style Gmail ──────────────────────────────────────────────
+
+function MessageCard({
+    message,
+    mail,
+    defaultExpanded,
+}: {
+    message: MailMessage
+    mail: Mail
+    defaultExpanded: boolean
+}) {
+    const [expanded, setExpanded] = useState(defaultExpanded)
+    const [showDetails, setShowDetails] = useState(false)
+
+    const isOutbound = message.author_type === 'USER'
+    const senderName = isOutbound ? 'Entre Rhône et Alpilles' : mail.from.name
+    const senderEmail = isOutbound ? 'contact@entre-rhone-alpilles.fr' : mail.from.email
+    const initials = senderName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+    const date = new Date(message.createdAt)
+
+    return (
+        <div className="border border-border rounded-lg bg-card overflow-hidden">
+            {/* Header — toujours visible */}
+            <button
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left"
+                onClick={() => setExpanded((v) => !v)}
+            >
+                <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarFallback className="text-xs font-semibold">{initials}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-semibold truncate">{senderName}</span>
+                        {!expanded && (
+                            <span className="text-xs text-muted-foreground truncate flex-1">
+                                {message.contenu.replace(/<[^>]*>/g, '').slice(0, 80)}
+                            </span>
+                        )}
+                    </div>
+                    {expanded && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                            <span className="text-xs text-muted-foreground">
+                                {senderEmail}
+                            </span>
+                            <button
+                                className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-1"
+                                onClick={(e) => { e.stopPropagation(); setShowDetails((v) => !v) }}
+                            >
+                                {showDetails ? <ChevronUp className="w-3 h-3 inline" /> : <ChevronDown className="w-3 h-3 inline" />}
+                            </button>
+                        </div>
+                    )}
+                </div>
+                <div className="shrink-0 flex items-center gap-2">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                {formatDistanceToNow(date, { addSuffix: true, locale: fr })}
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {format(date, "EEEE d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                        </TooltipContent>
+                    </Tooltip>
+                    {expanded
+                        ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                        : <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    }
+                </div>
+            </button>
+
+            {/* Détails expéditeur / destinataire */}
+            {expanded && showDetails && (
+                <div className="px-4 pb-2 text-xs text-muted-foreground space-y-0.5 border-t border-border/50 pt-2 bg-muted/20">
+                    <div><span className="font-medium">De :</span> {senderName} &lt;{senderEmail}&gt;</div>
+                    <div><span className="font-medium">À :</span> {mail.to.map((t) => `${t.name} <${t.email}>`).join(', ')}</div>
+                    <div><span className="font-medium">Date :</span> {format(date, "EEEE d MMMM yyyy 'à' HH:mm", { locale: fr })}</div>
+                    <div><span className="font-medium">Objet :</span> {mail.subject}</div>
+                </div>
+            )}
+
+            {/* Corps du message */}
+            {expanded && (
+                <div className="px-4 pb-4 pt-2 border-t border-border/50">
+                    <EmailBody content={message.contenu} />
+                </div>
+            )}
+        </div>
+    )
 }
 
 // ── Composant principal ────────────────────────────────────────────────────
@@ -89,7 +173,6 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
     const [replyOpen, setReplyOpen] = useState(false)
     const [replyBody, setReplyBody] = useState('')
     const [sending, setSending] = useState(false)
-    const [collapsedMessages, setCollapsedMessages] = useState<Set<string>>(new Set())
 
     if (!mail) {
         return (
@@ -108,9 +191,6 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
             </div>
         )
     }
-
-    const ContactIcon = CONTACT_ICONS[mail.contactType]
-    const initials = mail.from.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
 
     function handleTrash() {
         if (mail!.folder === 'trash') {
@@ -139,17 +219,10 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
             '',
             mail!.body,
         ].join('\n')
-        const subject = mail!.subject.startsWith('Fwd: ') ? mail!.subject : `Fwd: ${mail!.subject}`
-        onForward(subject, quotedBody)
-    }
-
-    function toggleCollapse(id: string) {
-        setCollapsedMessages((prev) => {
-            const next = new Set(prev)
-            if (next.has(id)) next.delete(id)
-            else next.add(id)
-            return next
-        })
+        onForward(
+            mail!.subject.startsWith('Fwd: ') ? mail!.subject : `Fwd: ${mail!.subject}`,
+            quotedBody
+        )
     }
 
     async function handleQuickReply() {
@@ -179,11 +252,8 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
         ? mail.messages
         : [{ id: mail.id, contenu: mail.body, author_type: 'OWNER', createdAt: mail.date }]
 
-    const threadCount = messages.length
-
     return (
         <>
-            {/* Confirm suppression définitive */}
             <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
                 <DialogContent>
                     <DialogHeader>
@@ -204,12 +274,12 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                 </DialogContent>
             </Dialog>
 
-            <div className="flex h-full flex-col">
+            <div className="flex h-full flex-col bg-background">
                 {/* ── Toolbar ── */}
                 <div className="flex items-center gap-0.5 border-b px-2 py-1.5 shrink-0 bg-card">
                     <Tooltip>
-                        <TooltipTrigger>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setReplyOpen(true)}>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onReply}>
                                 <Reply className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
@@ -217,7 +287,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                     </Tooltip>
 
                     <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleForwardClick}>
                                 <Forward className="h-4 w-4" />
                             </Button>
@@ -228,7 +298,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                     <Separator orientation="vertical" className="mx-1 h-5" />
 
                     <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleArchive}>
                                 <Archive className="h-4 w-4" />
                             </Button>
@@ -237,7 +307,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                     </Tooltip>
 
                     <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger asChild>
                             <Button
                                 variant="ghost" size="icon"
                                 className="h-8 w-8 hover:text-destructive hover:bg-destructive/10"
@@ -255,7 +325,6 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
 
                     <Separator orientation="vertical" className="mx-1 h-5" />
 
-                    {/* Déplacer vers */}
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -263,23 +332,14 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
-                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'inbox')}>
-                                Déplacer dans Boîte de réception
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'sent')}>
-                                Déplacer dans Envoyés
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'archived')}>
-                                Déplacer dans Archivés
-                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'inbox')}>Boîte de réception</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'sent')}>Envoyés</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'archived')}>Archivés</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'drafts')}>
-                                Mettre en brouillon
-                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'drafts')}>Brouillons</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Actions supplémentaires */}
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Button variant="ghost" size="icon" className="ml-auto h-8 w-8">
@@ -287,61 +347,26 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => { setReplyOpen(true) }}>
+                            <DropdownMenuItem onClick={onReply}>
                                 <Reply className="h-4 w-4 mr-2" /> Répondre
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleForwardClick}>
                                 <Forward className="h-4 w-4 mr-2" /> Transférer
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => onMoveTo(mail.id, 'inbox')}>
-                                <MailOpen className="h-4 w-4 mr-2" /> Marquer non lu
-                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
 
-                {/* ── En-tête sujet + expéditeur ── */}
-                <div className="px-5 pt-4 pb-3 border-b shrink-0">
+                {/* ── Sujet ── */}
+                <div className="px-6 pt-5 pb-3 shrink-0">
                     <div className="flex items-start justify-between gap-3">
-                        <h2 className="text-base font-semibold leading-snug flex-1">{mail.subject}</h2>
-                        {threadCount > 1 && (
-                            <span className="shrink-0 text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
-                                {threadCount} messages
+                        <h2 className="text-lg font-semibold leading-snug flex-1">{mail.subject}</h2>
+                        {messages.length > 1 && (
+                            <span className="shrink-0 text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5 mt-1">
+                                {messages.length} messages
                             </span>
                         )}
                     </div>
-
-                    <div className="mt-3 flex items-start gap-2.5">
-                        <Avatar className="h-9 w-9 shrink-0 mt-0.5">
-                            <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-semibold text-sm">{mail.from.name}</span>
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <ContactIcon className="h-3 w-3" />
-                                    {mail.from.email}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                <span className="text-xs text-muted-foreground">
-                                    À : {mail.to.map((t) => t.name).join(', ')}
-                                </span>
-                                <Tooltip>
-                                    <TooltipTrigger>
-                                        <span className="text-xs text-muted-foreground ml-auto tabular-nums cursor-default">
-                                            {formatDistanceToNow(new Date(mail.date), { addSuffix: true, locale: fr })}
-                                        </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        {format(new Date(mail.date), "EEEE d MMMM yyyy 'à' HH:mm", { locale: fr })}
-                                    </TooltipContent>
-                                </Tooltip>
-                            </div>
-                        </div>
-                    </div>
-
                     {mail.labels && mail.labels.length > 0 && (
                         <div className="mt-2 flex gap-1 flex-wrap">
                             {mail.labels.map((l) => (
@@ -353,43 +378,20 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
 
                 {/* ── Thread ── */}
                 <ScrollArea className="flex-1">
-                    <div className="px-5 py-4 space-y-4">
-                        {messages.map((msg, i) => {
-                            const isOutbound = msg.author_type === 'USER'
-                            const isCollapsed = collapsedMessages.has(msg.id)
-                            const isLast = i === messages.length - 1
-                            const showCollapseToggle = !isLast && messages.length > 2
-
-                            return (
-                                <div key={msg.id}>
-                                    {showCollapseToggle && isCollapsed ? (
-                                        <button
-                                            onClick={() => toggleCollapse(msg.id)}
-                                            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full py-1"
-                                        >
-                                            <div className="flex-1 h-px bg-border" />
-                                            <ChevronDown className="w-3 h-3" />
-                                            <span>Message précédent</span>
-                                            <ChevronDown className="w-3 h-3" />
-                                            <div className="flex-1 h-px bg-border" />
-                                        </button>
-                                    ) : (
-                                        <MessageBubble
-                                            message={msg}
-                                            fromName={mail.from.name}
-                                            isOutbound={isOutbound}
-                                            onCollapse={showCollapseToggle ? () => toggleCollapse(msg.id) : undefined}
-                                        />
-                                    )}
-                                </div>
-                            )
-                        })}
+                    <div className="px-6 pb-4 space-y-2">
+                        {messages.map((msg, i) => (
+                            <MessageCard
+                                key={msg.id}
+                                message={msg}
+                                mail={mail}
+                                defaultExpanded={i === messages.length - 1}
+                            />
+                        ))}
                     </div>
 
                     {/* Pièces jointes */}
                     {mail.attachments && mail.attachments.length > 0 && (
-                        <div className="px-5 pb-4">
-                            <Separator className="mb-3" />
+                        <div className="px-6 pb-4">
                             <p className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                                 Pièces jointes ({mail.attachments.length})
                             </p>
@@ -411,9 +413,9 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                     )}
                 </ScrollArea>
 
-                {/* ── Zone de réponse rapide ── */}
+                {/* ── Zone réponse rapide ── */}
                 {replyOpen ? (
-                    <div className="border-t px-4 py-3 space-y-2 shrink-0 bg-card shadow-[0_-1px_0_0_hsl(var(--border))]">
+                    <div className="border-t px-4 py-3 space-y-2 shrink-0 bg-card">
                         <div className="flex items-center justify-between">
                             <p className="text-xs font-medium text-muted-foreground">
                                 Répondre à <span className="text-foreground font-semibold">{mail.from.name}</span>
@@ -445,70 +447,28 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                         </div>
                     </div>
                 ) : (
-                    <div className="border-t px-4 py-3 shrink-0 bg-card">
+                    <div className="border-t px-6 py-3 shrink-0 bg-card flex gap-2">
                         <Button
                             onClick={() => setReplyOpen(true)}
                             variant="outline"
-                            className="w-full gap-2 text-sm"
+                            className="gap-2 text-sm"
                             size="sm"
                         >
                             <Reply className="h-4 w-4" />
-                            Répondre à {mail.from.name}
+                            Répondre
+                        </Button>
+                        <Button
+                            onClick={handleForwardClick}
+                            variant="ghost"
+                            className="gap-2 text-sm"
+                            size="sm"
+                        >
+                            <Forward className="h-4 w-4" />
+                            Transférer
                         </Button>
                     </div>
                 )}
             </div>
         </>
-    )
-}
-
-// ── Bulle de message ───────────────────────────────────────────────────────
-
-function MessageBubble({
-    message,
-    fromName,
-    isOutbound,
-    onCollapse,
-}: {
-    message: MailMessage
-    fromName: string
-    isOutbound: boolean
-    onCollapse?: () => void
-}) {
-    const initials = isOutbound
-        ? 'ERA'
-        : fromName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-
-    return (
-        <div className={cn('flex gap-2.5', isOutbound ? 'flex-row-reverse' : 'flex-row')}>
-            <Avatar className="h-7 w-7 shrink-0 mt-1">
-                <AvatarFallback className="text-[10px] font-semibold">{initials}</AvatarFallback>
-            </Avatar>
-            <div className={cn('max-w-[78%] space-y-1', isOutbound ? 'items-end' : 'items-start', 'flex flex-col')}>
-                <div
-                    className={cn(
-                        'rounded-2xl px-4 py-3 text-sm leading-relaxed',
-                        isOutbound
-                            ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                            : 'bg-muted text-foreground rounded-tl-sm'
-                    )}
-                >
-                    <EmailBody content={message.contenu} />
-                </div>
-                <div className={cn('flex items-center gap-2 px-1', isOutbound ? 'flex-row-reverse' : 'flex-row')}>
-                    <p className="text-[10px] text-muted-foreground">
-                        {isOutbound ? 'Vous' : fromName} · {format(new Date(message.createdAt), "d MMM 'à' HH:mm", { locale: fr })}
-                    </p>
-                    {onCollapse && (
-                        <button
-                            onClick={onCollapse}
-                            className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-                        >
-                            <ChevronUp className="w-3 h-3" />
-                        </button>
-                    )}
-                </div>
-            </div>
-        </div>
     )
 }
