@@ -9,7 +9,7 @@ export default async function DocumentsPage() {
   ])
 
   return (
-    <div className="space-y-4 h-[calc(100vh-4rem)]">
+    <div className="flex flex-col h-[calc(100vh-4rem)] gap-4">
       <PageHeader
         title="Documents"
         description={`${counts.total} document${counts.total !== 1 ? "s" : ""}`}

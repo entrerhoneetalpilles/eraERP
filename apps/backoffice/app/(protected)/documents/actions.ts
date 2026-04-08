@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { db } from "@conciergerie/db"
-import { createDocument, deleteDocument, getDocumentById, type DocumentType } from "@/lib/dal/documents"
+import { createDocument, deleteDocument, getDocumentById, getDocuments, type DocumentType } from "@/lib/dal/documents"
 import {
   buildStorageKey,
   uploadFile,
@@ -99,6 +99,15 @@ export async function getDocumentViewUrlAction(id: string) {
     // Fallback: return the direct URL
     return { url: doc.url_storage }
   }
+}
+
+// ─── Fetch live (pour refresh client-side) ────────────────────────────────────
+
+export async function fetchDocumentsAction(filters?: {
+  type?: DocumentType
+  search?: string
+}) {
+  return getDocuments(filters)
 }
 
 // ─── Generate mandate PDF ──────────────────────────────────────────────────────
