@@ -1,5 +1,5 @@
 import { db } from '@conciergerie/db'
-import type { MailFolder, ContactType } from '@/app/(protected)/mails/mail-data'
+import type { MailFolder, ContactType } from '@/app/(mail)/mails/mail-data'
 
 export async function getThreads(folder: MailFolder = 'inbox', contactType?: ContactType | 'all') {
     return db.messageThread.findMany({

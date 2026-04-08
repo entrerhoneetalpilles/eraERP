@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
@@ -27,8 +27,17 @@ export function ComposeDialog({ open, onClose, defaultTo = '', defaultSubject = 
     const [to, setTo] = useState(defaultTo)
     const [subject, setSubject] = useState(defaultSubject)
     const [body, setBody] = useState('')
-    const [contactType, setContactType] = useState<string>('')
+    const [contactType, setContactType] = useState<ContactType>('autre')
     const [sending, setSending] = useState(false)
+
+    // Sync props when dialog reopens
+    useEffect(() => {
+        if (open) {
+            setTo(defaultTo)
+            setSubject(defaultSubject)
+            setBody('')
+        }
+    }, [open, defaultTo, defaultSubject])
 
     async function handleSend() {
         if (!to || !subject || !body) return
@@ -39,16 +48,12 @@ export function ComposeDialog({ open, onClose, defaultTo = '', defaultSubject = 
                 toName: to,
                 subject,
                 body,
-                contactType: (contactType as ContactType) || 'autre',
+                contactType,
             })
             toast.success('Message envoyé')
             onClose()
-            setTo('')
-            setSubject('')
-            setBody('')
-            setContactType('')
         } catch (error) {
-            toast.error('Erreur lors de l\'envoi')
+            toast.error("Erreur lors de l'envoi")
             console.error(error)
         } finally {
             setSending(false)
@@ -61,12 +66,12 @@ export function ComposeDialog({ open, onClose, defaultTo = '', defaultSubject = 
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Send className="h-4 w-4" />
-                        Nouveau message
+                        {defaultSubject ? 'Transférer / Nouveau message' : 'Nouveau message'}
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="flex flex-col gap-3 py-2">
-                    <div className="grid grid-cols-[auto_1fr] items-center gap-3">
+                    <div className="grid grid-cols-[60px_1fr] items-center gap-3">
                         <Label className="text-right text-sm text-muted-foreground">À</Label>
                         <Input
                             placeholder="destinataire@email.com"
@@ -76,7 +81,7 @@ export function ComposeDialog({ open, onClose, defaultTo = '', defaultSubject = 
                         />
                     </div>
 
-                    <div className="grid grid-cols-[auto_1fr] items-center gap-3">
+                    <div className="grid grid-cols-[60px_1fr] items-center gap-3">
                         <Label className="text-right text-sm text-muted-foreground">Sujet</Label>
                         <Input
                             placeholder="Objet du message"
@@ -86,14 +91,9 @@ export function ComposeDialog({ open, onClose, defaultTo = '', defaultSubject = 
                         />
                     </div>
 
-                    <div className="grid grid-cols-[auto_1fr] items-center gap-3">
+                    <div className="grid grid-cols-[60px_1fr] items-center gap-3">
                         <Label className="text-right text-sm text-muted-foreground">Type</Label>
-                        <Select
-                            value={contactType}
-                            onValueChange={(value: string | null) => {
-                                if (value !== null) setContactType(value)
-                            }}
-                        >
+                        <Select value={contactType} onValueChange={(v) => setContactType(v as ContactType)}>
                             <SelectTrigger className="h-8">
                                 <SelectValue placeholder="Type de contact" />
                             </SelectTrigger>
@@ -111,7 +111,11 @@ export function ComposeDialog({ open, onClose, defaultTo = '', defaultSubject = 
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
                         className="min-h-[200px] resize-none"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSend()
+                        }}
                     />
+                    <p className="text-[10px] text-muted-foreground text-right">⌘ + Entrée pour envoyer</p>
                 </div>
 
                 <DialogFooter className="gap-2">

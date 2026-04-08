@@ -23,10 +23,9 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
         folder, contactFilter, search, composeOpen,
         loading, unreadCount,
         setFolder, setContactFilter, setSearch,
-        setComposeOpen, selectMail, moveTo, refresh,
+        setComposeOpen, selectMail, moveTo, refresh, refreshSelectedMail,
     } = useMail(initialMails, currentFolder)
 
-    // Mobile panel navigation
     const [mobilePanel, setMobilePanel] = useState<MobilePanel>('list')
 
     function handleSelectMail(id: string) {
@@ -39,14 +38,10 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
         setMobilePanel('list')
     }
 
-    function handleCompose() {
-        setComposeOpen(true)
-    }
-
     return (
         <>
             {/* ── Desktop : 3-panel layout ── */}
-            <div className="hidden md:flex rounded-lg border bg-card overflow-hidden h-[calc(100vh-10rem)]">
+            <div className="hidden md:flex border-t bg-card overflow-hidden h-[calc(100vh-3rem)]">
                 {/* Panneau gauche — Navigation */}
                 <div className="w-52 shrink-0 border-r overflow-y-auto bg-card">
                     <MailNav
@@ -55,12 +50,12 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                         unreadCount={unreadCount}
                         onFolderChange={handleFolderChange}
                         onContactFilterChange={setContactFilter}
-                        onCompose={handleCompose}
+                        onCompose={() => setComposeOpen(true)}
                     />
                 </div>
 
                 {/* Panneau central — Liste */}
-                <div className="w-72 shrink-0 border-r overflow-hidden">
+                <div className="w-80 shrink-0 border-r overflow-hidden">
                     {loading ? (
                         <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                             Chargement...
@@ -82,23 +77,18 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                         mail={selected}
                         onMoveTo={moveTo}
                         onReply={() => setComposeOpen(true)}
+                        onSent={() => selected && refreshSelectedMail(selected.id)}
                     />
                 </div>
             </div>
 
             {/* ── Mobile : stacked panels ── */}
-            <div className="md:hidden flex flex-col rounded-lg border bg-card overflow-hidden" style={{ height: 'calc(100svh - 8rem)' }}>
+            <div className="md:hidden flex flex-col bg-card overflow-hidden" style={{ height: 'calc(100svh - 3rem)' }}>
 
-                {/* Panel: nav (dossiers) */}
                 {mobilePanel === 'nav' && (
                     <div className="flex flex-col h-full">
                         <div className="flex items-center gap-2 px-3 py-2 border-b shrink-0">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="gap-1.5 text-sm"
-                                onClick={() => setMobilePanel('list')}
-                            >
+                            <Button variant="ghost" size="sm" className="gap-1.5 text-sm" onClick={() => setMobilePanel('list')}>
                                 <ArrowLeft className="w-4 h-4" />
                                 Retour
                             </Button>
@@ -108,42 +98,27 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                                 folder={folder}
                                 contactFilter={contactFilter}
                                 unreadCount={unreadCount}
-                                onFolderChange={handleFolderChange}
-                                onContactFilterChange={(c) => {
-                                    setContactFilter(c)
-                                    setMobilePanel('list')
-                                }}
-                                onCompose={() => {
-                                    handleCompose()
-                                    setMobilePanel('list')
-                                }}
+                                onFolderChange={(f) => { handleFolderChange(f); setMobilePanel('list') }}
+                                onContactFilterChange={(c) => { setContactFilter(c); setMobilePanel('list') }}
+                                onCompose={() => { setComposeOpen(true); setMobilePanel('list') }}
                             />
                         </div>
                     </div>
                 )}
 
-                {/* Panel: liste */}
                 {mobilePanel === 'list' && (
                     <div className="flex flex-col h-full">
-                        {/* Toolbar mobile liste */}
                         <div className="flex items-center justify-between px-3 py-2 border-b shrink-0">
-                            <button
-                                onClick={() => setMobilePanel('nav')}
-                                className="text-sm font-medium text-primary flex items-center gap-1"
-                            >
+                            <button onClick={() => setMobilePanel('nav')} className="text-sm font-medium text-primary">
                                 Dossiers
                             </button>
                             <span className="text-xs text-muted-foreground font-medium capitalize">
                                 {FOLDER_LABELS[folder]}
                             </span>
-                            <button
-                                onClick={handleCompose}
-                                className="text-sm font-medium text-primary"
-                            >
+                            <button onClick={() => setComposeOpen(true)} className="text-sm font-medium text-primary">
                                 Nouveau
                             </button>
                         </div>
-                        {/* Liste */}
                         <div className="flex-1 overflow-hidden">
                             {loading ? (
                                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -162,16 +137,10 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                     </div>
                 )}
 
-                {/* Panel: détail */}
                 {mobilePanel === 'detail' && (
                     <div className="flex flex-col h-full">
                         <div className="flex items-center gap-2 px-3 py-2 border-b shrink-0">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="gap-1.5 text-sm"
-                                onClick={() => setMobilePanel('list')}
-                            >
+                            <Button variant="ghost" size="sm" className="gap-1.5 text-sm" onClick={() => setMobilePanel('list')}>
                                 <ArrowLeft className="w-4 h-4" />
                                 {FOLDER_LABELS[folder]}
                             </Button>
@@ -179,11 +148,9 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                         <div className="flex-1 overflow-hidden">
                             <MailDisplay
                                 mail={selected}
-                                onMoveTo={(id, f) => {
-                                    moveTo(id, f)
-                                    setMobilePanel('list')
-                                }}
+                                onMoveTo={(id, f) => { moveTo(id, f); setMobilePanel('list') }}
                                 onReply={() => setComposeOpen(true)}
+                                onSent={() => selected && refreshSelectedMail(selected.id)}
                             />
                         </div>
                     </div>
@@ -197,6 +164,7 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                     refresh()
                 }}
                 defaultTo={selected?.from.email ?? ''}
+                defaultSubject={selected ? `Re: ${selected.subject}` : ''}
             />
         </>
     )

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { fetchThreadsAction, markAsReadAction, moveThreadAction, deleteThreadAction } from './actions'
+import { fetchThreadsAction, fetchThreadAction, markAsReadAction, moveThreadAction, deleteThreadAction } from './actions'
 import type { Mail, MailFolder, ContactType } from './mail-data'
 
-const POLL_INTERVAL = 15_000
+const POLL_INTERVAL = 20_000
 
 export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox') {
     const [folder, setFolderState] = useState<MailFolder>(initialFolder)
@@ -37,20 +37,20 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
         loadMails(folder, 'all')
     }, [folder, loadMails])
 
-    // Poll
+    // Polling
     useEffect(() => {
         const id = setInterval(() => {
             loadMails(folderRef.current, contactFilter)
         }, POLL_INTERVAL)
         return () => clearInterval(id)
-    }, [loadMails, contactFilter])  // Ajout contactFilter
+    }, [loadMails, contactFilter])
 
-    // Filter change
+    // Contact filter change
     useEffect(() => {
         loadMails(folder, contactFilter)
     }, [contactFilter, folder, loadMails])
 
-    // Filtered mails (CORRIGÉ : inclut contactFilter)
+    // Filtered mails
     const filtered = mails.filter((m) => {
         const matchSearch =
             search === '' ||
@@ -58,7 +58,7 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
             m.from.name.toLowerCase().includes(search.toLowerCase()) ||
             m.preview.toLowerCase().includes(search.toLowerCase())
         const matchFilter = contactFilter === 'all' || m.contactType === contactFilter
-        return matchSearch && matchFilter  // CORRIGÉ : && matchFilter
+        return matchSearch && matchFilter
     })
 
     const selected = mails.find((m) => m.id === selectedId) ?? null
@@ -83,18 +83,28 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
         } else {
             await moveThreadAction(id, target)
         }
-        // Auto-switch to target folder
         if (target !== folder) {
             setFolderState(target)
         }
     }
 
-    const setFolder = (f: MailFolder) => setFolderState(f)
+    // Reload a single thread after reply (live message update)
+    async function refreshSelectedMail(id: string) {
+        try {
+            const updated = await fetchThreadAction(id)
+            if (updated) {
+                setMails((prev) => prev.map((m) => (m.id === id ? updated : m)))
+            }
+        } catch (e) {
+            console.error('[useMail] refresh thread error', e)
+        }
+    }
 
+    const setFolder = (f: MailFolder) => setFolderState(f)
     const refresh = () => loadMails(folder, contactFilter)
 
     return {
-        mails: filtered,  // Retourne filtered (avec contactFilter)
+        mails: filtered,
         selected,
         selectedId,
         folder,
@@ -110,5 +120,6 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
         selectMail,
         moveTo,
         refresh,
+        refreshSelectedMail,
     }
 }

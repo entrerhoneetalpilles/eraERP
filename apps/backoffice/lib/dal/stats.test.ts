@@ -22,7 +22,7 @@ const mockArrival = {
   nb_nuits: 3,
   guest: { prenom: "Jean", nom: "Dupont" },
   property: { id: "p1", nom: "Villa Lavande" },
-}
+} as any  // ← fix
 
 const mockDeparture = {
   id: "b2",
@@ -32,7 +32,7 @@ const mockDeparture = {
   nb_nuits: 3,
   guest: { prenom: "Marie", nom: "Martin" },
   property: { id: "p2", nom: "Appartement Mistral" },
-}
+} as any  // ← fix
 
 const mockCleaning = {
   id: "ct1",

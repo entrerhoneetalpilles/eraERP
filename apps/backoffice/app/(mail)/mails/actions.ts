@@ -13,12 +13,8 @@ import {
 } from '@/lib/dal/emails'
 import type { Mail, MailFolder, ContactType, MailMessage } from './mail-data'
 
-export async function fetchThreadsAction(
-  folder: MailFolder,
-  contactType?: ContactType | 'all'
-): Promise<Mail[]> {
-  const threads = await getThreads(folder, contactType)
-  return (threads as any[]).map((t) => ({
+function mapThread(t: any): Mail {
+  return {
     id: t.id,
     from: {
       name: t.owner?.nom ?? t.to_name ?? 'Contact',
@@ -39,7 +35,21 @@ export async function fetchThreadsAction(
       author_type: m.author_type,
       createdAt: m.createdAt.toISOString(),
     })),
-  }))
+  }
+}
+
+export async function fetchThreadsAction(
+  folder: MailFolder,
+  contactType?: ContactType | 'all'
+): Promise<Mail[]> {
+  const threads = await getThreads(folder, contactType)
+  return (threads as any[]).map(mapThread)
+}
+
+export async function fetchThreadAction(threadId: string): Promise<Mail | null> {
+  const thread = await getThreadById(threadId)
+  if (!thread) return null
+  return mapThread(thread)
 }
 
 export async function sendMailAction(data: {
@@ -57,7 +67,14 @@ export async function sendMailAction(data: {
   await sendEmail({
     to: data.to,
     subject: data.subject,
-    html: `<div style="font-family:sans-serif;line-height:1.6;white-space:pre-wrap">${data.body}</div>`,
+    html: `<div style="font-family:sans-serif;line-height:1.6;color:#1a1a1a;max-width:600px">
+      <div style="white-space:pre-wrap;font-size:14px">${data.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+      <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb" />
+      <p style="font-size:12px;color:#6b7280">
+        Entre Rhône et Alpilles · Conciergerie haut de gamme
+      </p>
+    </div>`,
+    replyTo: 'contact@entrerhonenalpilles.fr',
   })
 
   if (data.replyToThreadId) {

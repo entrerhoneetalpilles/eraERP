@@ -1,6 +1,7 @@
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { getThreads } from '@/lib/dal/emails'
 import { MailClient } from './mail-client'
-import { PageHeader } from '@/components/ui/page-header'
 import type { Mail, MailFolder, MailMessage } from './mail-data'
 
 export default async function MailsPage({
@@ -37,12 +38,29 @@ export default async function MailsPage({
     }))
 
     return (
-        <div className="space-y-6">
-            <PageHeader
-                title="Messagerie"
-                description={`${mails.length} message${mails.length !== 1 ? 's' : ''}`}
-            />
-            <MailClient initialMails={mails} currentFolder={folder} />
+        <div className="flex flex-col h-screen bg-background">
+            {/* Topbar standalone */}
+            <header className="h-12 flex items-center gap-3 px-4 border-b border-border bg-card shrink-0">
+                <Link
+                    href="/dashboard"
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span className="hidden sm:inline">Retour à l'ERP</span>
+                </Link>
+                <div className="w-px h-4 bg-border" />
+                <h1 className="text-sm font-semibold text-foreground">Messagerie</h1>
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                    {mails.filter((m) => !m.read).length > 0
+                        ? `${mails.filter((m) => !m.read).length} non lu${mails.filter((m) => !m.read).length > 1 ? 's' : ''}`
+                        : 'À jour'}
+                </span>
+            </header>
+
+            {/* Mail client — remplit l'espace restant */}
+            <div className="flex-1 overflow-hidden p-0">
+                <MailClient initialMails={mails} currentFolder={folder} />
+            </div>
         </div>
     )
 }
