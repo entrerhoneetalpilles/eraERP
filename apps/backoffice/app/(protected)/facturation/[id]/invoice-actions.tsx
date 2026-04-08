@@ -57,7 +57,7 @@ export function InvoiceActions({ id, statut }: InvoiceActionsProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger>
         <Button size="sm" variant="outline" disabled={isPending} className="cursor-pointer gap-1.5">
           {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
           Actions
