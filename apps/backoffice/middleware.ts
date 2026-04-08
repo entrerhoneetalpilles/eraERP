@@ -19,7 +19,8 @@ export default auth(async (req) => {
   // Routes publiques
   const isAuthRoute = pathname.startsWith("/login")
   const isApiAuthRoute = pathname.startsWith("/api/auth")
-  if (isAuthRoute || isApiAuthRoute) return NextResponse.next()
+  const isWebhookRoute = pathname.startsWith("/api/webhooks")
+  if (isAuthRoute || isApiAuthRoute || isWebhookRoute) return NextResponse.next()
 
   // Non authentifié → login
   if (!session?.user) {

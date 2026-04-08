@@ -45,9 +45,17 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = JSON.parse(rawBody)
-    const { from, subject, text, html, id, to } = payload
 
-    if (!from || !id) {
+    // Resend inbound emails are wrapped in payload.data
+    // Format: { type: "email.received", data: { from, to, subject, html, text, message_id } }
+    const emailData = payload.data ?? payload
+    const { from, subject, text, html, to } = emailData
+    const id = emailData.message_id ?? emailData.id ?? payload.id
+
+    console.log('[Webhook Resend] type:', payload.type, '| from:', from, '| subject:', subject)
+
+    if (!from) {
+      console.error('[Webhook Resend] Payload invalide, champ "from" manquant:', JSON.stringify(payload).slice(0, 500))
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
