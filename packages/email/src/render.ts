@@ -12,6 +12,8 @@ import { VirementEffectueEmail } from "./templates/virement-effectue"
 import { ResetPasswordEmail } from "./templates/reset-password"
 import { NouveauMessageEmail } from "./templates/nouveau-message"
 
+const FROM = "Entre Rhône et Alpilles <contact@entre-rhone-alpilles.fr>"
+
 export async function sendWelcomeEmail(props: {
   to: string
   ownerName: string
@@ -21,7 +23,7 @@ export async function sendWelcomeEmail(props: {
   const html = await render(
     WelcomeOwnerEmail({ ownerName: props.ownerName, loginUrl: props.loginUrl, temporaryPassword: props.temporaryPassword })
   )
-  return sendEmail({ to: props.to, subject: "Bienvenue dans votre espace propriétaire", html })
+  return sendEmail({ to: props.to, subject: "Bienvenue dans votre espace propriétaire", html, from: FROM })
 }
 
 export async function sendBookingConfirmedEmail(props: {
@@ -36,7 +38,7 @@ export async function sendBookingConfirmedEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(BookingConfirmedEmail(rest))
-  return sendEmail({ to, subject: `Nouvelle réservation — ${props.propertyName}`, html })
+  return sendEmail({ to, subject: `Nouvelle réservation — ${props.propertyName}`, html, from: FROM })
 }
 
 export async function sendAccessCodesEmail(props: {
@@ -53,7 +55,7 @@ export async function sendAccessCodesEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(AccessCodesEmail(rest))
-  return sendEmail({ to, subject: `Informations d'accès — ${props.propertyName}`, html })
+  return sendEmail({ to, subject: `Informations d'accès — ${props.propertyName}`, html, from: FROM })
 }
 
 export async function sendCrgMensuelEmail(props: {
@@ -68,7 +70,7 @@ export async function sendCrgMensuelEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(CrgMensuelEmail(rest))
-  return sendEmail({ to, subject: `Compte-rendu de gestion — ${props.periode}`, html })
+  return sendEmail({ to, subject: `Compte-rendu de gestion — ${props.periode}`, html, from: FROM })
 }
 
 export async function sendFactureEmail(props: {
@@ -82,7 +84,7 @@ export async function sendFactureEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(FactureEmail(rest))
-  return sendEmail({ to, subject: `Facture d'honoraires n° ${props.numeroFacture}`, html })
+  return sendEmail({ to, subject: `Facture d'honoraires n° ${props.numeroFacture}`, html, from: FROM })
 }
 
 export async function sendDevisDemandEmail(props: {
@@ -95,7 +97,7 @@ export async function sendDevisDemandEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(DevisDemandEmail(rest))
-  return sendEmail({ to, subject: `Demande de devis — ${props.titreOrdre}`, html })
+  return sendEmail({ to, subject: `Demande de devis — ${props.titreOrdre}`, html, from: FROM })
 }
 
 export async function sendTravauxNotificationEmail(props: {
@@ -108,7 +110,7 @@ export async function sendTravauxNotificationEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(TravauxNotificationEmail(rest))
-  return sendEmail({ to, subject: `Ordre de travaux — ${props.propertyName}`, html })
+  return sendEmail({ to, subject: `Ordre de travaux — ${props.propertyName}`, html, from: FROM })
 }
 
 export async function sendVirementEffectueEmail(props: {
@@ -120,7 +122,7 @@ export async function sendVirementEffectueEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(VirementEffectueEmail(rest))
-  return sendEmail({ to, subject: `Virement effectué — ${props.periode}`, html })
+  return sendEmail({ to, subject: `Virement effectué — ${props.periode}`, html, from: FROM })
 }
 
 export async function sendResetPasswordEmail(props: {
@@ -130,7 +132,7 @@ export async function sendResetPasswordEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(ResetPasswordEmail(rest))
-  return sendEmail({ to, subject: "Réinitialisation de votre mot de passe", html })
+  return sendEmail({ to, subject: "Réinitialisation de votre mot de passe", html, from: FROM })
 }
 
 export async function sendNouveauMessageEmail(props: {
@@ -142,5 +144,5 @@ export async function sendNouveauMessageEmail(props: {
 }) {
   const { to, ...rest } = props
   const html = await render(NouveauMessageEmail(rest))
-  return sendEmail({ to, subject: `Nouveau message de ${props.senderName}`, html })
+  return sendEmail({ to, subject: `Nouveau message de ${props.senderName}`, html, from: FROM })
 }

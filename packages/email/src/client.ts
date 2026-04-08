@@ -10,7 +10,7 @@ function getResend(): Resend {
 }
 
 const FROM_EMAIL =
-  process.env.EMAIL_FROM ?? "Entre Rhône et Alpilles <noreply@entrerhonenalpilles.fr>"
+  process.env.EMAIL_FROM ?? "Entre Rhône et Alpilles <contact@entre-rhone-alpilles.fr>"
 
 interface EmailPayload {
   from: string
