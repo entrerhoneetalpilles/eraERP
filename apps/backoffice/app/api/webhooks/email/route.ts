@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
+import { Resend } from 'resend'
 import { createThread } from '@/lib/dal/emails'
 import { db } from '@conciergerie/db'
 
@@ -9,14 +10,11 @@ function verifyResendSignature(
   secret: string
 ): boolean {
   try {
-    // Resend utilise Svix — secret base64 préfixé "whsec_"
     const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64')
-    // Contenu signé : "{svix-id}.{svix-timestamp}.{raw-body}"
     const toSign = `${headers.id}.${headers.timestamp}.${payload}`
     const hmac = createHmac('sha256', secretBytes)
     hmac.update(toSign)
     const computed = hmac.digest('base64')
-    // svix-signature peut contenir plusieurs sigs : "v1,<base64> v1,<base64>"
     return headers.signature.split(' ').some((sig) => {
       const [version, sigValue] = sig.split(',')
       if (version !== 'v1') return false
@@ -61,60 +59,62 @@ export async function POST(req: NextRequest) {
 
     const payload = JSON.parse(rawBody)
 
-    // Ignorer tous les événements sauf les emails entrants
     if (payload.type && payload.type !== 'email.received') {
-      console.log('[Webhook Resend] Événement ignoré:', payload.type)
       return NextResponse.json({ success: true })
     }
 
-    // Resend inbound emails are wrapped in payload.data
-    // Format: { type: "email.received", data: { from, to, subject, html, text, message_id } }
-    const emailData = payload.data ?? payload
-    const id = emailData.message_id ?? emailData.id ?? payload.id
+    const webhookData = payload.data ?? payload
 
-    // Log complet pour diagnostiquer les champs réels envoyés par Resend
-    console.log('[Webhook Resend] from:', emailData.from, '| subject:', emailData.subject,
-      '| keys:', Object.keys(emailData).join(', '),
-      '| html len:', String(emailData.html ?? emailData.html_body ?? '').length,
-      '| text len:', String(emailData.text ?? emailData.plain_text ?? emailData.text_body ?? '').length,
-      '| attachments:', JSON.stringify(emailData.attachments ?? []).slice(0, 500))
+    // Le payload webhook Resend ne contient pas html/text — il faut les récupérer
+    // via l'API Resend en utilisant l'email_id
+    const emailId: string = webhookData.email_id ?? webhookData.id
 
-    const from: string = emailData.from
-    const subject: string = emailData.subject
+    let from: string = webhookData.from ?? ''
+    let subject: string = webhookData.subject ?? ''
+    let htmlContent = ''
+    let textContent = ''
 
-    if (!from) {
-      console.error('[Webhook Resend] Payload invalide:', JSON.stringify(payload).slice(0, 500))
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    if (emailId && process.env.RESEND_API_KEY) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        const { data: fullEmail, error } = await resend.emails.get(emailId)
+        if (error) {
+          console.error('[Webhook Resend] Erreur récupération email:', error)
+        } else if (fullEmail) {
+          from = (fullEmail as any).from ?? from
+          subject = (fullEmail as any).subject ?? subject
+          htmlContent = String((fullEmail as any).html ?? '').trim()
+          textContent = String((fullEmail as any).text ?? '').trim()
+          console.log('[Webhook Resend] Email récupéré via API | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
+        }
+      } catch (e) {
+        console.error('[Webhook Resend] Impossible de récupérer le contenu via API:', e)
+      }
     }
 
-    // Resend inbound : champs possibles selon la version
-    const htmlContent = String(emailData.html ?? emailData.html_body ?? '').trim()
-    const textContent = String(emailData.text ?? emailData.plain_text ?? emailData.text_body ?? '').trim()
+    // Fallback sur les champs du payload si l'API n'a rien donné
+    if (!htmlContent && !textContent) {
+      htmlContent = String(webhookData.html ?? webhookData.html_body ?? '').trim()
+      textContent = String(webhookData.text ?? webhookData.plain_text ?? webhookData.text_body ?? '').trim()
+    }
+
+    console.log('[Webhook Resend] from:', from, '| subject:', subject,
+      '| html:', htmlContent.length, 'chars | text:', textContent.length, 'chars')
+
+    if (!from) {
+      console.error('[Webhook Resend] Payload invalide:', JSON.stringify(payload).slice(0, 300))
+      return NextResponse.json({ error: 'Missing from field' }, { status: 400 })
+    }
 
     const { contact_type, owner_id, guest_id, contractor_id } = await resolveContactType(from)
 
-    // Extraire nom + email de l'expéditeur (ex: "Jean Martin <jean@mail.com>")
     const fromEmailMatch = from.match(/<(.+)>/)
     const fromEmail = fromEmailMatch ? fromEmailMatch[1] : from
-    const fromName = fromEmailMatch ? from.replace(/<.+>/, '').trim() : from
+    const fromName = fromEmailMatch ? from.replace(/<.+>/, '').trim().replace(/^"|"$/g, '') : from
 
-    // Fallback : chercher le corps dans les pièces jointes inline (MIME non-standard)
-    let attachmentContent = ''
-    if (!htmlContent && !textContent && Array.isArray(emailData.attachments)) {
-      for (const att of emailData.attachments as any[]) {
-        const mime = (att.content_type ?? att.mime_type ?? att.type ?? '').toLowerCase()
-        const content = att.content ?? att.data ?? att.body ?? ''
-        if (mime.includes('text/html') && content) { attachmentContent = content; break }
-        if (mime.includes('text/plain') && content) { attachmentContent = content }
-      }
-      if (attachmentContent) {
-        console.log('[Webhook Resend] Corps trouvé dans attachments, mime:', emailData.attachments[0]?.content_type)
-      }
-    }
+    const contenu = htmlContent || textContent || '(aucun contenu)'
+    const messageId = webhookData.message_id ?? emailId
 
-    const contenu = htmlContent || textContent || attachmentContent || '(aucun contenu)'
-
-    // Convention inbox : to_email/to_name = expéditeur (pas le destinataire)
     await createThread({
       subject: subject || 'Sans objet',
       contact_type,
@@ -129,10 +129,10 @@ export async function POST(req: NextRequest) {
         author_id: fromEmail,
         author_type: 'OWNER',
       },
-      resend_id: id,
+      resend_id: messageId,
     })
 
-    console.log(`[Webhook] Thread créé : ${subject || 'sans sujet'} from ${from} (${contact_type})`)
+    console.log(`[Webhook] Thread créé : "${subject}" from ${fromEmail} (${contact_type})`)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[Webhook Resend]', error)
