@@ -53,6 +53,11 @@ export async function POST(req: NextRequest) {
 
     const { contact_type, owner_id, guest_id, contractor_id } = await resolveContactType(from)
 
+    // Extraire nom + email de l'expéditeur (ex: "Jean Martin <jean@mail.com>")
+    const fromEmailMatch = from.match(/<(.+)>/)
+    const fromEmail = fromEmailMatch ? fromEmailMatch[1] : from
+    const fromName = fromEmailMatch ? from.replace(/<.+>/, '').trim() : from
+
     await createThread({
       subject: subject || 'Sans objet',
       contact_type,
@@ -61,10 +66,13 @@ export async function POST(req: NextRequest) {
       guest_id,
       contractor_id,
       to_email: Array.isArray(to) ? to[0] : to ?? 'contact@entre-rhone-alpilles.fr',
-      to_name: 'Conciergerie',
+      to_name: 'Entre Rhône et Alpilles',
+      from_email: fromEmail,
+      from_name: fromName || fromEmail,
       firstMessage: {
         contenu: html || text || 'Message sans contenu',
-        author_id: from,
+        author_id: fromEmail,
+        author_type: 'OWNER',
       },
       resend_id: id,
     })

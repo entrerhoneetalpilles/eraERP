@@ -8,7 +8,10 @@
       "Bash(bash \"C:/Users/marga/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh\" --project-dir \"C:/Developpement/conciergerie\")",
       "Bash(npx tsc:*)",
       "Bash(py:*)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(npx prisma:*)"
     ]
   },
   "enabledMcpjsonServers": [

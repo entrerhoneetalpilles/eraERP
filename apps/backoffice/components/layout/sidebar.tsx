@@ -19,6 +19,7 @@ import {
   FileBarChart2,
   KeyRound,
   Mail,
+  FolderOpen,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -50,6 +51,7 @@ const NAV_SECTIONS = [
     label: "Communication",
     items: [
       { href: "/mails", label: "Messagerie", icon: Mail, newTab: true },
+      { href: "/documents", label: "Documents", icon: FolderOpen },
     ],
   },
   {

@@ -14,18 +14,34 @@ import {
 import type { Mail, MailFolder, ContactType, MailMessage } from './mail-data'
 
 function mapThread(t: any): Mail {
+  const isInbox = t.folder === 'inbox' || !t.folder
+
+  // Pour inbox: from = expéditeur (from_name/from_email ou owner)
+  // Pour sent/autres: from = conciergerie, to = destinataire
+  const fromName = isInbox
+    ? (t.from_name ?? t.owner?.nom ?? t.from_email ?? 'Contact')
+    : 'Entre Rhône et Alpilles'
+  const fromEmail = isInbox
+    ? (t.from_email ?? t.owner?.email ?? '')
+    : 'contact@entre-rhone-alpilles.fr'
+
+  const toName = isInbox ? 'Entre Rhône et Alpilles' : (t.to_name ?? t.owner?.nom ?? 'Contact')
+  const toEmail = isInbox ? (t.to_email ?? '') : (t.to_email ?? t.owner?.email ?? '')
+
+  // Unread: messages OWNER non lus (inbox) ou tous non lus (sent)
+  const unreadMessages = isInbox
+    ? (t.messages ?? []).filter((m: any) => m.author_type === 'OWNER' && m.lu_at === null)
+    : (t.messages ?? []).filter((m: any) => m.lu_at === null)
+
   return {
     id: t.id,
-    from: {
-      name: t.owner?.nom ?? t.to_name ?? 'Contact',
-      email: t.owner?.email ?? '',
-    },
-    to: [{ name: t.to_name ?? 'Conciergerie', email: t.to_email ?? 'contact@entre-rhone-alpilles.fr' }],
+    from: { name: fromName, email: fromEmail },
+    to: [{ name: toName, email: toEmail }],
     subject: t.subject,
     body: t.messages?.at(-1)?.contenu ?? '',
     preview: (t.messages?.at(-1)?.contenu ?? '').slice(0, 120),
     date: t.updatedAt.toISOString(),
-    read: (t.messages ?? []).every((m: any) => m.lu_at !== null),
+    read: unreadMessages.length === 0,
     folder: t.folder ?? 'inbox',
     contactType: t.contact_type ?? 'autre' as ContactType,
     labels: [],

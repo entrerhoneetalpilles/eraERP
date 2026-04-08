@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import { MandateStatusButton } from "./status-button"
 import { DeleteMandateButton } from "./delete-button"
+import { MandatePdfButton } from "./pdf-button"
 
 const TABS = ["resume", "reservations", "conditions", "avenants", "documents"] as const
 type Tab = typeof TABS[number]
@@ -49,6 +50,7 @@ export default async function MandateDetailPage({
         }
         actions={
           <div className="flex items-center gap-2 flex-wrap">
+            <MandatePdfButton mandateId={mandate.id} />
             <MandateStatusButton mandateId={mandate.id} currentStatus={mandate.statut as "ACTIF" | "SUSPENDU" | "RESILIE"} />
             <DeleteMandateButton mandateId={mandate.id} numero={mandate.numero_mandat} />
           </div>

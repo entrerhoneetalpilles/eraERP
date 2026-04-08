@@ -18,6 +18,18 @@ export async function getThreads(folder: MailFolder = 'inbox', contactType?: Con
     })
 }
 
+export async function getUnreadCount(): Promise<number> {
+    const threads = await db.messageThread.findMany({
+        where: { folder: 'inbox' } as any,
+        include: {
+            messages: {
+                where: { lu_at: null, author_type: 'OWNER' } as any,
+            },
+        },
+    })
+    return threads.filter((t) => t.messages.length > 0).length
+}
+
 export async function markThreadAsRead(threadId: string) {
     return db.message.updateMany({
         where: { thread_id: threadId, lu_at: null },
@@ -47,8 +59,10 @@ export async function createThread(data: {
     property_id?: string
     to_email?: string
     to_name?: string
+    from_email?: string
+    from_name?: string
     resend_id?: string
-    firstMessage: { contenu: string; author_id: string }
+    firstMessage: { contenu: string; author_id: string; author_type?: 'USER' | 'OWNER' }
 }) {
     const { firstMessage, owner_id, property_id, ...rest } = data
     return db.messageThread.create({
@@ -58,7 +72,7 @@ export async function createThread(data: {
             ...(property_id ? { property: { connect: { id: property_id } } } : {}),
             messages: {
                 create: {
-                    author_type: 'USER',
+                    author_type: firstMessage.author_type ?? 'USER',
                     author_id: firstMessage.author_id,
                     contenu: firstMessage.contenu,
                 },
