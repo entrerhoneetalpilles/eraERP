@@ -37,6 +37,13 @@ export async function markThreadAsRead(threadId: string) {
     })
 }
 
+export async function markThreadAsUnread(threadId: string) {
+    return db.message.updateMany({
+        where: { thread_id: threadId },
+        data: { lu_at: null },
+    })
+}
+
 export async function moveThread(threadId: string, folder: MailFolder) {
     return db.messageThread.update({
         where: { id: threadId },

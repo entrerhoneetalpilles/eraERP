@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MailNav } from './mail-nav'
 import { MailList } from './mail-list'
 import { MailDisplay } from './mail-display'
@@ -80,6 +80,52 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
     function handleForward(subject: string, body: string) {
         openCompose({ mode: 'forward', defaultSubject: subject, defaultBody: body })
     }
+
+    // ── Raccourcis clavier globaux ──
+    useEffect(() => {
+        function onKey(e: KeyboardEvent) {
+            const tag = (e.target as HTMLElement).tagName
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return
+            if (e.metaKey || e.ctrlKey || e.altKey) return
+
+            const mailIds = mails.map((m) => m.id)
+            const currentIdx = selectedId ? mailIds.indexOf(selectedId) : -1
+
+            switch (e.key) {
+                case 'c': case 'n':
+                    e.preventDefault(); openCompose(); break
+                case 'r':
+                    if (selected) { e.preventDefault(); handleReply() } break
+                case 'f':
+                    if (selected) {
+                        e.preventDefault()
+                        const quotedBody = `\n\n\n---------- Message transféré ----------\nDe : ${selected.from.name} <${selected.from.email}>\n\n${selected.body}`
+                        handleForward(`Fwd: ${selected.subject}`, quotedBody)
+                    }
+                    break
+                case 'e': case 'a':
+                    if (selected) { e.preventDefault(); moveTo(selected.id, 'archived') } break
+                case '#':
+                    if (selected) { e.preventDefault(); moveTo(selected.id, 'trash') } break
+                case 'j': case 'ArrowDown':
+                    if (mailIds.length > 0) {
+                        e.preventDefault()
+                        const next = currentIdx < mailIds.length - 1 ? currentIdx + 1 : 0
+                        selectMail(mailIds[next])
+                    }
+                    break
+                case 'k': case 'ArrowUp':
+                    if (mailIds.length > 0) {
+                        e.preventDefault()
+                        const prev = currentIdx > 0 ? currentIdx - 1 : mailIds.length - 1
+                        selectMail(mailIds[prev])
+                    }
+                    break
+            }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [mails, selectedId, selected, moveTo, selectMail])
 
     const sharedListProps = {
         mails,

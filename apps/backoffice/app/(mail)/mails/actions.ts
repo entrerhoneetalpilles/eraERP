@@ -5,6 +5,7 @@ import { sendEmail } from '@conciergerie/email'
 import {
   createThread,
   markThreadAsRead,
+  markThreadAsUnread,
   moveThread,
   getThreads,
   deleteThread,
@@ -145,15 +146,6 @@ export async function bulkMarkReadAction(ids: string[], read: boolean) {
   if (read) {
     await Promise.all(ids.map((id) => markThreadAsRead(id)))
   } else {
-    // Marquer comme non lu = reset lu_at sur tous les messages
-    const { db } = await import('@conciergerie/db')
-    await Promise.all(
-      ids.map((id) =>
-        db.message.updateMany({
-          where: { thread_id: id },
-          data: { lu_at: null },
-        })
-      )
-    )
+    await Promise.all(ids.map((id) => markThreadAsUnread(id)))
   }
 }

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Search, Trash2, Archive, MailOpen, Mail, ChevronDown } from 'lucide-react'
+import { Search, Trash2, Archive, MailOpen, Mail, ChevronDown, X } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import type { Mail as MailType, ContactType, MailFolder } from './mail-data'
@@ -241,10 +241,3 @@ export function MailList({
     )
 }
 
-function X({ className }: { className?: string }) {
-    return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
-    )
-}
