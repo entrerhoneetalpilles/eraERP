@@ -70,33 +70,25 @@ export async function POST(req: NextRequest) {
     // Resend inbound emails are wrapped in payload.data
     // Format: { type: "email.received", data: { from, to, subject, html, text, message_id } }
     const emailData = payload.data ?? payload
-    const {
-      from,
-      subject,
-      text, html,
-      // Resend sometimes uses alternate field names
-      text_body, html_body,
-    } = emailData as any
     const id = emailData.message_id ?? emailData.id ?? payload.id
 
-    console.log('[Webhook Resend] from:', from, '| subject:', subject,
-      '| html len:', (html ?? html_body ?? '').length,
-      '| text len:', (text ?? text_body ?? '').length,
-      '| keys:', Object.keys(emailData).join(', '))
+    // Log complet pour diagnostiquer les champs réels envoyés par Resend
+    console.log('[Webhook Resend] from:', emailData.from, '| subject:', emailData.subject,
+      '| keys:', Object.keys(emailData).join(', '),
+      '| html len:', String(emailData.html ?? emailData.html_body ?? '').length,
+      '| text len:', String(emailData.text ?? emailData.plain_text ?? emailData.text_body ?? '').length)
+
+    const from: string = emailData.from
+    const subject: string = emailData.subject
 
     if (!from) {
       console.error('[Webhook Resend] Payload invalide:', JSON.stringify(payload).slice(0, 500))
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Filtrer les expéditeurs automatiques (noreply, mailer-daemon, etc.)
-    const fromLower = from.toLowerCase()
-    const isAutomated = ['noreply', 'no-reply', 'mailer-daemon', 'postmaster', 'bounce', 'donotreply', 'do-not-reply']
-      .some((marker) => fromLower.includes(marker))
-    if (isAutomated) {
-      console.log('[Webhook Resend] Expéditeur automatique ignoré:', from)
-      return NextResponse.json({ success: true })
-    }
+    // Resend inbound : champs possibles selon la version
+    const htmlContent = String(emailData.html ?? emailData.html_body ?? '').trim()
+    const textContent = String(emailData.text ?? emailData.plain_text ?? emailData.text_body ?? '').trim()
 
     const { contact_type, owner_id, guest_id, contractor_id } = await resolveContactType(from)
 
@@ -105,9 +97,6 @@ export async function POST(req: NextRequest) {
     const fromEmail = fromEmailMatch ? fromEmailMatch[1] : from
     const fromName = fromEmailMatch ? from.replace(/<.+>/, '').trim() : from
 
-    // Contenu : html en priorité, sinon texte brut, sinon fallback
-    const htmlContent = (html ?? html_body ?? '').trim()
-    const textContent = (text ?? text_body ?? '').trim()
     const contenu = htmlContent || textContent || '(aucun contenu)'
 
     // Convention inbox : to_email/to_name = expéditeur (pas le destinataire)
