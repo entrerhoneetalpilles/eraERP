@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { MailNav } from './mail-nav'
 import { MailList } from './mail-list'
 import { MailDisplay } from './mail-display'
@@ -8,12 +9,13 @@ import { ComposeDialog } from './compose-dialog'
 import type { ComposeMode } from './compose-dialog'
 import { useMail } from './use-mail'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import type { Mail, MailFolder } from './mail-data'
+import { ArrowLeft, Mail } from 'lucide-react'
+import type { Mail as MailType, MailFolder } from './mail-data'
 
 interface MailClientProps {
-    initialMails: Mail[]
+    initialMails: MailType[]
     currentFolder: MailFolder
+    userEmail?: string
 }
 
 type MobilePanel = 'nav' | 'list' | 'detail'
@@ -35,7 +37,7 @@ const DEFAULT_COMPOSE: ComposeState = {
     defaultBody: '',
 }
 
-export function MailClient({ initialMails, currentFolder }: MailClientProps) {
+export function MailClient({ initialMails, currentFolder, userEmail }: MailClientProps) {
     const {
         mails, selected, selectedId,
         bulkSelected, folder, contactFilter, search, loading, unreadCount,
@@ -140,10 +142,37 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
         onBulkMarkRead: bulkMarkRead,
     }
 
+    const inboxUnread = mails.filter((m) => m.folder === 'inbox' && !m.read).length
+
     return (
-        <>
+        <div className="flex flex-col h-full">
+            {/* ── Topbar ── */}
+            <header className="h-12 flex items-center gap-3 px-4 border-b border-border bg-card shrink-0">
+                <Link
+                    href="/dashboard"
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span className="hidden sm:inline">Retour à l'ERP</span>
+                </Link>
+                <div className="w-px h-4 bg-border shrink-0" />
+                <h1 className="text-sm font-semibold text-foreground shrink-0">Messagerie</h1>
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full shrink-0 transition-all">
+                    {inboxUnread > 0
+                        ? `${inboxUnread} non lu${inboxUnread > 1 ? 's' : ''}`
+                        : 'À jour'}
+                </span>
+                <div className="flex-1" />
+                {userEmail && (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 border border-border rounded-full px-3 py-1 shrink-0">
+                        <Mail className="w-3 h-3 shrink-0" />
+                        <span className="truncate max-w-[200px]">{userEmail}</span>
+                    </div>
+                )}
+            </header>
+
             {/* ── Desktop : 3-panel ── */}
-            <div className="hidden md:flex border-t bg-card overflow-hidden h-[calc(100vh-3rem)]">
+            <div className="hidden md:flex border-t bg-card overflow-hidden flex-1 min-h-0">
                 <div className="w-52 shrink-0 border-r overflow-y-auto bg-card">
                     <MailNav
                         folder={folder}
@@ -177,7 +206,7 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
             </div>
 
             {/* ── Mobile : stacked ── */}
-            <div className="md:hidden flex flex-col bg-card overflow-hidden" style={{ height: 'calc(100svh - 3rem)' }}>
+            <div className="md:hidden flex flex-col bg-card overflow-hidden flex-1 min-h-0">
                 {mobilePanel === 'nav' && (
                     <div className="flex flex-col h-full">
                         <div className="flex items-center gap-2 px-3 py-2 border-b shrink-0">
@@ -254,7 +283,7 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                 defaultBody={compose.defaultBody}
                 replyToThreadId={compose.replyToThreadId}
             />
-        </>
+        </div>
     )
 }
 

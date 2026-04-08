@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import { ArrowLeft, Mail } from 'lucide-react'
 import { auth } from '@/auth'
 import { getThreads } from '@/lib/dal/emails'
 import { MailClient } from './mail-client'
@@ -54,35 +52,7 @@ export default async function MailsPage({
 
     return (
         <div className="flex flex-col h-screen bg-background">
-            {/* Topbar standalone */}
-            <header className="h-12 flex items-center gap-3 px-4 border-b border-border bg-card shrink-0">
-                <Link
-                    href="/dashboard"
-                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">Retour à l'ERP</span>
-                </Link>
-                <div className="w-px h-4 bg-border shrink-0" />
-                <h1 className="text-sm font-semibold text-foreground shrink-0">Messagerie</h1>
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full shrink-0">
-                    {mails.filter((m) => !m.read).length > 0
-                        ? `${mails.filter((m) => !m.read).length} non lu${mails.filter((m) => !m.read).length > 1 ? 's' : ''}`
-                        : 'À jour'}
-                </span>
-                <div className="flex-1" />
-                {userEmail && (
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 border border-border rounded-full px-3 py-1 shrink-0">
-                        <Mail className="w-3 h-3 shrink-0" />
-                        <span className="truncate max-w-[200px]">{userEmail}</span>
-                    </div>
-                )}
-            </header>
-
-            {/* Mail client — remplit l'espace restant */}
-            <div className="flex-1 overflow-hidden p-0">
-                <MailClient initialMails={mails} currentFolder={folder} />
-            </div>
+            <MailClient initialMails={mails} currentFolder={folder} userEmail={userEmail} />
         </div>
     )
 }
