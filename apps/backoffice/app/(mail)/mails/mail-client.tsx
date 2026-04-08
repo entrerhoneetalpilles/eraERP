@@ -5,6 +5,7 @@ import { MailNav } from './mail-nav'
 import { MailList } from './mail-list'
 import { MailDisplay } from './mail-display'
 import { ComposeDialog } from './compose-dialog'
+import type { ComposeMode } from './compose-dialog'
 import { useMail } from './use-mail'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -17,16 +18,44 @@ interface MailClientProps {
 
 type MobilePanel = 'nav' | 'list' | 'detail'
 
+interface ComposeState {
+    open: boolean
+    mode: ComposeMode
+    defaultTo: string | string[]
+    defaultSubject: string
+    defaultBody: string
+    replyToThreadId?: string
+}
+
+const DEFAULT_COMPOSE: ComposeState = {
+    open: false,
+    mode: 'compose',
+    defaultTo: '',
+    defaultSubject: '',
+    defaultBody: '',
+}
+
 export function MailClient({ initialMails, currentFolder }: MailClientProps) {
     const {
         mails, selected, selectedId,
-        folder, contactFilter, search, composeOpen,
-        loading, unreadCount,
+        bulkSelected, folder, contactFilter, search, loading, unreadCount,
         setFolder, setContactFilter, setSearch,
-        setComposeOpen, selectMail, moveTo, refresh, refreshSelectedMail,
+        selectMail, moveTo, refresh, refreshSelectedMail,
+        toggleBulkSelect, selectAll, clearBulkSelection,
+        bulkMoveTo, bulkMarkRead,
     } = useMail(initialMails, currentFolder)
 
     const [mobilePanel, setMobilePanel] = useState<MobilePanel>('list')
+    const [compose, setCompose] = useState<ComposeState>(DEFAULT_COMPOSE)
+
+    function openCompose(overrides: Partial<ComposeState> = {}) {
+        setCompose({ ...DEFAULT_COMPOSE, open: true, ...overrides })
+    }
+
+    function closeCompose() {
+        setCompose((prev) => ({ ...prev, open: false }))
+        refresh()
+    }
 
     function handleSelectMail(id: string) {
         selectMail(id)
@@ -38,11 +67,37 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
         setMobilePanel('list')
     }
 
+    function handleReply() {
+        if (!selected) return
+        openCompose({
+            mode: 'reply',
+            defaultTo: selected.from.email,
+            defaultSubject: selected.subject.startsWith('Re: ') ? selected.subject : `Re: ${selected.subject}`,
+            replyToThreadId: selected.id,
+        })
+    }
+
+    function handleForward(subject: string, body: string) {
+        openCompose({ mode: 'forward', defaultSubject: subject, defaultBody: body })
+    }
+
+    const sharedListProps = {
+        mails,
+        selectedId,
+        bulkSelected,
+        search,
+        onSearch: setSearch,
+        onToggleBulk: toggleBulkSelect,
+        onSelectAll: selectAll,
+        onClearSelection: clearBulkSelection,
+        onBulkMoveTo: bulkMoveTo,
+        onBulkMarkRead: bulkMarkRead,
+    }
+
     return (
         <>
-            {/* ── Desktop : 3-panel layout ── */}
+            {/* ── Desktop : 3-panel ── */}
             <div className="hidden md:flex border-t bg-card overflow-hidden h-[calc(100vh-3rem)]">
-                {/* Panneau gauche — Navigation */}
                 <div className="w-52 shrink-0 border-r overflow-y-auto bg-card">
                     <MailNav
                         folder={folder}
@@ -50,41 +105,33 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                         unreadCount={unreadCount}
                         onFolderChange={handleFolderChange}
                         onContactFilterChange={setContactFilter}
-                        onCompose={() => setComposeOpen(true)}
+                        onCompose={() => openCompose()}
                     />
                 </div>
 
-                {/* Panneau central — Liste */}
                 <div className="w-80 shrink-0 border-r overflow-hidden">
                     {loading ? (
                         <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                             Chargement...
                         </div>
                     ) : (
-                        <MailList
-                            mails={mails}
-                            selectedId={selectedId}
-                            search={search}
-                            onSelect={selectMail}
-                            onSearch={setSearch}
-                        />
+                        <MailList {...sharedListProps} onSelect={selectMail} />
                     )}
                 </div>
 
-                {/* Panneau droit — Détail */}
                 <div className="flex-1 overflow-hidden">
                     <MailDisplay
                         mail={selected}
                         onMoveTo={moveTo}
-                        onReply={() => setComposeOpen(true)}
+                        onReply={handleReply}
+                        onForward={handleForward}
                         onSent={() => selected && refreshSelectedMail(selected.id)}
                     />
                 </div>
             </div>
 
-            {/* ── Mobile : stacked panels ── */}
+            {/* ── Mobile : stacked ── */}
             <div className="md:hidden flex flex-col bg-card overflow-hidden" style={{ height: 'calc(100svh - 3rem)' }}>
-
                 {mobilePanel === 'nav' && (
                     <div className="flex flex-col h-full">
                         <div className="flex items-center gap-2 px-3 py-2 border-b shrink-0">
@@ -100,7 +147,7 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                                 unreadCount={unreadCount}
                                 onFolderChange={(f) => { handleFolderChange(f); setMobilePanel('list') }}
                                 onContactFilterChange={(c) => { setContactFilter(c); setMobilePanel('list') }}
-                                onCompose={() => { setComposeOpen(true); setMobilePanel('list') }}
+                                onCompose={() => { openCompose(); setMobilePanel('list') }}
                             />
                         </div>
                     </div>
@@ -115,7 +162,7 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                             <span className="text-xs text-muted-foreground font-medium capitalize">
                                 {FOLDER_LABELS[folder]}
                             </span>
-                            <button onClick={() => setComposeOpen(true)} className="text-sm font-medium text-primary">
+                            <button onClick={() => openCompose()} className="text-sm font-medium text-primary">
                                 Nouveau
                             </button>
                         </div>
@@ -125,13 +172,7 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                                     Chargement...
                                 </div>
                             ) : (
-                                <MailList
-                                    mails={mails}
-                                    selectedId={selectedId}
-                                    search={search}
-                                    onSelect={handleSelectMail}
-                                    onSearch={setSearch}
-                                />
+                                <MailList {...sharedListProps} onSelect={handleSelectMail} />
                             )}
                         </div>
                     </div>
@@ -149,7 +190,8 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
                             <MailDisplay
                                 mail={selected}
                                 onMoveTo={(id, f) => { moveTo(id, f); setMobilePanel('list') }}
-                                onReply={() => setComposeOpen(true)}
+                                onReply={handleReply}
+                                onForward={handleForward}
                                 onSent={() => selected && refreshSelectedMail(selected.id)}
                             />
                         </div>
@@ -158,13 +200,13 @@ export function MailClient({ initialMails, currentFolder }: MailClientProps) {
             </div>
 
             <ComposeDialog
-                open={composeOpen}
-                onClose={() => {
-                    setComposeOpen(false)
-                    refresh()
-                }}
-                defaultTo={selected?.from.email ?? ''}
-                defaultSubject={selected ? `Re: ${selected.subject}` : ''}
+                open={compose.open}
+                onClose={closeCompose}
+                mode={compose.mode}
+                defaultTo={compose.defaultTo}
+                defaultSubject={compose.defaultSubject}
+                defaultBody={compose.defaultBody}
+                replyToThreadId={compose.replyToThreadId}
             />
         </>
     )

@@ -132,3 +132,28 @@ export async function moveThreadAction(threadId: string, folder: MailFolder) {
 export async function deleteThreadAction(threadId: string) {
   await deleteThread(threadId)
 }
+
+export async function bulkMoveAction(ids: string[], folder: MailFolder) {
+  await Promise.all(ids.map((id) => moveThread(id, folder)))
+}
+
+export async function bulkDeleteAction(ids: string[]) {
+  await Promise.all(ids.map((id) => deleteThread(id)))
+}
+
+export async function bulkMarkReadAction(ids: string[], read: boolean) {
+  if (read) {
+    await Promise.all(ids.map((id) => markThreadAsRead(id)))
+  } else {
+    // Marquer comme non lu = reset lu_at sur tous les messages
+    const { db } = await import('@conciergerie/db')
+    await Promise.all(
+      ids.map((id) =>
+        db.message.updateMany({
+          where: { thread_id: id },
+          data: { lu_at: null },
+        })
+      )
+    )
+  }
+}

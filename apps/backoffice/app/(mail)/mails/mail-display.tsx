@@ -36,10 +36,11 @@ interface MailDisplayProps {
     mail: Mail | null
     onMoveTo: (id: string, folder: MailFolder) => void
     onReply: () => void
+    onForward: (subject: string, body: string, from: string) => void
     onSent: () => void
 }
 
-export function MailDisplay({ mail, onMoveTo, onReply, onSent }: MailDisplayProps) {
+export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: MailDisplayProps) {
     const [confirmDelete, setConfirmDelete] = useState(false)
     const [replyOpen, setReplyOpen] = useState(false)
     const [replyBody, setReplyBody] = useState('')
@@ -127,7 +128,10 @@ export function MailDisplay({ mail, onMoveTo, onReply, onSent }: MailDisplayProp
 
                     <Tooltip>
                         <TooltipTrigger>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onReply}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                                const quotedBody = `\n\n\n---------- Message transféré ----------\nDe : ${mail.from.name} <${mail.from.email}>\nDate : ${format(new Date(mail.date), "d MMMM yyyy 'à' HH:mm", { locale: fr })}\nObjet : ${mail.subject}\n\n${mail.body}`
+                                onForward(`Fwd: ${mail.subject}`, quotedBody, mail.from.email)
+                            }}>
                                 <Forward className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
