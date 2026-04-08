@@ -79,13 +79,23 @@ export async function POST(req: NextRequest) {
     } = emailData as any
     const id = emailData.message_id ?? emailData.id ?? payload.id
 
-    console.log('[Webhook Resend] type:', payload.type, '| from:', from, '| subject:', subject,
+    console.log('[Webhook Resend] from:', from, '| subject:', subject,
       '| html len:', (html ?? html_body ?? '').length,
-      '| text len:', (text ?? text_body ?? '').length)
+      '| text len:', (text ?? text_body ?? '').length,
+      '| keys:', Object.keys(emailData).join(', '))
 
     if (!from) {
-      console.error('[Webhook Resend] Payload invalide, champ "from" manquant:', JSON.stringify(payload).slice(0, 500))
+      console.error('[Webhook Resend] Payload invalide:', JSON.stringify(payload).slice(0, 500))
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Filtrer les expéditeurs automatiques (noreply, mailer-daemon, etc.)
+    const fromLower = from.toLowerCase()
+    const isAutomated = ['noreply', 'no-reply', 'mailer-daemon', 'postmaster', 'bounce', 'donotreply', 'do-not-reply']
+      .some((marker) => fromLower.includes(marker))
+    if (isAutomated) {
+      console.log('[Webhook Resend] Expéditeur automatique ignoré:', from)
+      return NextResponse.json({ success: true })
     }
 
     const { contact_type, owner_id, guest_id, contractor_id } = await resolveContactType(from)
