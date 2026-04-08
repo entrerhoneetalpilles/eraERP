@@ -4,6 +4,7 @@ import { getFeeInvoiceById } from "@/lib/dal/facturation"
 import { PageHeader } from "@/components/ui/page-header"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { ArrowLeft } from "lucide-react"
+import { InvoiceActions } from "./invoice-actions"
 
 export default async function FactureDetailPage({
   params,
@@ -13,24 +14,35 @@ export default async function FactureDetailPage({
   const invoice = await getFeeInvoiceById(params.id)
   if (!invoice) notFound()
 
+  const tvaAmount = invoice.montant_ttc - invoice.montant_ht
+
   return (
     <div className="space-y-6">
       <PageHeader
         title={invoice.numero_facture}
+        description={`Créée le ${new Date(invoice.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`}
         actions={
-          <Link href="/facturation" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer">
-            <ArrowLeft className="w-4 h-4" />
-            Retour
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/facturation" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer">
+              <ArrowLeft className="w-4 h-4" />
+              Retour
+            </Link>
+            <InvoiceActions id={invoice.id} statut={invoice.statut as any} />
+          </div>
         }
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Infos facture */}
         <div className="bg-card rounded-md border border-border p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Facture
           </p>
           <div>
+            <div className="flex items-center justify-between py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">N° Facture</span>
+              <span className="text-sm font-mono font-medium text-foreground">{invoice.numero_facture}</span>
+            </div>
             <div className="flex items-center justify-between py-2 border-b border-border">
               <span className="text-sm text-muted-foreground">Propriétaire</span>
               <Link href={`/proprietaires/${invoice.owner.id}`} className="text-sm font-medium text-foreground hover:text-primary cursor-pointer">
@@ -51,6 +63,7 @@ export default async function FactureDetailPage({
           </div>
         </div>
 
+        {/* Montants */}
         <div className="bg-card rounded-md border border-border p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
             Montants
@@ -65,15 +78,12 @@ export default async function FactureDetailPage({
             <div className="flex items-center justify-between py-2 border-b border-border">
               <span className="text-sm text-muted-foreground">TVA ({(invoice.tva_rate * 100).toFixed(0)}%)</span>
               <span className="text-sm text-foreground font-medium">
-                {(invoice.montant_ttc - invoice.montant_ht).toLocaleString("fr-FR", {
-                  style: "currency",
-                  currency: "EUR",
-                })}
+                {tvaAmount.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
               </span>
             </div>
-            <div className="flex items-center justify-between py-2 border-t border-border mt-1 last:border-0">
+            <div className="flex items-center justify-between py-2 border-t border-border mt-1">
               <span className="text-sm font-semibold text-foreground">Total TTC</span>
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-lg font-semibold text-foreground">
                 {invoice.montant_ttc.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
               </span>
             </div>
