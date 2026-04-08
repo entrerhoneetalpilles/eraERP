@@ -1,4 +1,4 @@
-export { sendEmail, buildEmailPayload } from "./client"
+export { sendEmail, buildEmailPayload, getEmailById } from "./client"
 export { WelcomeOwnerEmail } from "./templates/welcome-owner"
 export { BookingConfirmedEmail } from "./templates/booking-confirmed"
 export { AccessCodesEmail } from "./templates/access-codes"

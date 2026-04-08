@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { Resend } from 'resend'
+import { getEmailById } from '@conciergerie/email'
 import { createThread } from '@/lib/dal/emails'
 import { createDocument } from '@/lib/dal/documents'
 import { uploadFile, buildStorageKey } from '@conciergerie/storage'
@@ -79,18 +79,14 @@ export async function POST(req: NextRequest) {
 
     if (emailId && process.env.RESEND_API_KEY) {
       try {
-        const resend = new Resend(process.env.RESEND_API_KEY)
-        const { data: fullEmail, error } = await resend.emails.get(emailId)
-        if (error) {
-          console.error('[Webhook Resend] Erreur récupération email:', error)
-        } else if (fullEmail) {
+        const fullEmail = await getEmailById(emailId)
+        if (fullEmail) {
           resendEmailData = fullEmail
           from = (fullEmail as any).from ?? from
           subject = (fullEmail as any).subject ?? subject
           htmlContent = String((fullEmail as any).html ?? '').trim()
           textContent = String((fullEmail as any).text ?? '').trim()
           console.log('[Webhook Resend] Email récupéré | html:', htmlContent.length, 'chars | text:', textContent.length, 'chars | PJ:', ((fullEmail as any).attachments ?? []).length)
-        }
       } catch (e) {
         console.error('[Webhook Resend] Impossible de récupérer le contenu via API:', e)
       }

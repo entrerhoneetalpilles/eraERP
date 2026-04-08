@@ -49,3 +49,9 @@ export async function sendEmail(options: SendEmailOptions) {
 
   return data
 }
+
+export async function getEmailById(emailId: string) {
+  const { data, error } = await getResend().emails.get(emailId)
+  if (error) throw new Error(`Email fetch failed: ${error.message}`)
+  return data
+}
