@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { propertySchema } from "@/lib/validations/property"
-import { updateProperty, upsertPropertyAccess } from "@/lib/dal/properties"
+import { updateProperty, upsertPropertyAccess, deleteProperty } from "@/lib/dal/properties"
 
 export async function updatePropertyAction(id: string, _prev: unknown, formData: FormData) {
   const raw = {
@@ -45,4 +45,20 @@ export async function updatePropertyAccessAction(property_id: string, _prev: unk
   await upsertPropertyAccess(property_id, data)
   revalidatePath(`/biens/${property_id}`)
   redirect(`/biens/${property_id}`)
+}
+
+export async function deletePropertyAction(id: string) {
+  try {
+    await deleteProperty(id)
+    revalidatePath("/biens")
+    redirect("/biens")
+  } catch (e: unknown) {
+    return { error: (e as Error).message }
+  }
+}
+
+export async function changePropertyStatusAction(id: string, statut: "ACTIF" | "INACTIF" | "TRAVAUX") {
+  await updateProperty(id, { statut })
+  revalidatePath(`/biens/${id}`)
+  revalidatePath("/biens")
 }

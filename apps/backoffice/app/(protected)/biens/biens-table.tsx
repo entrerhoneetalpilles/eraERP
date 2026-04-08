@@ -56,6 +56,18 @@ const columns: ColumnDef<PropertyRow>[] = [
     header: "Rés.",
     cell: ({ row }) => row.original._count.bookings,
   },
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => (
+      <Link
+        href={`/biens/${row.original.id}`}
+        className="text-sm text-primary hover:underline cursor-pointer"
+      >
+        Voir
+      </Link>
+    ),
+  },
 ]
 
 export function BiensTable({ data }: { data: PropertyRow[] }) {
