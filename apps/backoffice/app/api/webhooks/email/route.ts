@@ -70,10 +70,18 @@ export async function POST(req: NextRequest) {
     // Resend inbound emails are wrapped in payload.data
     // Format: { type: "email.received", data: { from, to, subject, html, text, message_id } }
     const emailData = payload.data ?? payload
-    const { from, subject, text, html, to } = emailData
+    const {
+      from,
+      subject,
+      text, html,
+      // Resend sometimes uses alternate field names
+      text_body, html_body,
+    } = emailData as any
     const id = emailData.message_id ?? emailData.id ?? payload.id
 
-    console.log('[Webhook Resend] type:', payload.type, '| from:', from, '| subject:', subject)
+    console.log('[Webhook Resend] type:', payload.type, '| from:', from, '| subject:', subject,
+      '| html len:', (html ?? html_body ?? '').length,
+      '| text len:', (text ?? text_body ?? '').length)
 
     if (!from) {
       console.error('[Webhook Resend] Payload invalide, champ "from" manquant:', JSON.stringify(payload).slice(0, 500))
@@ -87,6 +95,11 @@ export async function POST(req: NextRequest) {
     const fromEmail = fromEmailMatch ? fromEmailMatch[1] : from
     const fromName = fromEmailMatch ? from.replace(/<.+>/, '').trim() : from
 
+    // Contenu : html en priorité, sinon texte brut, sinon fallback
+    const htmlContent = (html ?? html_body ?? '').trim()
+    const textContent = (text ?? text_body ?? '').trim()
+    const contenu = htmlContent || textContent || '(aucun contenu)'
+
     // Convention inbox : to_email/to_name = expéditeur (pas le destinataire)
     await createThread({
       subject: subject || 'Sans objet',
@@ -98,7 +111,7 @@ export async function POST(req: NextRequest) {
       to_email: fromEmail,
       to_name: fromName || fromEmail,
       firstMessage: {
-        contenu: html || text || 'Message sans contenu',
+        contenu,
         author_id: fromEmail,
         author_type: 'OWNER',
       },
