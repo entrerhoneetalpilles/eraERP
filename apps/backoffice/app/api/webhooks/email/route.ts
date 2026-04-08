@@ -67,6 +67,9 @@ export async function POST(req: NextRequest) {
     const webhookData = payload.data ?? payload
     const emailId: string = webhookData.email_id ?? webhookData.id
 
+    // DEBUG: voir la structure complète du payload Resend inbound
+    console.log('[Webhook] webhookData JSON:', JSON.stringify(webhookData).slice(0, 1500))
+
     let from: string = webhookData.from ?? ''
     let subject: string = webhookData.subject ?? ''
     // Certains emails ont le contenu directement dans le payload webhook
