@@ -22,6 +22,7 @@ import {
   Wrench,
   Settings,
   KeyRound,
+  FolderOpen,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -56,7 +57,10 @@ const DRAWER_SECTIONS = [
   },
   {
     label: "Communication",
-    items: [{ href: "/mails", label: "Messagerie", icon: Mail, newTab: true }],
+    items: [
+      { href: "/mails", label: "Messagerie", icon: Mail, newTab: true },
+      { href: "/documents", label: "Documents", icon: FolderOpen },
+    ],
   },
   {
     label: "Finance",
