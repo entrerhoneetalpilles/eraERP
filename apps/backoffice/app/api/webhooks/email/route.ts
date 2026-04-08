@@ -76,7 +76,8 @@ export async function POST(req: NextRequest) {
     console.log('[Webhook Resend] from:', emailData.from, '| subject:', emailData.subject,
       '| keys:', Object.keys(emailData).join(', '),
       '| html len:', String(emailData.html ?? emailData.html_body ?? '').length,
-      '| text len:', String(emailData.text ?? emailData.plain_text ?? emailData.text_body ?? '').length)
+      '| text len:', String(emailData.text ?? emailData.plain_text ?? emailData.text_body ?? '').length,
+      '| attachments:', JSON.stringify(emailData.attachments ?? []).slice(0, 500))
 
     const from: string = emailData.from
     const subject: string = emailData.subject
@@ -97,7 +98,21 @@ export async function POST(req: NextRequest) {
     const fromEmail = fromEmailMatch ? fromEmailMatch[1] : from
     const fromName = fromEmailMatch ? from.replace(/<.+>/, '').trim() : from
 
-    const contenu = htmlContent || textContent || '(aucun contenu)'
+    // Fallback : chercher le corps dans les pièces jointes inline (MIME non-standard)
+    let attachmentContent = ''
+    if (!htmlContent && !textContent && Array.isArray(emailData.attachments)) {
+      for (const att of emailData.attachments as any[]) {
+        const mime = (att.content_type ?? att.mime_type ?? att.type ?? '').toLowerCase()
+        const content = att.content ?? att.data ?? att.body ?? ''
+        if (mime.includes('text/html') && content) { attachmentContent = content; break }
+        if (mime.includes('text/plain') && content) { attachmentContent = content }
+      }
+      if (attachmentContent) {
+        console.log('[Webhook Resend] Corps trouvé dans attachments, mime:', emailData.attachments[0]?.content_type)
+      }
+    }
+
+    const contenu = htmlContent || textContent || attachmentContent || '(aucun contenu)'
 
     // Convention inbox : to_email/to_name = expéditeur (pas le destinataire)
     await createThread({
