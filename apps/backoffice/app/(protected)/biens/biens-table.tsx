@@ -60,12 +60,51 @@ const columns: ColumnDef<PropertyRow>[] = [
 
 export function BiensTable({ data }: { data: PropertyRow[] }) {
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      searchPlaceholder="Rechercher un bien…"
-      searchColumn="nom"
-    />
+    <>
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data}
+          searchPlaceholder="Rechercher un bien…"
+          searchColumn="nom"
+        />
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden space-y-3">
+        {data.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">Aucun bien</p>
+        ) : (
+          data.map((row) => (
+            <Link
+              key={row.id}
+              href={`/biens/${row.id}`}
+              className="block rounded-lg border border-border bg-card p-4 space-y-1.5"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-medium text-sm text-foreground">{row.nom}</p>
+                <StatusBadge status={row.statut} />
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusBadge status={row.type} />
+                <span className="text-xs text-muted-foreground">
+                  {row.capacite_voyageurs} voyageurs
+                </span>
+              </div>
+              {row.mandate?.owner ? (
+                <p className="text-xs text-muted-foreground">{row.mandate.owner.nom}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">Sans mandat</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {row._count.bookings} réservation{row._count.bookings !== 1 ? "s" : ""}
+              </p>
+            </Link>
+          ))
+        )}
+      </div>
+    </>
   )
 }
 

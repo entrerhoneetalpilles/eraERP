@@ -54,8 +54,8 @@ export function DataTable<TData, TValue>({
         />
       )}
 
-      <div className="rounded-md border border-border overflow-hidden bg-white">
-        <table className="w-full text-sm">
+      <div className="rounded-md border border-border overflow-hidden bg-white overflow-x-auto">
+        <table className="w-full min-w-[600px] text-sm">
           <thead className="bg-[hsl(35,15%,96%)]">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>

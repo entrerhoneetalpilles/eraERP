@@ -72,12 +72,59 @@ const columns: ColumnDef<BookingRow>[] = [
 
 export function ReservationsTable({ data }: { data: BookingRow[] }) {
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      searchPlaceholder="Rechercher…"
-      searchColumn="voyageur"
-    />
+    <>
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data}
+          searchPlaceholder="Rechercher…"
+          searchColumn="voyageur"
+        />
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden space-y-3">
+        {data.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">Aucune réservation</p>
+        ) : (
+          data.map((row) => (
+            <Link
+              key={row.id}
+              href={`/reservations/${row.id}`}
+              className="block rounded-lg border border-border bg-card p-4 space-y-2"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-medium text-sm text-foreground">
+                    {row.guest.prenom} {row.guest.nom}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{row.property.nom}</p>
+                </div>
+                <StatusBadge status={row.statut} />
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {new Date(row.check_in).toLocaleDateString("fr-FR")} →{" "}
+                  {new Date(row.check_out).toLocaleDateString("fr-FR")}
+                </span>
+                <span className="font-medium text-foreground tabular-nums">
+                  {row.revenu_net_proprietaire.toLocaleString("fr-FR", {
+                    style: "currency",
+                    currency: "EUR",
+                  })}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{row.nb_nuits} nuit{row.nb_nuits !== 1 ? "s" : ""}</span>
+                <span>·</span>
+                <span>{row.platform}</span>
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+    </>
   )
 }
 

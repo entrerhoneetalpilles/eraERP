@@ -13,6 +13,13 @@ export interface MailAttachment {
     size: string
 }
 
+export interface MailMessage {
+    id: string
+    contenu: string
+    author_type: 'USER' | 'OWNER' | 'SYSTEM'
+    createdAt: string
+}
+
 export interface Mail {
     id: string
     from: MailContact
@@ -26,6 +33,7 @@ export interface Mail {
     contactType: ContactType
     labels?: string[]
     attachments?: MailAttachment[]
+    messages?: MailMessage[]
 }
 
 export const MOCK_MAILS: Mail[] = [

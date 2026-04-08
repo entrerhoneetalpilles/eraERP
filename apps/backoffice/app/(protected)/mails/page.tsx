@@ -1,7 +1,7 @@
 import { getThreads } from '@/lib/dal/emails'
 import { MailClient } from './mail-client'
 import { PageHeader } from '@/components/ui/page-header'
-import type { Mail, MailFolder } from './mail-data'
+import type { Mail, MailFolder, MailMessage } from './mail-data'
 
 export default async function MailsPage({
     searchParams,
@@ -14,7 +14,7 @@ export default async function MailsPage({
     const mails: Mail[] = (threads as any[]).map((t) => ({
         id: t.id,
         from: {
-            name: t.owner?.nom ?? 'Contact',
+            name: t.owner?.nom ?? t.to_name ?? 'Contact',
             email: t.owner?.email ?? '',
         },
         to: t.to_name
@@ -28,6 +28,12 @@ export default async function MailsPage({
         folder: t.folder ?? 'inbox',
         contactType: t.contact_type ?? 'autre',
         labels: [],
+        messages: (t.messages ?? []).map((m: any): MailMessage => ({
+            id: m.id,
+            contenu: m.contenu,
+            author_type: m.author_type,
+            createdAt: m.createdAt.toISOString(),
+        })),
     }))
 
     return (

@@ -117,4 +117,9 @@
     background-color: hsl(var(--border));
     border-radius: 2px;
   }
+
+  /* Safe area padding for iOS bottom bar */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }

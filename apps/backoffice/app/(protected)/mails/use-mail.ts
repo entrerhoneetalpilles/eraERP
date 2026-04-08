@@ -18,11 +18,9 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
     folderRef.current = folder
 
     const loadMails = useCallback(async (f: MailFolder, ct?: ContactType | 'all') => {
-        console.log(`[useMail] Loading: folder=${f}, filter=${ct}`)  // Log ajouté
         setLoading(true)
         try {
             const fresh = await fetchThreadsAction(f, ct)
-            console.log(`[useMail] Loaded ${fresh.length} mails`)  // Log count
             setMails(fresh)
         } catch (e) {
             console.error('[useMail] fetch error', e)
@@ -33,7 +31,6 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
 
     // Change folder
     useEffect(() => {
-        console.log(`[useMail] Folder changed to: ${folder}`)  // Log
         setSelectedId(null)
         setContactFilter('all')
         setSearch('')
@@ -50,9 +47,6 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
 
     // Filter change
     useEffect(() => {
-        if (contactFilter !== 'all') {
-            console.log(`[useMail] Filter changed to: ${contactFilter}`)
-        }
         loadMails(folder, contactFilter)
     }, [contactFilter, folder, loadMails])
 
@@ -71,7 +65,6 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
     const unreadCount = (f: MailFolder) => mails.filter((m) => m.folder === f && !m.read).length
 
     async function selectMail(id: string) {
-        console.log(`[useMail] Select mail: ${id}`)  // Log
         setSelectedId(id)
         const mail = mails.find((m) => m.id === id)
         if (mail && !mail.read) {
@@ -81,7 +74,6 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
     }
 
     async function moveTo(id: string, target: MailFolder) {
-        console.log(`[useMail] Move ${id} to ${target}`)
         const mail = mails.find((m) => m.id === id)
         setMails((prev) => prev.filter((m) => m.id !== id))
         if (selectedId === id) setSelectedId(null)

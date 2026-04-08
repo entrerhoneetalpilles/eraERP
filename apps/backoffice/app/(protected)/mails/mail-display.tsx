@@ -13,13 +13,17 @@ import {
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import {
     Reply, Forward, Archive, Trash2, MoreVertical,
-    Paperclip, User, Home, Wrench,
+    Paperclip, User, Home, Wrench, Send,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import type { Mail, MailFolder } from './mail-data'
+import { toast } from 'sonner'
+import { sendMailAction } from './actions'
+import type { Mail, MailFolder, MailMessage } from './mail-data'
+import { cn } from '@conciergerie/ui'
 
 const CONTACT_ICONS = {
     proprietaire: Home,
@@ -36,6 +40,9 @@ interface MailDisplayProps {
 
 export function MailDisplay({ mail, onMoveTo, onReply }: MailDisplayProps) {
     const [confirmDelete, setConfirmDelete] = useState(false)
+    const [replyOpen, setReplyOpen] = useState(false)
+    const [replyBody, setReplyBody] = useState('')
+    const [sending, setSending] = useState(false)
 
     if (!mail) {
         return (
@@ -58,8 +65,32 @@ export function MailDisplay({ mail, onMoveTo, onReply }: MailDisplayProps) {
 
     function handleConfirmDelete() {
         setConfirmDelete(false)
-        onMoveTo(mail!.id, 'trash') // moveTo détecte folder=trash → suppression définitive
+        onMoveTo(mail!.id, 'trash')
     }
+
+    async function handleQuickReply() {
+        if (!replyBody.trim()) return
+        setSending(true)
+        try {
+            await sendMailAction({
+                to: mail!.from.email,
+                toName: mail!.from.name,
+                subject: mail!.subject.startsWith('Re: ') ? mail!.subject : `Re: ${mail!.subject}`,
+                body: replyBody,
+                contactType: mail!.contactType,
+                replyToThreadId: mail!.id,
+            })
+            toast.success('Réponse envoyée')
+            setReplyBody('')
+            setReplyOpen(false)
+        } catch {
+            toast.error("Erreur lors de l'envoi")
+        } finally {
+            setSending(false)
+        }
+    }
+
+    const messages = mail.messages ?? [{ id: mail.id, contenu: mail.body, author_type: 'OWNER' as const, createdAt: mail.date }]
 
     return (
         <>
@@ -85,10 +116,10 @@ export function MailDisplay({ mail, onMoveTo, onReply }: MailDisplayProps) {
 
             <div className="flex h-full flex-col">
                 {/* Toolbar */}
-                <div className="flex items-center gap-1 border-b p-2">
+                <div className="flex items-center gap-1 border-b p-2 shrink-0">
                     <Tooltip>
                         <TooltipTrigger>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onReply}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setReplyOpen(true)}>
                                 <Reply className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
@@ -97,7 +128,7 @@ export function MailDisplay({ mail, onMoveTo, onReply }: MailDisplayProps) {
 
                     <Tooltip>
                         <TooltipTrigger>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onReply}>
                                 <Forward className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
@@ -149,52 +180,45 @@ export function MailDisplay({ mail, onMoveTo, onReply }: MailDisplayProps) {
                     </DropdownMenu>
                 </div>
 
-                {/* Header */}
-                <div className="p-4">
-                    <h2 className="text-lg font-semibold">{mail.subject}</h2>
-                    <div className="mt-3 flex items-start gap-3">
-                        <Avatar className="h-9 w-9">
+                {/* Subject + from */}
+                <div className="p-4 border-b shrink-0">
+                    <h2 className="text-base font-semibold">{mail.subject}</h2>
+                    <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        <Avatar className="h-7 w-7">
                             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                         </Avatar>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-medium text-sm">{mail.from.name}</span>
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <ContactIcon className="h-3 w-3" />
-                                    {mail.from.email}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-xs text-muted-foreground">
-                                    À : {mail.to.map((t) => t.name).join(', ')}
-                                </span>
-                                <span className="text-xs text-muted-foreground ml-auto">
-                                    {format(new Date(mail.date), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
-                                </span>
-                            </div>
+                        <div>
+                            <span className="font-medium text-sm">{mail.from.name}</span>
+                            <span className="ml-2 text-xs text-muted-foreground flex items-center gap-1 inline-flex">
+                                <ContactIcon className="h-3 w-3" />
+                                {mail.from.email}
+                            </span>
                         </div>
+                        {mail.labels && mail.labels.length > 0 && (
+                            <div className="flex gap-1 ml-auto">
+                                {mail.labels.map((l) => (
+                                    <Badge key={l} variant="secondary" className="text-xs">{l}</Badge>
+                                ))}
+                            </div>
+                        )}
                     </div>
-
-                    {mail.labels && mail.labels.length > 0 && (
-                        <div className="mt-2 flex gap-1 flex-wrap">
-                            {mail.labels.map((l) => (
-                                <Badge key={l} variant="secondary" className="text-xs">{l}</Badge>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
-                <Separator />
-
-                {/* Body */}
-                <ScrollArea className="flex-1 p-4">
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {mail.body}
+                {/* Thread conversation */}
+                <ScrollArea className="flex-1">
+                    <div className="p-4 space-y-4">
+                        {messages.map((msg) => (
+                            <MessageBubble
+                                key={msg.id}
+                                message={msg}
+                                fromName={mail.from.name}
+                            />
+                        ))}
                     </div>
 
                     {mail.attachments && mail.attachments.length > 0 && (
-                        <div className="mt-6">
-                            <Separator className="mb-4" />
+                        <div className="px-4 pb-4">
+                            <Separator className="mb-3" />
                             <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                 Pièces jointes
                             </p>
@@ -216,14 +240,71 @@ export function MailDisplay({ mail, onMoveTo, onReply }: MailDisplayProps) {
                     )}
                 </ScrollArea>
 
-                {/* Quick reply */}
-                <div className="border-t p-3">
-                    <Button onClick={onReply} variant="outline" className="w-full gap-2" size="sm">
-                        <Reply className="h-4 w-4" />
-                        Répondre à {mail.from.name}
-                    </Button>
-                </div>
+                {/* Inline reply */}
+                {replyOpen ? (
+                    <div className="border-t p-3 space-y-2 shrink-0">
+                        <p className="text-xs text-muted-foreground font-medium">
+                            Répondre à {mail.from.name}
+                        </p>
+                        <Textarea
+                            placeholder="Votre réponse..."
+                            value={replyBody}
+                            onChange={(e) => setReplyBody(e.target.value)}
+                            className="min-h-[80px] text-sm resize-none"
+                            autoFocus
+                        />
+                        <div className="flex items-center gap-2 justify-end">
+                            <Button variant="ghost" size="sm" onClick={() => { setReplyOpen(false); setReplyBody('') }}>
+                                Annuler
+                            </Button>
+                            <Button size="sm" disabled={!replyBody.trim() || sending} onClick={handleQuickReply}>
+                                <Send className="h-3.5 w-3.5 mr-1.5" />
+                                {sending ? 'Envoi...' : 'Envoyer'}
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="border-t p-3 shrink-0">
+                        <Button
+                            onClick={() => setReplyOpen(true)}
+                            variant="outline"
+                            className="w-full gap-2"
+                            size="sm"
+                        >
+                            <Reply className="h-4 w-4" />
+                            Répondre à {mail.from.name}
+                        </Button>
+                    </div>
+                )}
             </div>
         </>
+    )
+}
+
+function MessageBubble({ message, fromName }: { message: MailMessage; fromName: string }) {
+    const isOutbound = message.author_type === 'USER'
+    const initials = isOutbound ? 'ERA' : fromName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+
+    return (
+        <div className={cn('flex gap-2.5', isOutbound ? 'flex-row-reverse' : 'flex-row')}>
+            <Avatar className="h-7 w-7 shrink-0 mt-0.5">
+                <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
+            </Avatar>
+            <div className={cn('max-w-[80%] space-y-1', isOutbound ? 'items-end' : 'items-start')}>
+                <div
+                    className={cn(
+                        'rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap leading-relaxed',
+                        isOutbound
+                            ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                            : 'bg-muted text-foreground rounded-tl-sm'
+                    )}
+                >
+                    {message.contenu}
+                </div>
+                <p className={cn('text-[10px] text-muted-foreground px-1', isOutbound ? 'text-right' : 'text-left')}>
+                    {format(new Date(message.createdAt), "d MMM 'à' HH:mm", { locale: fr })}
+                </p>
+            </div>
+        </div>
     )
 }

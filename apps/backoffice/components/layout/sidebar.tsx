@@ -49,7 +49,7 @@ const NAV_SECTIONS = [
   {
     label: "Communication",
     items: [
-      { href: "/mails", label: "Messagerie", icon: Mail },
+      { href: "/mails", label: "Messagerie", icon: Mail, newTab: true },
     ],
   },
   {
@@ -73,7 +73,7 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-[hsl(var(--sidebar-bg))] border-r border-border">
+    <aside className="fixed inset-y-0 left-0 z-40 w-64 hidden md:flex flex-col bg-[hsl(var(--sidebar-bg))] border-r border-border">
       {/* Brand */}
       <div className="h-14 flex items-center gap-2.5 px-4 border-b border-border shrink-0">
         <div className="w-6 h-6 rounded-sm bg-[hsl(var(--primary))] flex items-center justify-center shrink-0">
@@ -97,7 +97,7 @@ export function Sidebar() {
               </p>
             )}
             <div className="space-y-0.5">
-              {section.items.map(({ href, label, icon: Icon }) => {
+              {section.items.map(({ href, label, icon: Icon, newTab }: { href: string; label: string; icon: React.ElementType; newTab?: boolean }) => {
                 const active =
                   href === "/dashboard"
                     ? pathname === "/dashboard"
@@ -106,6 +106,7 @@ export function Sidebar() {
                   <Link
                     key={href}
                     href={href}
+                    {...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className={cn(
                       "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm transition-colors duration-100 cursor-pointer",
                       active

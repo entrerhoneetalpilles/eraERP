@@ -37,7 +37,7 @@ export async function Header() {
   const todayFormatted = today.charAt(0).toUpperCase() + today.slice(1)
 
   return (
-    <header className="fixed top-0 right-0 left-64 z-30 h-14 bg-card border-b border-border flex items-center justify-between px-6">
+    <header className="fixed top-0 right-0 left-0 md:left-64 z-30 h-14 bg-card border-b border-border flex items-center justify-between px-4 md:px-6">
       {/* Left: current date */}
       <p className="text-sm text-muted-foreground hidden sm:block">{todayFormatted}</p>
 

@@ -63,12 +63,44 @@ const columns: ColumnDef<OwnerRow>[] = [
 
 export function ProprietairesTable({ data }: { data: OwnerRow[] }) {
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      searchPlaceholder="Rechercher un propriétaire..."
-      searchColumn="nom"
-    />
+    <>
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data}
+          searchPlaceholder="Rechercher un propriétaire..."
+          searchColumn="nom"
+        />
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden space-y-3">
+        {data.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">Aucun propriétaire</p>
+        ) : (
+          data.map((row) => (
+            <Link
+              key={row.id}
+              href={`/proprietaires/${row.id}`}
+              className="block rounded-lg border border-border bg-card p-4 space-y-1.5"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-medium text-sm text-foreground">{row.nom}</p>
+                <StatusBadge status={row.type} />
+              </div>
+              <p className="text-xs text-muted-foreground">{row.email}</p>
+              {row.telephone && (
+                <p className="text-xs text-muted-foreground">{row.telephone}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {row._count.mandates} bien{row._count.mandates !== 1 ? "s" : ""}
+              </p>
+            </Link>
+          ))
+        )}
+      </div>
+    </>
   )
 }
 

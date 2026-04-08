@@ -78,12 +78,45 @@ const columns: ColumnDef<WorkOrderRow>[] = [
 
 export function TravauxTable({ data }: { data: WorkOrderRow[] }) {
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      searchPlaceholder="Rechercher un travail…"
-      searchColumn="titre"
-    />
+    <>
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data}
+          searchPlaceholder="Rechercher un travail…"
+          searchColumn="titre"
+        />
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden space-y-3">
+        {data.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">Aucun travail</p>
+        ) : (
+          data.map((row) => (
+            <Link
+              key={row.id}
+              href={`/travaux/${row.id}`}
+              className="block rounded-lg border border-border bg-card p-4 space-y-2"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-medium text-sm text-foreground">{row.titre}</p>
+                <StatusBadge status={row.statut} />
+              </div>
+              <p className="text-xs text-muted-foreground">{row.property.nom}</p>
+              <div className="flex items-center gap-2">
+                <StatusBadge status={row.urgence} />
+                <span className="text-xs text-muted-foreground">{row.type}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {row.contractor ? row.contractor.nom : "Non assigné"}
+              </p>
+            </Link>
+          ))
+        )}
+      </div>
+    </>
   )
 }
 

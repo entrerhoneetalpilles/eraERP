@@ -69,10 +69,47 @@ const columns: ColumnDef<CleaningRow>[] = [
 
 export function MenageTable({ data }: { data: CleaningRow[] }) {
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-    />
+    <>
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <DataTable columns={columns} data={data} />
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden space-y-3">
+        {data.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">Aucun ménage</p>
+        ) : (
+          data.map((row) => (
+            <Link
+              key={row.id}
+              href={`/menage/${row.id}`}
+              className="block rounded-lg border border-border bg-card p-4 space-y-2"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-medium text-sm text-foreground">{row.property.nom}</p>
+                <StatusBadge status={row.statut} />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {new Date(row.date_prevue).toLocaleDateString("fr-FR", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {row.booking.check_in
+                  ? `${new Date(row.booking.check_in).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} → ${new Date(row.booking.check_out).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`
+                  : ""}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {row.contractor ? row.contractor.nom : "Non assigné"}
+              </p>
+            </Link>
+          ))
+        )}
+      </div>
+    </>
   )
 }
 

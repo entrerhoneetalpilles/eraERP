@@ -11,7 +11,7 @@ import {
   addMessageToThread,
   getThreadById,
 } from '@/lib/dal/emails'
-import type { Mail, MailFolder, ContactType } from './mail-data'
+import type { Mail, MailFolder, ContactType, MailMessage } from './mail-data'
 
 export async function fetchThreadsAction(
   folder: MailFolder,
@@ -33,6 +33,12 @@ export async function fetchThreadsAction(
     folder: t.folder ?? 'inbox',
     contactType: t.contact_type ?? 'autre' as ContactType,
     labels: [],
+    messages: (t.messages ?? []).map((m: any): MailMessage => ({
+      id: m.id,
+      contenu: m.contenu,
+      author_type: m.author_type,
+      createdAt: m.createdAt.toISOString(),
+    })),
   }))
 }
 
