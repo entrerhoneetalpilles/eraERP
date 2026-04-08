@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef, KeyboardEvent } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
