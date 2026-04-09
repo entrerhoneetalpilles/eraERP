@@ -17,7 +17,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import {
     Reply, Forward, Archive, Trash2, MoreVertical,
-    Paperclip, Send, ChevronDown, ChevronUp,
+    Paperclip, Send, ChevronDown, ChevronUp, X,
     Mail as MailIcon, MoveRight,
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
