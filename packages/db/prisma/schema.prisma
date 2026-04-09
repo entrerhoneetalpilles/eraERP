@@ -212,6 +212,11 @@ model Guest {
   platform_guest_id String?
   langue            String   @default("fr")
   nb_sejours        Int      @default(0)
+  nb_annulations    Int      @default(0)
+  nationalite       String?
+  note_interne      Float?
+  tags              String[]
+  notes_internes    String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -594,6 +599,11 @@ model CleaningTask {
   checklist        Json[]
   photos           String[]
   notes            String?
+  note_agent       String?
+  duree_estimee    Int?
+  duree_reelle     Int?
+  montant          Float?
+  note_qualite     Float?
   schedule_id      String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
@@ -629,23 +639,27 @@ model CleaningSchedule {
 }
 
 model WorkOrder {
-  id            String          @id @default(cuid())
-  property_id   String
-  contractor_id String?
-  titre         String
-  description   String
-  type          String
-  urgence       Urgency         @default(NORMALE)
-  statut        WorkOrderStatus @default(OUVERT)
-  imputable_a   Imputation      @default(PROPRIETAIRE)
-  devis_id      String?
-  facture_id    String?
-  created_by    String
-  montant_devis Float?
-  notes_devis   String?
-  notes         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id                 String          @id @default(cuid())
+  property_id        String
+  contractor_id      String?
+  titre              String
+  description        String
+  type               String
+  urgence            Urgency         @default(NORMALE)
+  statut             WorkOrderStatus @default(OUVERT)
+  imputable_a        Imputation      @default(PROPRIETAIRE)
+  devis_id           String?
+  facture_id         String?
+  created_by         String
+  montant_devis      Float?
+  montant_facture    Float?
+  notes_devis        String?
+  notes              String?
+  date_debut_prevue  DateTime?
+  date_fin_prevue    DateTime?
+  photos             String[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   property   Property    @relation(fields: [property_id], references: [id])
   contractor Contractor? @relation(fields: [contractor_id], references: [id])
@@ -675,18 +689,24 @@ enum Imputation {
 }
 
 model Contractor {
-  id                  String    @id @default(cuid())
-  nom                 String
-  metier              String
-  email               String?
-  telephone           String?
-  siret               String?
-  assurance_rc_pro    DateTime?
-  assurance_decennale DateTime?
-  notes               String?
-  actif               Boolean   @default(true)
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  nom                   String
+  metier                String
+  email                 String?
+  telephone             String?
+  siret                 String?
+  assurance_rc_pro      DateTime?
+  assurance_decennale   DateTime?
+  note_qualite          Float?
+  nb_evaluations        Int       @default(0)
+  tarif_horaire         Float?
+  tarif_forfait_menage  Float?
+  zone_intervention     String?
+  delai_intervention_h  Int?
+  notes                 String?
+  actif                 Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   workOrders        WorkOrder[]
   cleaningTasks     CleaningTask[]
