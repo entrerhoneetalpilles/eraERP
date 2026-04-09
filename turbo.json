@@ -24,6 +24,8 @@
     "YOUSIGN_BASE_URL",
     "AIRBNB_CLIENT_ID",
     "AIRBNB_CLIENT_SECRET",
+    "CRON_SECRET",
+    "PORTAL_URL",
     "NODE_ENV"
   ],
   "tasks": {
