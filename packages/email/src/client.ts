@@ -26,6 +26,7 @@ interface SendEmailOptions {
   html: string
   replyTo?: string
   from?: string
+  attachments?: Array<{ filename: string; content: string; contentType: string }>
 }
 
 export function buildEmailPayload(options: SendEmailOptions): EmailPayload {
@@ -35,6 +36,14 @@ export function buildEmailPayload(options: SendEmailOptions): EmailPayload {
     subject: options.subject,
     html: options.html,
     ...(options.replyTo ? { replyTo: options.replyTo } : {}),
+    ...(options.attachments?.length
+      ? {
+          attachments: options.attachments.map((a) => ({
+            filename: a.filename,
+            content: Buffer.from(a.content, "base64"),
+          })),
+        }
+      : {}),
   }
 }
 

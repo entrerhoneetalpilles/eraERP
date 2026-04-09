@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import type { KeyboardEvent } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import type { KeyboardEvent, ChangeEvent } from 'react'
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import { Send, X, ChevronDown } from 'lucide-react'
+import { Send, X, ChevronDown, Paperclip } from 'lucide-react'
 import { toast } from 'sonner'
 import { sendMailAction } from './actions'
 import type { ContactType } from './mail-data'
@@ -125,7 +125,9 @@ export function ComposeDialog({
     const [subject, setSubject] = useState('')
     const [body, setBody] = useState('')
     const [contactType, setContactType] = useState<ContactType>('autre')
+    const [attachments, setAttachments] = useState<Array<{ filename: string; content: string; contentType: string; size: number }>>([])
     const [sending, setSending] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (!open) return
@@ -137,8 +139,24 @@ export function ComposeDialog({
         setShowCc(false)
         setSubject(defaultSubject)
         setBody(defaultBody)
+        setAttachments([])
         setSending(false)
     }, [open, defaultTo, defaultSubject, defaultBody])
+
+    const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files ?? [])
+        const loaded = await Promise.all(files.map((file) => new Promise<{ filename: string; content: string; contentType: string; size: number }>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => {
+                const base64 = (reader.result as string).split(',')[1]
+                resolve({ filename: file.name, content: base64, contentType: file.type || 'application/octet-stream', size: file.size })
+            }
+            reader.onerror = reject
+            reader.readAsDataURL(file)
+        })))
+        setAttachments((prev) => [...prev, ...loaded])
+        if (fileInputRef.current) fileInputRef.current.value = ''
+    }, [])
 
     const canSend = to.length > 0 && subject.trim() && body.trim()
 
@@ -154,6 +172,7 @@ export function ComposeDialog({
                     body,
                     contactType,
                     replyToThreadId,
+                    attachments: attachments.length > 0 ? attachments : undefined,
                 })
             }
             if (cc.length > 0) {
@@ -263,10 +282,32 @@ export function ComposeDialog({
                             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSend()
                         }}
                     />
+                    {/* Pièces jointes */}
+                    {attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                            {attachments.map((att, i) => (
+                                <span key={i} className="flex items-center gap-1.5 rounded-md border bg-muted/40 px-2.5 py-1 text-xs">
+                                    <Paperclip className="h-3 w-3 text-muted-foreground shrink-0" />
+                                    <span className="truncate max-w-[180px]">{att.filename}</span>
+                                    <span className="text-muted-foreground">
+                                        {att.size < 1024 * 1024 ? `${Math.round(att.size / 1024)} Ko` : `${(att.size / 1024 / 1024).toFixed(1)} Mo`}
+                                    </span>
+                                    <button type="button" onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive transition-colors">
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
                     <p className="text-[10px] text-muted-foreground text-right">⌘ + Entrée pour envoyer</p>
                 </div>
 
                 <DialogFooter className="gap-2">
+                    <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
+                    <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} type="button">
+                        <Paperclip className="mr-2 h-4 w-4" />
+                        Joindre
+                    </Button>
                     <Button variant="ghost" size="sm" onClick={onClose}>
                         <X className="mr-2 h-4 w-4" />
                         Annuler

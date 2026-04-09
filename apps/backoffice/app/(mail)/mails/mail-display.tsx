@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@conciergerie/ui'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -201,7 +201,9 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
     const [confirmDelete, setConfirmDelete] = useState(false)
     const [replyOpen, setReplyOpen] = useState(false)
     const [replyBody, setReplyBody] = useState('')
+    const [replyAttachments, setReplyAttachments] = useState<Array<{ filename: string; content: string; contentType: string; size: number }>>([])
     const [sending, setSending] = useState(false)
+    const replyFileRef = useRef<HTMLInputElement>(null)
 
     if (!mail) {
         return (
@@ -265,9 +267,11 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                 body: replyBody,
                 contactType: mail!.contactType,
                 replyToThreadId: mail!.id,
+                attachments: replyAttachments.length > 0 ? replyAttachments : undefined,
             })
             toast.success('Réponse envoyée')
             setReplyBody('')
+            setReplyAttachments([])
             setReplyOpen(false)
             onSent()
         } catch {
@@ -275,6 +279,21 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
         } finally {
             setSending(false)
         }
+    }
+
+    async function handleReplyFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const files = Array.from(e.target.files ?? [])
+        const loaded = await Promise.all(files.map((file) => new Promise<{ filename: string; content: string; contentType: string; size: number }>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => {
+                const base64 = (reader.result as string).split(',')[1]
+                resolve({ filename: file.name, content: base64, contentType: file.type || 'application/octet-stream', size: file.size })
+            }
+            reader.onerror = reject
+            reader.readAsDataURL(file)
+        })))
+        setReplyAttachments((prev) => [...prev, ...loaded])
+        if (replyFileRef.current) replyFileRef.current.value = ''
     }
 
     const messages: MailMessage[] = mail.messages?.length
@@ -444,8 +463,27 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                                 if (e.key === 'Escape') { setReplyOpen(false); setReplyBody('') }
                             }}
                         />
+                        {replyAttachments.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {replyAttachments.map((att, i) => (
+                                    <span key={i} className="flex items-center gap-1.5 rounded-md border bg-muted/40 px-2 py-1 text-xs">
+                                        <Paperclip className="h-3 w-3 text-muted-foreground shrink-0" />
+                                        <span className="truncate max-w-[160px]">{att.filename}</span>
+                                        <button type="button" onClick={() => setReplyAttachments((prev) => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive transition-colors">
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                         <div className="flex items-center justify-between">
-                            <p className="text-[10px] text-muted-foreground">⌘ + Entrée pour envoyer · Échap pour annuler</p>
+                            <div className="flex items-center gap-1">
+                                <input ref={replyFileRef} type="file" multiple className="hidden" onChange={handleReplyFileChange} />
+                                <Button type="button" variant="ghost" size="sm" className="h-7 px-2" onClick={() => replyFileRef.current?.click()}>
+                                    <Paperclip className="h-3.5 w-3.5" />
+                                </Button>
+                                <p className="text-[10px] text-muted-foreground">⌘ + Entrée pour envoyer · Échap pour annuler</p>
+                            </div>
                             <Button size="sm" disabled={!replyBody.trim() || sending} onClick={handleQuickReply}>
                                 <Send className="h-3.5 w-3.5 mr-1.5" />
                                 {sending ? 'Envoi...' : 'Envoyer'}

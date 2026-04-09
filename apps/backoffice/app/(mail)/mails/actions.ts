@@ -89,6 +89,7 @@ export async function sendMailAction(data: {
   contactType: ContactType
   ownerId?: string
   replyToThreadId?: string
+  attachments?: Array<{ filename: string; content: string; contentType: string }>
 }) {
   const session = await auth()
   if (!session?.user) throw new Error('Non autorisé')
@@ -109,6 +110,7 @@ export async function sendMailAction(data: {
       </p>
     </div>`,
     replyTo: userEmail,
+    attachments: data.attachments,
   })
 
   if (data.replyToThreadId) {
