@@ -5,7 +5,7 @@ import { DataTable } from "@/components/ui/data-table"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { getMandantAccounts } from "@/lib/dal/comptes"
 
-type AccountRow = Awaited<ReturnType<typeof getMandantAccounts>>[number]
+type AccountRow = Awaited<ReturnType<typeof getMandantAccounts>>["accounts"][number]
 
 const columns: ColumnDef<AccountRow>[] = [
   {
