@@ -74,3 +74,17 @@ export async function getDocumentCounts() {
   for (const g of all) byType[g.type] = g._count.id
   return { total, byType }
 }
+
+export async function getExpiringDocuments(withinDays: number) {
+  const now = new Date()
+  const limit = new Date(now.getTime() + withinDays * 24 * 60 * 60 * 1000)
+  return db.document.findMany({
+    where: {
+      date_expiration: { not: null, lte: limit },
+    },
+    include: {
+      owner: { select: { id: true, nom: true, email: true } },
+    },
+    orderBy: { date_expiration: "asc" },
+  })
+}

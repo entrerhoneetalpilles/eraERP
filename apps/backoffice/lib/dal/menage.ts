@@ -63,3 +63,14 @@ export async function updateCleaningStatut(
     },
   })
 }
+
+export async function assignContractor(taskId: string, contractorId: string) {
+  return db.cleaningTask.update({
+    where: { id: taskId },
+    data: { prestataire_id: contractorId },
+    include: {
+      contractor: { select: { id: true, nom: true, email: true, telephone: true } },
+      property: { select: { nom: true } },
+    },
+  })
+}
