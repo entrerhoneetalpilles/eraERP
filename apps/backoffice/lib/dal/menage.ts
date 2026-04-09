@@ -1,6 +1,6 @@
 import { db } from "@conciergerie/db"
 
-export async function getCleaningTasks() {
+export async function getCleaningTasks(limit = 100) {
   return db.cleaningTask.findMany({
     include: {
       property: { select: { id: true, nom: true } },
@@ -8,6 +8,7 @@ export async function getCleaningTasks() {
       contractor: { select: { id: true, nom: true } },
     },
     orderBy: { date_prevue: "asc" },
+    take: limit,
   })
 }
 

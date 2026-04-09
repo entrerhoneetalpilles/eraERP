@@ -1,9 +1,10 @@
 import { db } from "@conciergerie/db"
 
-export async function getBookings(filters?: { property_id?: string }) {
+export async function getBookings(filters?: { property_id?: string; limit?: number }) {
   return db.booking.findMany({
-    where: filters,
+    where: filters?.property_id ? { property_id: filters.property_id } : undefined,
     orderBy: { check_in: "desc" },
+    take: filters?.limit ?? 100,
     include: {
       property: true,
       guest: true,

@@ -1,12 +1,13 @@
 import { db } from "@conciergerie/db"
 
-export async function getWorkOrders() {
+export async function getWorkOrders(limit = 100) {
   return db.workOrder.findMany({
     include: {
       property: { select: { id: true, nom: true } },
       contractor: { select: { id: true, nom: true } },
     },
     orderBy: { createdAt: "desc" },
+    take: limit,
   })
 }
 

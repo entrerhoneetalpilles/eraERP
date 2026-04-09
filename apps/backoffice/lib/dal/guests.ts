@@ -1,8 +1,9 @@
 import { db } from "@conciergerie/db"
 
-export async function getGuests() {
+export async function getGuests(limit = 100) {
   return db.guest.findMany({
     orderBy: [{ nb_sejours: "desc" }, { createdAt: "desc" }],
+    take: limit,
     include: {
       _count: { select: { bookings: true } },
       bookings: {
