@@ -432,24 +432,49 @@ model ManagementReport {
 }
 
 model FeeInvoice {
-  id             String        @id @default(cuid())
-  owner_id       String
-  numero_facture String        @unique
-  periode_debut  DateTime
-  periode_fin    DateTime
-  montant_ht     Float
-  tva_rate       Float         @default(0.20)
-  montant_ttc    Float
-  statut         InvoiceStatus @default(BROUILLON)
-  document_id    String?
-  avoir_id       String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  owner_id           String
+  numero_facture     String        @unique
+  objet              String?
+  periode_debut      DateTime
+  periode_fin        DateTime
+  montant_ht         Float
+  tva_rate           Float         @default(0.20)
+  montant_ttc        Float
+  remise_pourcent    Float?
+  statut             InvoiceStatus @default(BROUILLON)
+  date_echeance      DateTime?
+  date_paiement      DateTime?
+  mode_paiement      String?
+  reference_paiement String?
+  notes              String?
+  notes_client       String?
+  document_id        String?
+  avoir_id           String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
-  owner       Owner       @relation(fields: [owner_id], references: [id])
+  owner       Owner             @relation(fields: [owner_id], references: [id])
   timeEntries TimeEntry[]
+  lineItems   InvoiceLineItem[]
 
   @@map("fee_invoices")
+}
+
+model InvoiceLineItem {
+  id            String @id @default(cuid())
+  invoice_id    String
+  description   String
+  quantite      Float  @default(1)
+  unite         String @default("forfait")
+  prix_unitaire Float
+  montant_ht    Float
+  tva_rate      Float  @default(0.20)
+  ordre         Int    @default(0)
+
+  invoice FeeInvoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+
+  @@map("invoice_line_items")
 }
 
 enum InvoiceStatus {
