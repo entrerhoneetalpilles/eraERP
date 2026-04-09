@@ -242,6 +242,7 @@ model Booking {
   commission_plateforme   Float         @default(0)
   revenu_net_proprietaire Float
   notes_internes          String?
+  instructions_envoyees   Boolean       @default(false)
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
@@ -456,6 +457,8 @@ model FeeInvoice {
   notes_client       String?
   document_id        String?
   avoir_id           String?
+  derniere_relance   DateTime?
+  nb_relances        Int           @default(0)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
