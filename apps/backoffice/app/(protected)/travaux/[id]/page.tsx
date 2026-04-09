@@ -5,7 +5,7 @@ import { DevisForm } from "./devis-form"
 import { PageHeader } from "@/components/ui/page-header"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { updateWorkOrderStatutAction } from "./actions"
-import { AlertTriangle, Calendar, Euro, Building2, User, Wrench, TrendingUp, TrendingDown, Image as ImageIcon } from "lucide-react"
+import { AlertTriangle, Calendar, Euro, Building2, User, Wrench, TrendingUp, TrendingDown, Image as ImageIcon, Upload } from "lucide-react"
 
 const NEXT_STATUTS: Record<string, Array<{ label: string; value: string; variant?: string }>> = {
   OUVERT: [
@@ -171,9 +171,9 @@ export default async function WorkOrderDetailPage({ params }: { params: { id: st
           </div>
 
           {/* Photos */}
-          {photos.length > 0 && (
-            <div className="bg-card rounded-lg border border-border p-5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" />Photos ({photos.length})</p>
+          <div className="bg-card rounded-lg border border-border p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" />Photos ({photos.length})</p>
+            {photos.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {photos.map((url, i) => (
                   <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-md overflow-hidden bg-muted hover:opacity-80 transition-opacity cursor-pointer">
@@ -181,8 +181,27 @@ export default async function WorkOrderDetailPage({ params }: { params: { id: st
                   </a>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+            {/* Upload photos */}
+            <form
+              action={`/api/upload/travaux/${wo.id}`}
+              method="POST"
+              encType="multipart/form-data"
+              className="mt-3"
+            >
+              <label className="flex items-center gap-2 px-3 py-2 text-sm border border-dashed border-border rounded-md cursor-pointer hover:bg-accent/50 transition-colors w-fit">
+                <Upload className="w-4 h-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Ajouter une photo</span>
+                <input
+                  type="file"
+                  name="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => e.target.form?.submit()}
+                />
+              </label>
+            </form>
+          </div>
         </div>
       </div>
 

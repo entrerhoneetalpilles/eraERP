@@ -4,7 +4,7 @@ import { getCleaningTaskById } from "@/lib/dal/menage"
 import { PageHeader } from "@/components/ui/page-header"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { updateCleaningStatutAction } from "./actions"
-import { CheckCircle2, Circle, AlertTriangle, Clock, User, Building2, Calendar, Euro, Star, MessageSquare, Image as ImageIcon, Timer } from "lucide-react"
+import { CheckCircle2, Circle, AlertTriangle, Clock, User, Building2, Calendar, Euro, Star, MessageSquare, Image as ImageIcon, Timer, Upload } from "lucide-react"
 
 const NEXT_STATUTS: Record<string, Array<{ label: string; value: "PLANIFIEE" | "EN_COURS" | "TERMINEE" | "PROBLEME" }>> = {
   PLANIFIEE: [{ label: "Démarrer le ménage", value: "EN_COURS" }, { label: "Signaler un problème", value: "PROBLEME" }],
@@ -187,9 +187,9 @@ export default async function CleaningTaskDetailPage({ params }: { params: { id:
           )}
 
           {/* Photos */}
-          {photos.length > 0 && (
-            <div className="bg-card rounded-lg border border-border p-5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" />Photos ({photos.length})</p>
+          <div className="bg-card rounded-lg border border-border p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" />Photos ({photos.length})</p>
+            {photos.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {photos.map((url, i) => (
                   <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-md overflow-hidden bg-muted hover:opacity-80 transition-opacity cursor-pointer">
@@ -197,13 +197,31 @@ export default async function CleaningTaskDetailPage({ params }: { params: { id:
                   </a>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+            {/* Upload photos */}
+            <form
+              action={`/api/upload/menage/${task.id}`}
+              method="POST"
+              encType="multipart/form-data"
+              className="mt-3"
+            >
+              <label className="flex items-center gap-2 px-3 py-2 text-sm border border-dashed border-border rounded-md cursor-pointer hover:bg-accent/50 transition-colors w-fit">
+                <Upload className="w-4 h-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Ajouter une photo</span>
+                <input
+                  type="file"
+                  name="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => e.target.form?.submit()}
+                />
+              </label>
+            </form>
+          </div>
 
-          {checklist.length === 0 && photos.length === 0 && (
+          {checklist.length === 0 && (
             <div className="bg-card rounded-lg border border-border p-8 text-center">
-              <p className="text-sm text-muted-foreground">Aucune checklist ni photo pour cette tâche.</p>
-              <p className="text-xs text-muted-foreground mt-1">Les checklists et photos peuvent être ajoutées via l&apos;application mobile.</p>
+              <p className="text-sm text-muted-foreground">Aucune checklist pour cette tâche.</p>
             </div>
           )}
         </div>
