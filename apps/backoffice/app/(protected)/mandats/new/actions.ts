@@ -17,6 +17,7 @@ export async function createMandateAction(_prev: unknown, formData: FormData) {
     taux_horaire_ht: formData.get("taux_horaire_ht") || undefined,
     seuil_validation_devis: formData.get("seuil_validation_devis") || 500,
     reconduction_tacite: formData.get("reconduction_tacite") === "true",
+    prestations_incluses: formData.getAll("prestations_incluses"),
   }
 
   const parsed = mandateSchema.safeParse(raw)

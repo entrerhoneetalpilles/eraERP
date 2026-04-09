@@ -105,19 +105,49 @@ export function NewMandateForm({ owners, properties, nextNumber, defaultOwnerId 
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="taux_honoraires" className="text-sm font-medium">Taux honoraires (%)</Label>
+              <Label htmlFor="taux_honoraires" className="text-sm font-medium">Taux honoraires gestion (%)</Label>
               <Input id="taux_honoraires" name="taux_honoraires" type="number" min="0" max="100" step="0.5" placeholder="15" className="h-10" />
               {state?.error?.taux_honoraires && <p className="text-xs text-destructive">{state.error.taux_honoraires[0]}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="honoraires_location" className="text-sm font-medium">Honoraires location (% — optionnel)</Label>
+              <Input id="honoraires_location" name="honoraires_location" type="number" min="0" max="100" step="0.5" placeholder="50" className="h-10" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="taux_horaire_ht" className="text-sm font-medium">Taux horaire HT (€/h — optionnel)</Label>
+              <Input id="taux_horaire_ht" name="taux_horaire_ht" type="number" min="0" step="0.5" placeholder="50" className="h-10" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="seuil_validation_devis" className="text-sm font-medium">Seuil validation devis (€)</Label>
               <Input id="seuil_validation_devis" name="seuil_validation_devis" type="number" min="0" defaultValue="500" className="h-10" />
             </div>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="taux_horaire_ht" className="text-sm font-medium">Taux horaire HT (€/h — optionnel)</Label>
-            <Input id="taux_horaire_ht" name="taux_horaire_ht" type="number" min="0" step="0.5" placeholder="50" className="h-10" />
+        {/* Section — Prestations incluses */}
+        <div className="px-6 py-5 border-t border-border space-y-4">
+          <h2 className="text-sm font-semibold text-foreground">Prestations incluses</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              "Ménage",
+              "Accueil voyageurs",
+              "Remise des clés",
+              "Gestion des urgences",
+              "Maintenance",
+              "Communication voyageurs",
+              "Gestion plateformes",
+              "Conciergerie 24/7",
+              "Blanchisserie",
+              "Réapprovisionnement",
+            ].map((p) => (
+              <label key={p} className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                <input type="checkbox" name="prestations_incluses" value={p} className="w-4 h-4 cursor-pointer" />
+                {p}
+              </label>
+            ))}
           </div>
         </div>
 
