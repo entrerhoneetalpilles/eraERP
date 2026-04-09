@@ -30,19 +30,26 @@ import { cn } from '@conciergerie/ui'
 // ── HTML sécurisé dans iframe sandboxée ───────────────────────────────────
 
 function EmailBody({ content }: { content: string }) {
-    const [height, setHeight] = useState(200)
-    const isHtml = /<[a-z][\s\S]*>/i.test(content)
+    const [height, setHeight] = useState(300)
 
     const handleLoad = useCallback((e: React.SyntheticEvent<HTMLIFrameElement>) => {
         const iframe = e.currentTarget
         try {
-            const body = iframe.contentDocument?.body
-            if (body) setHeight(Math.max(body.scrollHeight + 32, 80))
+            const doc = iframe.contentDocument
+            if (doc?.body) setHeight(Math.max(doc.body.scrollHeight + 32, 80))
         } catch {}
     }, [])
 
-    if (isHtml) {
-        const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    const isHtml = /<[a-z][\s\S]*>/i.test(content)
+    if (!isHtml) {
+        return <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{content}</div>
+    }
+
+    // Si c'est déjà un document HTML complet, l'utiliser tel quel
+    const isFullDocument = /^\s*(<\!DOCTYPE|<html)/i.test(content)
+    const srcDoc = isFullDocument
+        ? content
+        : `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
             * { box-sizing: border-box; }
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                    font-size: 14px; line-height: 1.6; color: #1a1a1a;
@@ -51,20 +58,18 @@ function EmailBody({ content }: { content: string }) {
             img { max-width: 100%; height: auto; }
             blockquote { border-left: 3px solid #e5e7eb; margin: 8px 0; padding-left: 12px; color: #6b7280; }
             pre, code { font-family: monospace; font-size: 13px; background: #f3f4f6; padding: 2px 4px; border-radius: 3px; }
-        </style></head><body>${content}</body></html>`
-        return (
-            <iframe
-                srcDoc={srcDoc}
-                sandbox="allow-same-origin"
-                className="w-full border-0"
-                style={{ height }}
-                onLoad={handleLoad}
-                title="Contenu du message"
-            />
-        )
-    }
+          </style></head><body>${content}</body></html>`
 
-    return <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{content}</div>
+    return (
+        <iframe
+            srcDoc={srcDoc}
+            sandbox="allow-same-origin"
+            className="w-full border-0"
+            style={{ height }}
+            onLoad={handleLoad}
+            title="Contenu du message"
+        />
+    )
 }
 
 // ── Carte message style Gmail ──────────────────────────────────────────────
@@ -401,7 +406,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                 </div>
 
                 {/* ── Thread ── */}
-                <ScrollArea className="flex-1">
+                <div className="flex-1 overflow-y-auto min-h-0">
                     <div className="px-6 pb-4 space-y-2">
                         {messages.map((msg, i) => (
                             <MessageCard
@@ -412,8 +417,7 @@ export function MailDisplay({ mail, onMoveTo, onReply, onForward, onSent }: Mail
                             />
                         ))}
                     </div>
-
-                </ScrollArea>
+                </div>
 
                 {/* ── Zone réponse rapide ── */}
                 {replyOpen ? (

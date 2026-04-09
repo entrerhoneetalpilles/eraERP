@@ -211,7 +211,7 @@ export async function POST(req: NextRequest) {
           })
           const url = await uploadFile({ key, body: buffer, contentType: att.contentType })
 
-          await createDocument({
+          const doc = await createDocument({
             nom: att.filename,
             type: 'AUTRE',
             url_storage: url,
@@ -222,6 +222,13 @@ export async function POST(req: NextRequest) {
             uploaded_by: fromEmail,
             owner_id,
           })
+          // Connecter le document à la relation Prisma Message.attachments
+          if (msgId) {
+            await db.message.update({
+              where: { id: msgId },
+              data: { attachments: { connect: { id: doc.id } } },
+            })
+          }
           console.log('[Webhook] PJ sauvegardée:', att.filename)
         } catch (e) {
           console.error('[Webhook] Erreur sauvegarde PJ:', att.filename, e)
