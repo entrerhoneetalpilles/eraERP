@@ -15,6 +15,7 @@ const nextConfig = {
     "@conciergerie/types",
     "@conciergerie/email",
     "@conciergerie/storage",
+    "react-big-calendar",
   ],
   images: {
     remotePatterns: [

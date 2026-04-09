@@ -762,6 +762,7 @@ model Document {
   mandate_id           String?
   contractor_id        String?
   booking_id           String?
+  date_expiration      DateTime?
   createdAt            DateTime        @default(now())
 
   owner      Owner?      @relation(fields: [owner_id], references: [id])
