@@ -76,6 +76,7 @@ export async function getPlanningEvents(
   for (const t of cleaningTasks) {
     const start = new Date(t.date_prevue)
     const end = new Date(start)
+    // Default 3h duration — actual duration not stored on CleaningTask
     end.setHours(end.getHours() + 3)
     events.push({
       id: t.id,
@@ -119,6 +120,7 @@ export async function getPlanningStats(from: Date, to: Date) {
     db.property.count({ where: { statut: "ACTIF" } }),
   ])
 
+  // Assumes no two bookings overlap on the same property (enforced at booking creation)
   let occupiedDays = 0
   for (const b of bookings) {
     const s = Math.max(b.check_in.getTime(), from.getTime())

@@ -81,10 +81,12 @@ export async function getExpiringDocuments(withinDays: number) {
   return db.document.findMany({
     where: {
       date_expiration: { not: null, lte: limit },
+      entity_type: { not: "message" },
     },
     include: {
       owner: { select: { id: true, nom: true, email: true } },
     },
     orderBy: { date_expiration: "asc" },
+    take: 200,
   })
 }
