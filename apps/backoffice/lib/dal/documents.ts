@@ -28,10 +28,11 @@ export async function getDocuments(filters?: {
 }) {
   return db.document.findMany({
     where: {
+      // Exclure les pièces jointes d'emails (entity_type = 'message')
+      entity_type: filters?.entity_type ?? { not: 'message' },
       ...(filters?.type ? { type: filters.type } : {}),
       ...(filters?.owner_id ? { owner_id: filters.owner_id } : {}),
       ...(filters?.mandate_id ? { mandate_id: filters.mandate_id } : {}),
-      ...(filters?.entity_type ? { entity_type: filters.entity_type } : {}),
       ...(filters?.search
         ? { nom: { contains: filters.search, mode: "insensitive" } }
         : {}),
@@ -65,6 +66,7 @@ export async function deleteDocument(id: string) {
 export async function getDocumentCounts() {
   const all = await db.document.groupBy({
     by: ["type"],
+    where: { entity_type: { not: 'message' } },
     _count: { id: true },
   })
   const total = all.reduce((acc, g) => acc + g._count.id, 0)
