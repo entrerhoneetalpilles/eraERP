@@ -19,6 +19,9 @@ const s3Client = new S3Client({
 
 const BUCKET = process.env.S3_BUCKET ?? "conciergerie-dev"
 const ENDPOINT = process.env.S3_ENDPOINT ?? "http://localhost:9000"
+// URL publique optionnelle (ex: R2 public bucket, CDN custom domain)
+// Si défini, les fichiers sont servis via cette URL sans presigning
+const PUBLIC_BASE = process.env.S3_PUBLIC_URL ?? null
 
 interface StorageKeyOptions {
   entityType: string
@@ -40,6 +43,7 @@ export function buildStorageKey({
 }
 
 export function getPublicUrl(key: string): string {
+  if (PUBLIC_BASE) return `${PUBLIC_BASE}/${key}`
   return `${ENDPOINT}/${BUCKET}/${key}`
 }
 
