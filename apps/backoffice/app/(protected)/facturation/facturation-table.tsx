@@ -18,8 +18,8 @@ type StatutFilter = "TOUS" | "BROUILLON" | "EMISE" | "PAYEE" | "AVOIR"
 const STATUT_TABS: { key: StatutFilter; label: string }[] = [
   { key: "TOUS", label: "Toutes" },
   { key: "BROUILLON", label: "Brouillons" },
-  { key: "EMISE", label: "\u00c9mises" },
-  { key: "PAYEE", label: "Pay\u00e9es" },
+  { key: "EMISE", label: "\Émises" },
+  { key: "PAYEE", label: "Pay\ées" },
   { key: "AVOIR", label: "Avoirs" },
 ]
 
@@ -30,7 +30,7 @@ function isOverdue(row: InvoiceRow) {
 const columns: ColumnDef<InvoiceRow>[] = [
   {
     accessorKey: "numero_facture",
-    header: "N\u00b0 Facture",
+    header: "N\° Facture",
     cell: ({ row }) => (
       <Link
         href={`/facturation/${row.original.id}`}
@@ -42,7 +42,7 @@ const columns: ColumnDef<InvoiceRow>[] = [
   },
   {
     id: "proprietaire",
-    header: "Propri\u00e9taire",
+    header: "Propri\étaire",
     cell: ({ row }) => (
       <Link href={`/proprietaires/${row.original.owner.id}`} className="text-sm text-muted-foreground hover:text-primary cursor-pointer">
         {row.original.owner.nom}
@@ -54,22 +54,22 @@ const columns: ColumnDef<InvoiceRow>[] = [
     header: "Objet",
     cell: ({ row }) => (
       <span className="text-sm text-muted-foreground truncate max-w-[200px] block">
-        {row.original.objet ?? "\u2014"}
+        {row.original.objet ?? "\—"}
       </span>
     ),
   },
   {
     id: "periode",
-    header: "P\u00e9riode",
+    header: "P\ériode",
     cell: ({ row }) =>
-      `${new Date(row.original.periode_debut).toLocaleDateString("fr-FR", { month: "short", year: "numeric" })} \u2192 ${new Date(row.original.periode_fin).toLocaleDateString("fr-FR", { month: "short", year: "numeric" })}`,
+      `${new Date(row.original.periode_debut).toLocaleDateString("fr-FR", { month: "short", year: "numeric" })} \→ ${new Date(row.original.periode_fin).toLocaleDateString("fr-FR", { month: "short", year: "numeric" })}`,
   },
   {
     id: "echeance",
-    header: "\u00c9ch\u00e9ance",
+    header: "\Éch\éance",
     cell: ({ row }) => {
       const overdue = isOverdue(row.original)
-      if (!row.original.date_echeance) return <span className="text-muted-foreground text-sm">\u2014</span>
+      if (!row.original.date_echeance) return <span className="text-muted-foreground text-sm">\—</span>
       return (
         <span className={cn("text-sm flex items-center gap-1", overdue ? "text-red-600 font-medium" : "text-muted-foreground")}>
           {overdue && <AlertTriangle className="w-3 h-3" />}
@@ -108,14 +108,14 @@ export function FacturationTable({ data }: { data: InvoiceRow[] }) {
   async function exportCsv() {
     const res = await exportInvoiceCsvAction()
     if (!res || res.error || !res.csv) return toast.error((res as any)?.error ?? "Erreur export")
-    const blob = new Blob(["\uFEFF" + res.csv], { type: "text/csv;charset=utf-8;" })
+    const blob = new Blob(["\﻿" + res.csv], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
     a.download = `factures-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success("Export CSV t\u00e9l\u00e9charg\u00e9")
+    toast.success("Export CSV t\él\écharg\é")
   }
 
   const overdueCount = filtered.filter(isOverdue).length
@@ -168,7 +168,7 @@ export function FacturationTable({ data }: { data: InvoiceRow[] }) {
       <DataTable
         columns={columns}
         data={filtered}
-        searchPlaceholder="Rechercher par num\u00e9ro, propri\u00e9taire\u2026"
+        searchPlaceholder="Rechercher par num\éro, propri\étaire\…"
         searchColumn="numero_facture"
       />
     </div>

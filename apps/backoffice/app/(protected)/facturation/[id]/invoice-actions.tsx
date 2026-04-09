@@ -71,7 +71,7 @@ export function InvoiceActions({ id, statut, montantTTC, numeroFacture }: Invoic
   async function exportCsv() {
     const res = await exportInvoiceCsvAction()
     if (!res || res.error || !res.csv) return toast.error((res as any)?.error ?? "Erreur export")
-    const blob = new Blob(["\uFEFF" + res.csv], { type: "text/csv;charset=utf-8;" })
+    const blob = new Blob(["\﻿" + res.csv], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url

@@ -6,7 +6,7 @@ import { ArrowLeft, Building2, Calendar, Clock, CheckCircle2, AlertTriangle, Cre
 import { InvoiceActions } from "./invoice-actions"
 
 function fmt(n: number) {
-  return n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " \u20AC"
+  return n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " \€"
 }
 function fmtDate(d: Date | string) {
   return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
@@ -16,8 +16,8 @@ function fmtShort(d: Date | string) {
 }
 
 const MODE_LABELS: Record<string, string> = {
-  VIREMENT: "Virement bancaire", CHEQUE: "Ch\u00e8que",
-  CB: "Carte bancaire", PRELEVEMENT: "Pr\u00e9l\u00e8vement", ESPECES: "Esp\u00e8ces",
+  VIREMENT: "Virement bancaire", CHEQUE: "Ch\èque",
+  CB: "Carte bancaire", PRELEVEMENT: "Pr\él\èvement", ESPECES: "Esp\èces",
 }
 
 export default async function FactureDetailPage({ params }: { params: { id: string } }) {
@@ -63,7 +63,7 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Building2 className="w-5 h-5 text-primary" />
-                <span className="font-bold text-lg text-foreground">Entre Rh\u00f4ne et Alpilles</span>
+                <span className="font-bold text-lg text-foreground">Entre Rh\ône et Alpilles</span>
               </div>
               <p className="text-sm text-muted-foreground">Conciergerie Haut de Gamme</p>
             </div>
@@ -90,24 +90,24 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />Date d&apos;\u00e9mission</span>
+              <span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />Date d&apos;\émission</span>
               <span className="font-medium">{fmtDate(invoice.createdAt)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">P\u00e9riode couverte</span>
-              <span className="font-medium">{fmtShort(invoice.periode_debut)} \u2192 {fmtShort(invoice.periode_fin)}</span>
+              <span className="text-muted-foreground">P\ériode couverte</span>
+              <span className="font-medium">{fmtShort(invoice.periode_debut)} \→ {fmtShort(invoice.periode_fin)}</span>
             </div>
             {invoice.date_echeance && (
               <div className={`flex items-center justify-between text-sm ${isOverdue ? "text-red-600 dark:text-red-400" : ""}`}>
                 <span className={`flex items-center gap-1.5 ${isOverdue ? "" : "text-muted-foreground"}`}>
-                  <Clock className="w-3.5 h-3.5" />\u00c9ch\u00e9ance
+                  <Clock className="w-3.5 h-3.5" />\Éch\éance
                 </span>
                 <span className={`font-medium ${isOverdue ? "font-semibold" : ""}`}>{fmtDate(invoice.date_echeance)}</span>
               </div>
             )}
             {invoice.date_paiement && (
               <div className="flex items-center justify-between text-sm text-emerald-600 dark:text-emerald-400">
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" />Pay\u00e9e le</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" />Pay\ée le</span>
                 <span className="font-semibold">{fmtDate(invoice.date_paiement)}</span>
               </div>
             )}
@@ -117,7 +117,7 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
         {/* Objet */}
         {invoice.objet && (
           <div className="px-8 py-3 border-b border-border bg-muted/10">
-            <p className="text-sm"><span className="font-medium text-muted-foreground">Objet\u00a0: </span><span className="text-foreground">{invoice.objet}</span></p>
+            <p className="text-sm"><span className="font-medium text-muted-foreground">Objet\ : </span><span className="text-foreground">{invoice.objet}</span></p>
           </div>
         )}
 
@@ -127,7 +127,7 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
             <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr className="border-b border-border">
-                  {["Description","Qt\u00e9","Unit\u00e9","PU HT","TVA","Total HT"].map((h, i) => (
+                  {["Description","Qt\é","Unit\é","PU HT","TVA","Total HT"].map((h, i) => (
                     <th key={h} className={`pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground ${i === 0 ? "text-left" : "text-right"} ${i === 1 ? "w-16" : ""} ${i === 2 ? "w-20" : ""} ${i > 2 ? "w-24" : ""}`}>{h}</th>
                   ))}
                 </tr>
@@ -162,7 +162,7 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
                     <td className="py-2.5 pr-4 text-muted-foreground w-24">{fmtShort(entry.date)}</td>
                     <td className="py-2.5 pr-4 text-foreground">{entry.description}</td>
                     <td className="py-2.5 text-right text-muted-foreground">{entry.nb_heures}h</td>
-                    <td className="py-2.5 text-right font-mono text-muted-foreground">{entry.taux_horaire} \u20AC/h</td>
+                    <td className="py-2.5 text-right font-mono text-muted-foreground">{entry.taux_horaire} \€/h</td>
                     <td className="py-2.5 text-right font-mono font-medium">{fmt(entry.montant_ht)}</td>
                   </tr>
                 ))}
@@ -183,7 +183,7 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
                   </div>
                   <div className="flex justify-between text-sm text-emerald-600">
                     <span>Remise ({invoice.remise_pourcent}%)</span>
-                    <span className="font-mono">\u2212 {fmt(remiseAmount)}</span>
+                    <span className="font-mono">\− {fmt(remiseAmount)}</span>
                   </div>
                 </>
               )}
@@ -209,8 +209,8 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
             <div className="flex items-start gap-2 text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
               <CreditCard className="w-4 h-4 mt-0.5 shrink-0" />
               <div>
-                <span className="font-medium">Paiement re\u00e7u</span>
-                {invoice.mode_paiement && <span> \u2014 {MODE_LABELS[invoice.mode_paiement] ?? invoice.mode_paiement}</span>}
+                <span className="font-medium">Paiement re\çu</span>
+                {invoice.mode_paiement && <span> \— {MODE_LABELS[invoice.mode_paiement] ?? invoice.mode_paiement}</span>}
                 {invoice.date_paiement && <span> le {fmtDate(invoice.date_paiement)}</span>}
                 {invoice.reference_paiement && <span className="ml-1 font-mono text-xs">({invoice.reference_paiement})</span>}
               </div>
@@ -235,11 +235,11 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
 
       {/* Footer meta */}
       <div className="flex items-center gap-4 text-xs text-muted-foreground px-1">
-        <span>Cr\u00e9\u00e9e le {fmtDate(invoice.createdAt)}</span>
-        <span>\u00b7</span>
-        <Link href={`/proprietaires/${invoice.owner.id}`} className="hover:text-primary cursor-pointer">Voir le propri\u00e9taire</Link>
-        <span>\u00b7</span>
-        <span>Modifi\u00e9e {fmtDate(invoice.updatedAt)}</span>
+        <span>Cr\é\ée le {fmtDate(invoice.createdAt)}</span>
+        <span>\·</span>
+        <Link href={`/proprietaires/${invoice.owner.id}`} className="hover:text-primary cursor-pointer">Voir le propri\étaire</Link>
+        <span>\·</span>
+        <span>Modifi\ée {fmtDate(invoice.updatedAt)}</span>
       </div>
     </div>
   )
