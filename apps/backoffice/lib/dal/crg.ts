@@ -108,3 +108,40 @@ export async function generateCrg(data: {
     return report
   })
 }
+
+export async function getManagementReportById(id: string) {
+  return db.managementReport.findUnique({
+    where: { id },
+    include: {
+      account: {
+        include: {
+          owner: {
+            select: {
+              id: true,
+              nom: true,
+              email: true,
+              type: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function getMandatesWithActiveBookings(periodeDebut: Date, periodeFin: Date) {
+  return db.mandate.findMany({
+    where: {
+      statut: "ACTIF",
+      property: {
+        bookings: {
+          some: {
+            statut: "CHECKEDOUT",
+            check_out: { gte: periodeDebut, lte: periodeFin },
+          },
+        },
+      },
+    },
+    select: { owner_id: true },
+  })
+}

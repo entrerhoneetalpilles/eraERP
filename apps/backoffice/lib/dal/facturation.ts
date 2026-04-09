@@ -158,6 +158,36 @@ export async function updateInvoiceNotes(
   return db.feeInvoice.update({ where: { id }, data: notes })
 }
 
+export async function getOverdueInvoices() {
+  const now = new Date()
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  return db.feeInvoice.findMany({
+    where: {
+      statut: "EMISE",
+      date_echeance: { lt: now },
+      nb_relances: { lt: 3 },
+      OR: [
+        { derniere_relance: null },
+        { derniere_relance: { lt: sevenDaysAgo } },
+      ],
+    },
+    include: {
+      owner: { select: { id: true, nom: true, email: true } },
+    },
+    orderBy: { date_echeance: "asc" },
+  })
+}
+
+export async function updateDerniereRelance(id: string) {
+  return db.feeInvoice.update({
+    where: { id },
+    data: {
+      derniere_relance: new Date(),
+      nb_relances: { increment: 1 },
+    },
+  })
+}
+
 export async function duplicateFeeInvoice(id: string) {
   const source = await getFeeInvoiceById(id)
   if (!source) throw new Error("Invoice not found")

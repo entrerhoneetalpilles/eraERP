@@ -53,3 +53,32 @@ export async function updateBookingStatut(
 ) {
   return db.booking.update({ where: { id }, data: { statut } })
 }
+
+export async function getBookingsForCheckin() {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setHours(0, 0, 0, 0)
+  const dayAfter = new Date(tomorrow)
+  dayAfter.setDate(dayAfter.getDate() + 1)
+
+  return db.booking.findMany({
+    where: {
+      statut: "CONFIRMED",
+      instructions_envoyees: false,
+      check_in: { gte: tomorrow, lt: dayAfter },
+    },
+    include: {
+      guest: { select: { id: true, prenom: true, nom: true, email: true } },
+      property: {
+        include: { access: true },
+      },
+    },
+  })
+}
+
+export async function markInstructionsEnvoyees(id: string) {
+  return db.booking.update({
+    where: { id },
+    data: { instructions_envoyees: true },
+  })
+}
