@@ -69,6 +69,20 @@ const columns: ColumnDef<CrgRow>[] = [
         <span className="text-xs text-muted-foreground">En attente</span>
       ),
   },
+  {
+    id: "pdf",
+    header: "",
+    cell: ({ row }) => (
+      <a
+        href={`/api/pdf/crg/${row.original.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-primary hover:underline"
+      >
+        PDF
+      </a>
+    ),
+  },
 ]
 
 export function CrgTable({ data }: { data: CrgRow[] }) {

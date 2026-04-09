@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getFeeInvoiceById } from "@/lib/dal/facturation"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { ArrowLeft, Building2, Calendar, Clock, CheckCircle2, AlertTriangle, CreditCard } from "lucide-react"
+import { ArrowLeft, Building2, Calendar, Clock, CheckCircle2, AlertTriangle, CreditCard, FileDown } from "lucide-react"
 import { InvoiceActions } from "./invoice-actions"
 
 function fmt(n: number) {
@@ -52,7 +52,18 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
             </span>
           )}
         </div>
-        <InvoiceActions id={invoice.id} statut={invoice.statut as any} montantTTC={invoice.montant_ttc} numeroFacture={invoice.numero_facture} />
+        <div className="flex items-center gap-2">
+          <a
+            href={`/api/pdf/facture/${invoice.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md border border-border bg-background hover:bg-accent transition-colors cursor-pointer"
+          >
+            <FileDown className="w-4 h-4" />
+            PDF
+          </a>
+          <InvoiceActions id={invoice.id} statut={invoice.statut as any} montantTTC={invoice.montant_ttc} numeroFacture={invoice.numero_facture} />
+        </div>
       </div>
 
       {/* Invoice paper */}
