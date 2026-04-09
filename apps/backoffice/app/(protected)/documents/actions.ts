@@ -109,9 +109,12 @@ export async function getDocumentViewUrlAction(id: string) {
     // MinIO-style URL: http://endpoint/bucket/key  → strip /bucket/ prefix
     const urlParts = new URL(doc.url_storage)
     const key = urlParts.pathname.replace(/^\/[^/]+\//, "")
+    console.log('[getDocumentViewUrl] url_storage:', doc.url_storage, '| extracted key:', key)
     const url = await getPresignedDownloadUrl(key, 900) // 15 min
+    console.log('[getDocumentViewUrl] presigned URL generated (first 100 chars):', url.slice(0, 100))
     return { url }
-  } catch {
+  } catch (e) {
+    console.error('[getDocumentViewUrl] error:', e)
     return { url: doc.url_storage }
   }
 }
@@ -146,7 +149,9 @@ export async function saveMandatePdfAction(mandateId: string) {
     fileName: filename,
   })
 
+  console.log('[saveMandatePdf] uploading key:', key, '| buffer size:', buffer.byteLength)
   const url = await uploadFile({ key, body: buffer, contentType: "application/pdf" })
+  console.log('[saveMandatePdf] uploaded, url_storage:', url)
 
   const doc = await createDocument({
     nom: `Mandat ${mandate.numero_mandat}.pdf`,
