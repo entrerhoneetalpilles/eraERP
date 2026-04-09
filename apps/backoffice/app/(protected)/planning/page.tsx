@@ -23,22 +23,7 @@ export default async function PlanningPage({
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0, 23, 59, 59)
 
-  const [bookings, properties, events, stats] = await Promise.all([
-    db.booking.findMany({
-      where: {
-        ...(propertyId ? { property_id: propertyId } : {}),
-        statut: { notIn: ["CANCELLED"] },
-        OR: [
-          { check_in: { gte: firstDay, lte: lastDay } },
-          { check_out: { gte: firstDay, lte: lastDay } },
-          { check_in: { lte: firstDay }, check_out: { gte: lastDay } },
-        ],
-      },
-      include: {
-        property: { select: { id: true, nom: true } },
-        guest: { select: { prenom: true, nom: true } },
-      },
-    }),
+  const [properties, events, stats] = await Promise.all([
     db.property.findMany({
       where: { statut: "ACTIF" },
       orderBy: { nom: "asc" },
@@ -47,6 +32,23 @@ export default async function PlanningPage({
     getPlanningEvents(firstDay, lastDay, propertyId),
     getPlanningStats(firstDay, lastDay),
   ])
+
+  // Only fetch bookings for the grid view (PlanningGrid needs the slots array)
+  const bookings = view === "calendar" ? [] : await db.booking.findMany({
+    where: {
+      ...(propertyId ? { property_id: propertyId } : {}),
+      statut: { notIn: ["CANCELLED"] },
+      OR: [
+        { check_in: { gte: firstDay, lte: lastDay } },
+        { check_out: { gte: firstDay, lte: lastDay } },
+        { check_in: { lte: firstDay }, check_out: { gte: lastDay } },
+      ],
+    },
+    include: {
+      property: { select: { id: true, nom: true } },
+      guest: { select: { prenom: true, nom: true } },
+    },
+  })
 
   const slots = bookings.map((b) => ({
     id: b.id,
