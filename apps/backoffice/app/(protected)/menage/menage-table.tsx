@@ -7,6 +7,7 @@ import { DataTable } from "@/components/ui/data-table"
 import { StatusBadge } from "@/components/ui/status-badge"
 
 type CleaningRow = Awaited<ReturnType<typeof getCleaningTasks>>[number]
+type Contractor = { id: string; nom: string }
 
 const columns: ColumnDef<CleaningRow>[] = [
   {
@@ -43,14 +44,32 @@ const columns: ColumnDef<CleaningRow>[] = [
   },
   {
     header: "Prestataire",
-    cell: ({ row }) =>
-      row.original.contractor ? (
-        <Link href={`/prestataires/${row.original.contractor.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
-          {row.original.contractor.nom}
-        </Link>
-      ) : (
-        <span className="text-muted-foreground text-xs">Non assigné</span>
-      ),
+    cell: ({ row }) => {
+      const t = row.original
+      const overrun =
+        t.duree_reelle != null &&
+        t.duree_estimee != null &&
+        t.duree_reelle > t.duree_estimee * 1.3
+      return (
+        <div className="space-y-1">
+          {t.contractor ? (
+            <Link
+              href={`/prestataires/${t.contractor.id}`}
+              className="font-medium text-foreground hover:text-primary cursor-pointer text-sm"
+            >
+              {t.contractor.nom}
+            </Link>
+          ) : (
+            <span className="text-xs text-muted-foreground">Non assigné</span>
+          )}
+          {overrun && (
+            <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 rounded font-medium block w-fit">
+              Dépassement +{Math.round(t.duree_reelle! - t.duree_estimee!)}min
+            </span>
+          )}
+        </div>
+      )
+    },
   },
   {
     accessorKey: "statut",
@@ -67,7 +86,7 @@ const columns: ColumnDef<CleaningRow>[] = [
   },
 ]
 
-export function MenageTable({ data }: { data: CleaningRow[] }) {
+export function MenageTable({ data, contractors: _contractors = [] }: { data: CleaningRow[]; contractors?: Contractor[] }) {
   return (
     <>
       {/* Desktop */}
