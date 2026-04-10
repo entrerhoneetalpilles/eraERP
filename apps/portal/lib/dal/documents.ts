@@ -1,5 +1,5 @@
 import { db } from "@conciergerie/db"
-import type { DocumentType } from "@prisma/client"
+import type { DocumentType } from "@conciergerie/db"
 
 export async function getOwnerDocuments(ownerId: string, type?: DocumentType) {
   return db.document.findMany({

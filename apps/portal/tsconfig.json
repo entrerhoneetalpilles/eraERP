@@ -16,6 +16,9 @@
       ],
       "@conciergerie/email": [
         "../../packages/email/src/index.ts"
+      ],
+      "@conciergerie/storage": [
+        "../../packages/storage/src/index.ts"
       ]
     },
     "incremental": true
