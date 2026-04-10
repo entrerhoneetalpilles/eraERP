@@ -19,7 +19,7 @@ export default async function PortalProtectedLayout({
       <SidebarNav />
       <div className="flex flex-col flex-1 min-w-0">
         <PortalHeader />
-        <main className="flex-1 px-4 py-6 pb-24 lg:px-8 lg:pb-6">
+        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 pb-safe-nav lg:pb-8 overflow-auto">
           {children}
         </main>
       </div>
