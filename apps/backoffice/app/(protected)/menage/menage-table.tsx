@@ -53,12 +53,9 @@ const columns: ColumnDef<CleaningRow>[] = [
       return (
         <div className="space-y-1">
           {t.contractor ? (
-            <Link
-              href={`/prestataires/${t.contractor.id}`}
-              className="font-medium text-foreground hover:text-primary cursor-pointer text-sm"
-            >
+            <span className="text-sm text-foreground">
               {t.contractor.nom}
-            </Link>
+            </span>
           ) : (
             <span className="text-xs text-muted-foreground">Non assigné</span>
           )}
