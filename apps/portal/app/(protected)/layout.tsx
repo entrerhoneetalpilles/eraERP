@@ -12,11 +12,14 @@ export default async function PortalProtectedLayout({
   const session = await auth()
 
   if (!session?.user) redirect("/login")
-  if (session.user.mfaRequired && !session.user.mfaVerified) redirect("/login/mfa")
+  if ((session.user as any).mfaRequired && !(session.user as any).mfaVerified) redirect("/login/mfa")
 
   return (
     <div className="flex min-h-screen bg-calcaire-100">
-      <SidebarNav />
+      <SidebarNav
+        userName={session.user.name ?? "Propriétaire"}
+        userEmail={session.user.email ?? ""}
+      />
       <div className="flex flex-col flex-1 min-w-0">
         <PortalHeader />
         <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 pb-safe-nav lg:pb-8 overflow-auto">

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
 import {
   LayoutDashboard,
   Building2,
@@ -9,6 +10,8 @@ import {
   FileText,
   MessageCircle,
   Calendar,
+  Settings,
+  LogOut,
 } from "lucide-react"
 
 const NAV_ITEMS = [
@@ -18,10 +21,22 @@ const NAV_ITEMS = [
   { href: "/documents", icon: FileText, label: "Documents" },
   { href: "/messagerie", icon: MessageCircle, label: "Messages" },
   { href: "/planning", icon: Calendar, label: "Planning" },
+  { href: "/parametres", icon: Settings, label: "Paramètres" },
 ]
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  userName: string
+  userEmail: string
+}
+
+export function SidebarNav({ userName, userEmail }: SidebarNavProps) {
   const pathname = usePathname()
+  const initials = userName
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
 
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 bg-white border-r border-argile-200/60 min-h-screen">
@@ -68,11 +83,25 @@ export function SidebarNav() {
         </ul>
       </nav>
 
-      {/* Bottom divider */}
-      <div className="px-7 pb-6 pt-4 border-t border-argile-200/40">
-        <p aria-hidden="true" className="text-xs text-garrigue-400/60 tracking-wider uppercase">
-          Espace Propriétaire
-        </p>
+      {/* User card + logout */}
+      <div className="px-4 pb-5 pt-4 border-t border-argile-200/40">
+        <div className="flex items-center gap-3 px-2 py-2 mb-2">
+          {/* Avatar initials */}
+          <div className="w-8 h-8 rounded-full bg-garrigue-100 flex items-center justify-center shrink-0">
+            <span className="text-xs font-semibold text-garrigue-700">{initials}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-garrigue-900 truncate">{userName}</p>
+            <p className="text-xs text-garrigue-400 truncate">{userEmail}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex w-full items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-garrigue-500 hover:bg-red-50 hover:text-red-600 transition-fast cursor-pointer"
+        >
+          <LogOut size={16} strokeWidth={1.6} className="shrink-0" />
+          <span className="tracking-wide">Se déconnecter</span>
+        </button>
       </div>
     </aside>
   )

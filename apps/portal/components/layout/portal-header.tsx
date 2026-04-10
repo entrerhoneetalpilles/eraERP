@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
-import { Bell } from "lucide-react"
+import { Bell, Settings } from "lucide-react"
+import Link from "next/link"
 
 export async function PortalHeader() {
   const session = await auth()
@@ -23,13 +24,22 @@ export async function PortalHeader() {
         <span className="text-garrigue-900 font-medium">{prenom}</span>
       </span>
 
-      {/* Notification bell */}
-      <button
-        aria-label="Notifications"
-        className="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-calcaire-200 transition-fast text-garrigue-500 hover:text-garrigue-900 cursor-pointer focus-visible:ring-2 focus-visible:ring-olivier-500"
-      >
-        <Bell size={18} strokeWidth={1.8} />
-      </button>
+      {/* Right: settings + bell */}
+      <div className="flex items-center gap-1">
+        <Link
+          href="/parametres"
+          aria-label="Paramètres"
+          className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-calcaire-200 transition-fast text-garrigue-500 hover:text-garrigue-900 cursor-pointer focus-visible:ring-2 focus-visible:ring-olivier-500"
+        >
+          <Settings size={18} strokeWidth={1.8} />
+        </Link>
+        <button
+          aria-label="Notifications"
+          className="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-calcaire-200 transition-fast text-garrigue-500 hover:text-garrigue-900 cursor-pointer focus-visible:ring-2 focus-visible:ring-olivier-500"
+        >
+          <Bell size={18} strokeWidth={1.8} />
+        </button>
+      </div>
     </header>
   )
 }
