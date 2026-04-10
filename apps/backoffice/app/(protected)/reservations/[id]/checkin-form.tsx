@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useFormStatus } from "react-dom"
 import { startCheckinAction } from "./actions"
 import { CheckCircle2, Circle } from "lucide-react"
 
@@ -10,6 +11,19 @@ const ITEMS = [
   "État général du logement vérifié",
   "Voyageur informé des règles maison",
 ]
+
+function SubmitCheckinButton({ allChecked }: { allChecked: boolean }) {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={!allChecked || pending}
+      className="px-4 py-1.5 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+    >
+      {pending ? "Validation…" : "Valider le check-in"}
+    </button>
+  )
+}
 
 export function CheckinForm({ bookingId }: { bookingId: string }) {
   const [checked, setChecked] = useState<boolean[]>(ITEMS.map(() => false))
@@ -36,13 +50,13 @@ export function CheckinForm({ bookingId }: { bookingId: string }) {
           <label key={i} className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              className="hidden"
+              className="sr-only"
               checked={checked[i]}
               onChange={() => setChecked(prev => prev.map((v, j) => j === i ? !v : v))}
             />
             {checked[i]
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              : <Circle className="w-4 h-4 text-muted-foreground/40 shrink-0" />}
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" aria-hidden="true" />
+              : <Circle className="w-4 h-4 text-muted-foreground/40 shrink-0" aria-hidden="true" />}
             <span className={`text-sm ${checked[i] ? "text-muted-foreground line-through" : "text-foreground"}`}>{item}</span>
           </label>
         ))}
@@ -52,15 +66,10 @@ export function CheckinForm({ bookingId }: { bookingId: string }) {
           {ITEMS.map((_, i) => (
             <input key={i} type="hidden" name={`item_${i}`} value={checked[i] ? "on" : "off"} />
           ))}
-          <button
-            type="submit"
-            disabled={!allChecked}
-            className="px-4 py-1.5 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-          >
-            Valider le check-in
-          </button>
+          <SubmitCheckinButton allChecked={allChecked} />
         </form>
         <button
+          type="button"
           onClick={() => setOpen(false)}
           className="px-3 py-1.5 text-sm rounded-md border border-border hover:bg-accent transition-colors cursor-pointer"
         >

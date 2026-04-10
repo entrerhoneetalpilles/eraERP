@@ -18,6 +18,7 @@ export function CheckoutForm({ bookingId, guestId }: { bookingId: string; guestI
   const [open, setOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [observations, setObservations] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
   const allChecked = checked.every(Boolean)
 
@@ -55,13 +56,13 @@ export function CheckoutForm({ bookingId, guestId }: { bookingId: string; guestI
           <label key={i} className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              className="hidden"
+              className="sr-only"
               checked={checked[i]}
               onChange={() => setChecked(prev => prev.map((v, j) => j === i ? !v : v))}
             />
             {checked[i]
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              : <Circle className="w-4 h-4 text-muted-foreground/40 shrink-0" />}
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" aria-hidden="true" />
+              : <Circle className="w-4 h-4 text-muted-foreground/40 shrink-0" aria-hidden="true" />}
             <span className={`text-sm ${checked[i] ? "text-muted-foreground line-through" : "text-foreground"}`}>{item}</span>
           </label>
         ))}
@@ -69,12 +70,13 @@ export function CheckoutForm({ bookingId, guestId }: { bookingId: string; guestI
 
       <div className="space-y-2 pt-2 border-t border-border">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Caution</p>
-        <div className="flex gap-2 flex-wrap">
+        <div role="group" aria-label="Caution" className="flex gap-2 flex-wrap">
           {(["liberee", "retenue_partielle", "retenue_totale"] as const).map(v => (
             <button
               key={v}
               type="button"
               onClick={() => setCaution(v)}
+              aria-pressed={caution === v}
               className={`px-2.5 py-1 text-xs rounded-md border transition-colors cursor-pointer ${caution === v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}
             >
               {v === "liberee" ? "Libérée" : v === "retenue_partielle" ? "Retenue partielle" : "Retenue totale"}
@@ -112,20 +114,22 @@ export function CheckoutForm({ bookingId, guestId }: { bookingId: string; guestI
 
       <form
         action={async (fd) => {
+          setSubmitting(true)
           fd.set("observations", observations)
           fd.set("caution", caution)
           ITEMS.forEach((_, i) => fd.set(`item_${i}`, checked[i] ? "on" : "off"))
           await completeCheckoutAction(bookingId, fd)
+          setSubmitting(false)
           setSubmitted(true)
         }}
         className="flex gap-2"
       >
         <button
           type="submit"
-          disabled={!allChecked}
+          disabled={!allChecked || submitting}
           className="px-4 py-1.5 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
-          Valider le check-out
+          {submitting ? "Validation…" : "Valider le check-out"}
         </button>
         <button
           type="button"

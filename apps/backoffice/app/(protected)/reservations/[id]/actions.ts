@@ -7,9 +7,14 @@ import { db } from "@conciergerie/db"
 import { auth } from "@/auth"
 
 export async function updateBookingStatutAction(id: string, formData: FormData) {
-  const statut = formData.get("statut") as "PENDING" | "CONFIRMED" | "CHECKEDIN" | "CHECKEDOUT" | "CANCELLED"
-  if (!statut) return
-  await updateBookingStatut(id, statut)
+  const session = await auth()
+  if (!session?.user) return
+
+  const VALID_STATUTS = ["PENDING", "CONFIRMED", "CHECKEDIN", "CHECKEDOUT", "CANCELLED"] as const
+  type ValidStatut = typeof VALID_STATUTS[number]
+  const statut = formData.get("statut") as string
+  if (!VALID_STATUTS.includes(statut as ValidStatut)) return
+  await updateBookingStatut(id, statut as ValidStatut)
   if (statut === "CHECKEDOUT") {
     try {
       await autoCreateCleaningTask(id)
@@ -34,6 +39,7 @@ export async function startCheckinAction(id: string, formData: FormData) {
   ]
 
   const booking = await db.booking.findUnique({ where: { id }, select: { notes_internes: true } })
+  if (!booking) return
   const existing = (() => {
     try { return JSON.parse(booking?.notes_internes ?? "{}") } catch { return {} }
   })()
@@ -72,6 +78,7 @@ export async function completeCheckoutAction(id: string, formData: FormData) {
   const observations = formData.get("observations") as string
 
   const booking = await db.booking.findUnique({ where: { id }, select: { notes_internes: true } })
+  if (!booking) return
   const existing = (() => {
     try { return JSON.parse(booking?.notes_internes ?? "{}") } catch { return {} }
   })()
