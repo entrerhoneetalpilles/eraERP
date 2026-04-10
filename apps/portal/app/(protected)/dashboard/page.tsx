@@ -70,33 +70,38 @@ export default async function OwnerDashboardPage() {
   }).format(now)
 
   return (
-    <div className="space-y-5 max-w-2xl">
-      <div>
-        <h1 className="font-serif text-2xl text-garrigue-900">Bonjour, {prenom}</h1>
-        <p className="text-sm text-garrigue-400 capitalize mt-0.5">{today}</p>
+    <div className="space-y-8 max-w-2xl animate-fade-up">
+      {/* Hero greeting */}
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.14em] capitalize">
+          {today}
+        </p>
+        <h1 className="font-serif text-4xl text-garrigue-900 font-light italic leading-tight">
+          Bonjour, {prenom}.
+        </h1>
       </div>
 
+      {/* KPI cards */}
       <SoldeCard
         solde={account?.solde_courant ?? 0}
         sequestre={account?.solde_sequestre ?? 0}
         dernierVirement={dernierVirement}
       />
 
+      {/* Upcoming events */}
       {upcomingBookings.length > 0 && (
         <section>
-          <h2 className="text-xs font-semibold text-garrigue-400 uppercase tracking-wider mb-2">
+          <h2 className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em] mb-3">
             Prochains événements
           </h2>
           <div className="space-y-2">
             {(() => {
               const events: { key: string; type: "checkin" | "checkout"; propertyName: string; date: Date }[] = []
               for (const b of upcomingBookings) {
-                if (b.check_in >= now && b.check_in <= in7days) {
+                if (b.check_in >= now && b.check_in <= in7days)
                   events.push({ key: `${b.id}-in`, type: "checkin", propertyName: b.property.nom, date: b.check_in })
-                }
-                if (b.check_out >= now && b.check_out <= in7days) {
+                if (b.check_out >= now && b.check_out <= in7days)
                   events.push({ key: `${b.id}-out`, type: "checkout", propertyName: b.property.nom, date: b.check_out })
-                }
               }
               events.sort((a, b) => a.date.getTime() - b.date.getTime())
               return events.map((e) => (
@@ -107,6 +112,7 @@ export default async function OwnerDashboardPage() {
         </section>
       )}
 
+      {/* Alerts */}
       <AlertBanner alerts={alerts} />
     </div>
   )

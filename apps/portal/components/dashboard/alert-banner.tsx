@@ -1,25 +1,27 @@
 import { AlertTriangle } from "lucide-react"
 
-interface Alert {
-  id: string
-  message: string
+interface AlertBannerProps {
+  alerts: { id: string; message: string }[]
 }
 
-export function AlertBanner({ alerts }: { alerts: Alert[] }) {
-  if (alerts.length === 0) return null
+export function AlertBanner({ alerts }: AlertBannerProps) {
+  if (!alerts.length) return null
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-      <div className="flex items-start gap-2">
-        <AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" />
-        <div className="space-y-1">
-          {alerts.map((a) => (
-            <p key={a.id} className="text-sm text-amber-800">
-              {a.message}
-            </p>
-          ))}
-        </div>
+    <div className="bg-or-300/10 border border-or-400/30 rounded-xl p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <AlertTriangle size={14} className="text-or-500 shrink-0" />
+        <p className="text-xs font-semibold text-or-600 uppercase tracking-wide">
+          {alerts.length} alerte{alerts.length > 1 ? "s" : ""}
+        </p>
       </div>
+      <ul className="space-y-1">
+        {alerts.map((a) => (
+          <li key={a.id} className="text-sm text-garrigue-700 font-light">
+            {a.message}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
