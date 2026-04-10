@@ -42,8 +42,8 @@ export default async function OwnerDashboardPage() {
 
   const account = owner?.mandantAccount
   const lastReport = account?.reports?.[0]
-  const dernierVirement = lastReport
-    ? { montant: lastReport.montant_reverse, date: lastReport.date_virement ?? lastReport.periode_fin }
+  const dernierVirement = lastReport?.date_virement
+    ? { montant: lastReport.montant_reverse, date: lastReport.date_virement }
     : null
 
   const alerts: { id: string; message: string }[] = []
@@ -88,17 +88,21 @@ export default async function OwnerDashboardPage() {
             Prochains événements
           </h2>
           <div className="space-y-2">
-            {upcomingBookings.map((b) => {
-              const isCheckin = b.check_in >= now && b.check_in <= in7days
-              return (
-                <EventCard
-                  key={b.id}
-                  type={isCheckin ? "checkin" : "checkout"}
-                  propertyName={b.property.nom}
-                  date={isCheckin ? b.check_in : b.check_out}
-                />
-              )
-            })}
+            {(() => {
+              const events: { key: string; type: "checkin" | "checkout"; propertyName: string; date: Date }[] = []
+              for (const b of upcomingBookings) {
+                if (b.check_in >= now && b.check_in <= in7days) {
+                  events.push({ key: `${b.id}-in`, type: "checkin", propertyName: b.property.nom, date: b.check_in })
+                }
+                if (b.check_out >= now && b.check_out <= in7days) {
+                  events.push({ key: `${b.id}-out`, type: "checkout", propertyName: b.property.nom, date: b.check_out })
+                }
+              }
+              events.sort((a, b) => a.date.getTime() - b.date.getTime())
+              return events.map((e) => (
+                <EventCard key={e.key} type={e.type} propertyName={e.propertyName} date={e.date} />
+              ))
+            })()}
           </div>
         </section>
       )}
