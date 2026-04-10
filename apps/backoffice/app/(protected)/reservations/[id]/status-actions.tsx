@@ -1,42 +1,30 @@
 "use client"
 
 import { updateBookingStatutAction } from "./actions"
+import { CheckinForm } from "./checkin-form"
+import { CheckoutForm } from "./checkout-form"
 import { Button } from "@conciergerie/ui"
 
-const TRANSITIONS: Record<string, { label: string; next: string }[]> = {
-  PENDING: [{ label: "Confirmer", next: "CONFIRMED" }],
-  CONFIRMED: [
-    { label: "Check-in", next: "CHECKEDIN" },
-    { label: "Annuler", next: "CANCELLED" },
-  ],
-  CHECKEDIN: [{ label: "Check-out", next: "CHECKEDOUT" }],
-  CHECKEDOUT: [],
-  CANCELLED: [],
-}
+interface Props { id: string; statut: string; guestId: string }
 
-interface Props { id: string; statut: string }
+export function BookingStatusActions({ id, statut, guestId }: Props) {
+  if (statut === "CONFIRMED") {
+    return <CheckinForm bookingId={id} />
+  }
 
-export function BookingStatusActions({ id, statut }: Props) {
-  const transitions = TRANSITIONS[statut] ?? []
-  if (transitions.length === 0) return null
-  return (
-    <div className="flex gap-2">
-      {transitions.map(({ label, next }) => {
-        const action = updateBookingStatutAction.bind(null, id)
-        return (
-          <form key={next} action={action}>
-            <input type="hidden" name="statut" value={next} />
-            <Button
-              type="submit"
-              size="sm"
-              variant={next === "CANCELLED" ? "outline" : "default"}
-              className="cursor-pointer"
-            >
-              {label}
-            </Button>
-          </form>
-        )
-      })}
-    </div>
-  )
+  if (statut === "CHECKEDIN") {
+    return <CheckoutForm bookingId={id} guestId={guestId} />
+  }
+
+  if (statut === "PENDING") {
+    const action = updateBookingStatutAction.bind(null, id)
+    return (
+      <form action={action}>
+        <input type="hidden" name="statut" value="CONFIRMED" />
+        <Button type="submit" size="sm" className="cursor-pointer">Confirmer</Button>
+      </form>
+    )
+  }
+
+  return null
 }

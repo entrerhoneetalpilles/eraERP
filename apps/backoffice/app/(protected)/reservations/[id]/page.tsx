@@ -15,7 +15,7 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
     <div className="space-y-6">
       <PageHeader
         title={`${booking.guest.prenom} ${booking.guest.nom} — ${booking.property.nom}`}
-        actions={<BookingStatusActions id={booking.id} statut={booking.statut} />}
+        actions={<BookingStatusActions id={booking.id} statut={booking.statut} guestId={booking.guest.id} />}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-card rounded-md border border-border p-5">
