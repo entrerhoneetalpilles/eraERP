@@ -17,6 +17,7 @@ export function BottomNav() {
 
   return (
     <nav
+      aria-label="Navigation principale"
       className="fixed bottom-4 inset-x-4 z-40 lg:hidden"
       style={{ bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
     >

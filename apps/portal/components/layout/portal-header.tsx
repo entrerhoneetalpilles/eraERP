@@ -26,7 +26,7 @@ export async function PortalHeader() {
       {/* Notification bell */}
       <button
         aria-label="Notifications"
-        className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-calcaire-200 transition-fast text-garrigue-500 hover:text-garrigue-900 cursor-pointer focus-visible:ring-2 focus-visible:ring-olivier-500"
+        className="relative w-11 h-11 flex items-center justify-center rounded-full hover:bg-calcaire-200 transition-fast text-garrigue-500 hover:text-garrigue-900 cursor-pointer focus-visible:ring-2 focus-visible:ring-olivier-500"
       >
         <Bell size={18} strokeWidth={1.8} />
       </button>

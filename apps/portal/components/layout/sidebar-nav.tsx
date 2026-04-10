@@ -38,7 +38,7 @@ export function SidebarNav() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6">
+      <nav aria-label="Navigation principale" className="flex-1 px-4 py-6">
         <ul className="space-y-0.5">
           {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
             const active = pathname === href || pathname.startsWith(href + "/")
@@ -70,7 +70,7 @@ export function SidebarNav() {
 
       {/* Bottom divider */}
       <div className="px-7 pb-6 pt-4 border-t border-argile-200/40">
-        <p className="text-xs text-garrigue-400/60 tracking-wider uppercase">
+        <p aria-hidden="true" className="text-xs text-garrigue-400/60 tracking-wider uppercase">
           Espace Propriétaire
         </p>
       </div>
