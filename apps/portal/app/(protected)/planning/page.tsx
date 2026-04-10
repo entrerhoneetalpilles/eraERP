@@ -19,8 +19,26 @@ export default async function PlanningPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="font-serif text-2xl text-garrigue-900">Planning</h1>
-      <CalendarPortal bookings={bookings} cleanings={cleanings} blockedDates={blockedDates} />
+      <div className="mb-6">
+        <h1 className="font-serif text-4xl text-garrigue-900 font-light italic">Planning.</h1>
+        <p className="text-sm text-garrigue-400 mt-1">Calendrier de vos biens</p>
+      </div>
+      <div className="bg-white rounded-2xl shadow-luxury-card border border-argile-200/40 p-4 overflow-hidden">
+        <CalendarPortal bookings={bookings} cleanings={cleanings} blockedDates={blockedDates} />
+      </div>
+      <div className="flex flex-wrap gap-3 mt-4">
+        {[
+          { color: "bg-blue-500", label: "Réservation confirmée" },
+          { color: "bg-amber-400", label: "En attente" },
+          { color: "bg-sky-300", label: "Ménage" },
+          { color: "bg-gray-400", label: "Période bloquée" },
+        ].map(({ color, label }) => (
+          <div key={label} className="flex items-center gap-2 text-xs text-garrigue-500">
+            <span className={`w-2.5 h-2.5 rounded-full ${color}`} />
+            {label}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

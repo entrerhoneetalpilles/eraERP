@@ -15,17 +15,17 @@ export default async function ThreadPage({ params }: { params: { id: string } })
 
   return (
     <div className="flex flex-col max-w-2xl h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
-      <div className="flex items-center gap-3 pb-4 border-b border-border shrink-0">
+      <div className="flex items-center gap-3 pb-4 border-b border-argile-200/60 shrink-0">
         <Link
           href="/messagerie"
-          className="text-garrigue-400 hover:text-garrigue-700 transition-colors"
+          className="text-garrigue-400 hover:text-garrigue-700 transition-smooth"
         >
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="font-serif text-lg text-garrigue-900 truncate">{thread.subject}</h1>
+        <h1 className="font-serif text-xl text-garrigue-900 font-light truncate">{thread.subject}</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-3 px-4 py-6">
         {thread.messages.map((m) => (
           <MessageBubble
             key={m.id}

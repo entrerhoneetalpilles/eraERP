@@ -14,7 +14,7 @@ export default async function MessageriePage() {
 
   return (
     <div className="space-y-4 max-w-2xl">
-      <h1 className="font-serif text-2xl text-garrigue-900">Messages</h1>
+      <h1 className="font-serif text-4xl text-garrigue-900 font-light italic mb-6">Messages.</h1>
       {threads.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-garrigue-400">
           <MessageCircle size={40} />
@@ -29,20 +29,16 @@ export default async function MessageriePage() {
               <Link
                 key={t.id}
                 href={`/messagerie/${t.id}`}
-                className="block bg-white rounded-xl px-4 py-3 shadow-soft hover:shadow-hover transition-shadow"
+                className={`block bg-white rounded-xl p-4 shadow-luxury-card border transition-smooth hover:shadow-luxury cursor-pointer ${
+                  unread > 0 ? "border-l-4 border-l-or-400" : ""
+                }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p
-                    className={`text-sm ${
-                      unread > 0
-                        ? "font-semibold text-garrigue-900"
-                        : "font-medium text-garrigue-700"
-                    }`}
-                  >
+                  <p className="font-serif text-lg text-garrigue-900 font-light truncate">
                     {t.subject}
                   </p>
                   {unread > 0 && (
-                    <span className="shrink-0 text-xs bg-olivier-600 text-white rounded-full px-2 py-0.5 font-medium">
+                    <span className="shrink-0 text-xs font-bold text-white bg-or-500 rounded-full w-5 h-5 flex items-center justify-center">
                       {unread}
                     </span>
                   )}

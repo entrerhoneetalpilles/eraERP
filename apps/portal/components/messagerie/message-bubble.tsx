@@ -17,35 +17,32 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ contenu, authorType, createdAt, attachments }: MessageBubbleProps) {
   const isOwner = authorType === "OWNER"
+  const time = format(createdAt, "HH:mm", { locale: fr })
 
   return (
-    <div className={`flex ${isOwner ? "justify-end" : "justify-start"}`}>
+    <div className={`flex flex-col gap-1 max-w-[80%] ${isOwner ? "items-end self-end" : "items-start self-start"}`}>
       <div
-        className={`max-w-[80%] space-y-1 flex flex-col ${isOwner ? "items-end" : "items-start"}`}
+        className={`px-4 py-3 text-sm leading-relaxed ${
+          isOwner
+            ? "bg-garrigue-900 text-white rounded-2xl rounded-tr-sm"
+            : "bg-calcaire-200 text-garrigue-900 rounded-2xl rounded-tl-sm"
+        }`}
       >
-        <div
-          className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-            isOwner
-              ? "bg-olivier-50 text-garrigue-900 rounded-br-sm"
-              : "bg-garrigue-50 text-garrigue-900 rounded-bl-sm"
-          }`}
-        >
-          {contenu}
-        </div>
-        {attachments.length > 0 && (
-          <div className="space-y-1">
-            {attachments.map((a) => (
-              <div key={a.id} className="flex items-center gap-1.5 text-xs text-garrigue-400">
-                <FileText size={12} />
-                <span className="truncate max-w-[200px]">{a.nom}</span>
-              </div>
-            ))}
-          </div>
-        )}
-        <p className={`text-xs text-garrigue-300 ${isOwner ? "text-right" : ""}`}>
-          {format(createdAt, "d MMM à HH:mm", { locale: fr })}
-        </p>
+        {contenu}
       </div>
+      {attachments.length > 0 && (
+        <div className="space-y-1">
+          {attachments.map((a) => (
+            <div key={a.id} className="flex items-center gap-1.5 text-xs text-garrigue-400">
+              <FileText size={12} />
+              <span className="truncate max-w-[200px]">{a.nom}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <p className={`text-[10px] text-garrigue-400 px-1 ${isOwner ? "text-right" : "text-left"}`}>
+        {time}
+      </p>
     </div>
   )
 }
