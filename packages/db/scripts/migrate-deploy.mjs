@@ -44,8 +44,17 @@ if (!stderr.includes('P3005')) {
 }
 
 // P3005: database not empty but no migration history → baseline
+//
+// Strategy: db push first (applies ALL schema changes that are missing,
+// including columns added in migrations that were never run), then mark
+// every migration as "already applied" so migrate deploy becomes a no-op.
+// Future deploys will use migrate deploy normally.
 console.log('\nP3005 detected: database exists without migration history.')
-console.log('Baselining — marking all existing migrations as applied...\n')
+console.log('Step 1: syncing schema to database via db push...\n')
+
+run(['db', 'push', '--skip-generate', '--accept-data-loss', `--schema=${schemaPath}`])
+
+console.log('\nStep 2: marking all migrations as applied (baseline)...\n')
 
 const migrations = readdirSync(migrationsDir)
   .filter(f => !f.endsWith('.toml'))
@@ -59,7 +68,6 @@ for (const migration of migrations) {
     { stdio: 'pipe', encoding: 'utf8' }
   )
   if (r.status !== 0) {
-    // "Already recorded" is fine — skip silently
     const out = (r.stdout || '') + (r.stderr || '')
     if (!out.includes('already been applied') && !out.includes('already recorded')) {
       process.stderr.write(out)
@@ -67,5 +75,5 @@ for (const migration of migrations) {
   }
 }
 
-console.log('\nBaseline complete. Running migrate deploy for any new migrations...\n')
+console.log('\nBaseline complete. Running migrate deploy (no-op on first run)...\n')
 run(['migrate', 'deploy', `--schema=${schemaPath}`])
