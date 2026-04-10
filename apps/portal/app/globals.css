@@ -4,26 +4,34 @@
 
 @layer base {
   :root {
-    --background: 30 30% 96%;
-    --foreground: 20 18% 30%;
+    /* shadcn semantic tokens */
+    --background: 35 28% 96%;
+    --foreground: 25 35% 14%;
     --card: 0 0% 100%;
-    --card-foreground: 20 18% 30%;
+    --card-foreground: 25 35% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 18% 30%;
-    --primary: 95 11% 60%;
+    --popover-foreground: 25 35% 14%;
+    --primary: 85 12% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 20 30% 88%;
-    --secondary-foreground: 20 18% 30%;
-    --muted: 30 20% 93%;
-    --muted-foreground: 20 10% 55%;
-    --accent: 270 18% 68%;
+    --secondary: 32 25% 88%;
+    --secondary-foreground: 25 35% 14%;
+    --muted: 35 20% 93%;
+    --muted-foreground: 25 15% 52%;
+    --accent: 43 55% 55%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 58%;
     --destructive-foreground: 0 0% 98%;
-    --border: 20 15% 88%;
-    --input: 20 15% 88%;
-    --ring: 95 11% 60%;
-    --radius: 10px;
+    --border: 32 18% 87%;
+    --input: 32 18% 87%;
+    --ring: 85 12% 48%;
+    --radius: 12px;
+
+    /* Premium custom variables */
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --gradient-gold: linear-gradient(135deg, #C9A84C 0%, #DFC078 50%, #C9A84C 100%);
+    --gradient-dark: linear-gradient(145deg, #2C1A0E 0%, #3d2e24 100%);
+    --gradient-hero: linear-gradient(160deg, #F4EFEA 0%, #EDE7E2 100%);
   }
 }
 
@@ -31,7 +39,77 @@
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-calcaire-100 text-foreground;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  }
+
+  /* Premium custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-calcaire-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-garrigue-100 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-garrigue-400;
+  }
+
+  /* Focus ring — premium style */
+  :focus-visible {
+    outline: 2px solid theme('colors.olivier.500');
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Headings use Cormorant */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-cormorant), Georgia, serif;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+}
+
+@layer utilities {
+  /* Text gradient utility */
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Smooth transition shorthand */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+
+  /* Safe area for floating bottom nav */
+  .pb-safe-nav {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
