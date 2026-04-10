@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { db } from "@conciergerie/db"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
+import { authConfig } from "./auth.config"
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -11,8 +12,8 @@ const credentialsSchema = z.object({
 })
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(db),
-  session: { strategy: "jwt", maxAge: 60 * 60 }, // 60 min
   providers: [
     Credentials({
       id: "owner-credentials",
@@ -54,30 +55,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id!
-        token.ownerId = (user as any).ownerId
-        token.mfaRequired = (user as any).mfaRequired
-        token.mfaVerified = (user as any).mfaVerified ?? false
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (session.user && token) {
-        session.user.id = token.id as string
-        session.user.ownerId = token.ownerId as string
-        session.user.mfaRequired = token.mfaRequired as boolean
-        session.user.mfaVerified = token.mfaVerified as boolean
-      }
-      return session
-    },
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
 })
 
 declare module "next-auth" {
