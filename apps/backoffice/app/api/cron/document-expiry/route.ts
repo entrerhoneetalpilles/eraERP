@@ -1,11 +1,17 @@
+import { timingSafeEqual } from "crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { getExpiringDocuments } from "@/lib/dal/documents"
 import { sendNouveauMessageEmail } from "@conciergerie/email"
 import { db } from "@conciergerie/db"
 
+function safeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b))
+}
+
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("Authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || !authHeader || !safeCompare(authHeader, `Bearer ${process.env.CRON_SECRET}`)) {
     return new NextResponse("Non autorisé", { status: 401 })
   }
 
@@ -38,7 +44,7 @@ export async function GET(req: NextRequest) {
 
       await sendNouveauMessageEmail({
         to: email,
-        recipientName: nom,
+        recipientName: nom ?? email,
         senderName: "Entre Rhône et Alpilles",
         preview: `${ownerDocs.length} document${ownerDocs.length > 1 ? "s" : ""} arrivent à expiration : ${docList}`.slice(0, 200),
         mailboxUrl: process.env.PORTAL_URL ?? "https://portail.entre-rhone-alpilles.fr",
@@ -51,13 +57,17 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  await db.auditLog.create({
-    data: {
-      action: "CRON_DOCUMENT_EXPIRY",
-      entity_type: "Document",
-      entity_id: "cron",
-    },
-  })
+  try {
+    await db.auditLog.create({
+      data: {
+        action: "CRON_DOCUMENT_EXPIRY",
+        entity_type: "Document",
+        entity_id: "cron",
+      },
+    })
+  } catch (err) {
+    console.error("[document-expiry] Audit log failed:", err)
+  }
 
   return NextResponse.json({ docs: docs.length, owners: byOwner.size, sent, errors })
 }
