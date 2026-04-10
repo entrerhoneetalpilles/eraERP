@@ -48,7 +48,7 @@ export default async function BienDetailPage({ params }: { params: { id: string 
         <Link href="/biens" className="text-garrigue-400 hover:text-garrigue-700 transition-colors">
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="font-serif text-2xl text-garrigue-900">{property.nom}</h1>
+        <h1 className="font-serif text-3xl text-garrigue-900 font-light italic">{property.nom}</h1>
       </div>
 
       <div className="bg-white rounded-xl p-5 shadow-soft">
@@ -65,14 +65,14 @@ export default async function BienDetailPage({ params }: { params: { id: string 
           </div>
         </div>
         <div className="mt-4 pt-4 border-t border-border">
-          <p className="text-xs text-garrigue-400 mb-1">Revenus du mois</p>
+          <p className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em] mb-1">Revenus du mois</p>
           <p className="font-serif text-xl text-garrigue-900">{fmt(property.revenusThisMonth)}</p>
         </div>
       </div>
 
       {recentBookings.length > 0 && (
         <section>
-          <h2 className="text-xs font-semibold text-garrigue-400 uppercase tracking-wider mb-3">
+          <h2 className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em] mb-3">
             Réservations récentes
           </h2>
           <div className="space-y-2">

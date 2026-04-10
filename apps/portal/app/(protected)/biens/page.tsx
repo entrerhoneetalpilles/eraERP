@@ -12,7 +12,14 @@ export default async function BienListPage() {
 
   return (
     <div className="space-y-4 max-w-2xl">
-      <h1 className="font-serif text-2xl text-garrigue-900">Mes biens</h1>
+      <div className="mb-8">
+        <h1 className="font-serif text-4xl text-garrigue-900 font-light italic">
+          Mes biens.
+        </h1>
+        <p className="text-sm text-garrigue-400 mt-1">
+          {properties.length} bien{properties.length > 1 ? "s" : ""} en gestion
+        </p>
+      </div>
       {properties.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-garrigue-400">
           <Building2 size={40} />
