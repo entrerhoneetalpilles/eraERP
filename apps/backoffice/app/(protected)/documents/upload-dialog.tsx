@@ -43,6 +43,7 @@ interface Props {
 export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
   const [files, setFiles] = useState<File[]>([])
   const [type, setType] = useState<string>("AUTRE")
+  const [dateExpiration, setDateExpiration] = useState<string>("")
   const [uploading, setUploading] = useState(false)
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -85,6 +86,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
       fd.set("type", type)
       fd.set("entity_type", "document")
       fd.set("entity_id", "misc")
+      if (dateExpiration) fd.set("date_expiration", dateExpiration)
 
       const result = await uploadDocumentAction(fd)
       if (result.error) errors++
@@ -98,6 +100,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
     }
 
     setFiles([])
+    setDateExpiration("")
     onUploaded()
     onOpenChange(false)
   }
@@ -122,6 +125,20 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}
             </select>
+          </div>
+
+          {/* Date d'expiration */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">
+              Date d&apos;expiration <span className="font-normal">(optionnel — DPE, assurance…)</span>
+            </label>
+            <input
+              type="date"
+              name="date_expiration"
+              value={dateExpiration}
+              onChange={(e) => setDateExpiration(e.target.value)}
+              className="w-full text-sm border border-border rounded-md px-2.5 py-1.5 bg-background"
+            />
           </div>
 
           {/* Drop zone */}
@@ -171,7 +188,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => { onOpenChange(false); setFiles([]) }}>
+          <Button variant="outline" onClick={() => { onOpenChange(false); setFiles([]); setDateExpiration("") }}>
             Annuler
           </Button>
           <Button

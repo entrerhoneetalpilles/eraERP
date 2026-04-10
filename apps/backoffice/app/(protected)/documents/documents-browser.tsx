@@ -84,6 +84,20 @@ function TypeBadge({ type }: { type: string }) {
   )
 }
 
+function getExpiryBadge(dateExpiration: Date | string | null | undefined) {
+  if (!dateExpiration) return null
+  const now = new Date()
+  const exp = new Date(dateExpiration)
+  const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays < 0) {
+    return <span className="text-xs px-1.5 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded font-medium">Expiré</span>
+  }
+  if (diffDays <= 30) {
+    return <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 rounded font-medium">Expire dans {diffDays}j</span>
+  }
+  return null
+}
+
 // ─── Preview panel ─────────────────────────────────────────────────────────────
 
 function DocumentPreview({ doc, onClose, onDeleted }: {
@@ -261,7 +275,10 @@ function DocCard({ doc, selected, onClick }: { doc: Doc; selected: boolean; onCl
         <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
           <FileIcon mime={doc.mime_type} className="w-5 h-5" />
         </div>
-        <TypeBadge type={doc.type} />
+        <div className="flex items-center gap-1">
+          {getExpiryBadge(doc.date_expiration)}
+          <TypeBadge type={doc.type} />
+        </div>
       </div>
       <p className="text-sm font-medium truncate w-full leading-tight mb-0.5">{doc.nom}</p>
       <p className="text-xs text-muted-foreground">{formatDate(doc.createdAt)}</p>
@@ -295,6 +312,7 @@ function DocRow({ doc, selected, onClick }: { doc: Doc; selected: boolean; onCli
           {[doc.owner?.nom, formatDate(doc.createdAt)].filter(Boolean).join(" · ")}
         </p>
       </div>
+      {getExpiryBadge(doc.date_expiration)}
       <TypeBadge type={doc.type} />
       <span className="text-xs text-muted-foreground shrink-0 tabular-nums">{formatBytes(doc.taille)}</span>
     </button>

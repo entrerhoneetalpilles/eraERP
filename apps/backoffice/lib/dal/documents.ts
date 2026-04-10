@@ -17,6 +17,7 @@ export interface CreateDocumentInput {
   mandate_id?: string
   contractor_id?: string
   booking_id?: string
+  date_expiration?: Date
 }
 
 export async function getDocuments(filters?: {

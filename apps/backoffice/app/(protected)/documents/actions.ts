@@ -29,6 +29,8 @@ export async function uploadDocumentAction(formData: FormData) {
   const entity_id = (formData.get("entity_id") as string) || "misc"
   const owner_id = (formData.get("owner_id") as string) || undefined
   const mandate_id = (formData.get("mandate_id") as string) || undefined
+  const date_expiration_raw = formData.get("date_expiration") as string | null
+  const date_expiration = date_expiration_raw ? new Date(date_expiration_raw) : undefined
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_")
   const key = buildStorageKey({
@@ -52,6 +54,7 @@ export async function uploadDocumentAction(formData: FormData) {
     uploaded_by: session.user.email ?? "system",
     owner_id: owner_id || undefined,
     mandate_id: mandate_id || undefined,
+    date_expiration,
   })
 
   revalidatePath("/documents")
