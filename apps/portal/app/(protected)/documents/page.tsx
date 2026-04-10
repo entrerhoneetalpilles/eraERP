@@ -85,6 +85,7 @@ export default async function DocumentsPage({
               type={d.type}
               createdAt={d.createdAt}
               date_expiration={d.date_expiration}
+              mime_type={d.mime_type ?? null}
             />
           ))}
         </div>
