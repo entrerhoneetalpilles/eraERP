@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import Link from "next/link"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { getCleaningTasks } from "@/lib/dal/menage"
@@ -10,8 +11,8 @@ import { AssignButton } from "./assign-form"
 type CleaningRow = Awaited<ReturnType<typeof getCleaningTasks>>[number]
 type Contractor = { id: string; nom: string }
 
-export function MenageTable({ data, contractors = [] }: { data: CleaningRow[]; contractors?: Contractor[] }) {
-  const columns: ColumnDef<CleaningRow>[] = [
+function buildColumns(contractors: Contractor[]): ColumnDef<CleaningRow>[] {
+  return [
     {
       accessorKey: "date_prevue",
       header: "Date prévue",
@@ -85,6 +86,10 @@ export function MenageTable({ data, contractors = [] }: { data: CleaningRow[]; c
       ),
     },
   ]
+}
+
+export function MenageTable({ data, contractors = [] }: { data: CleaningRow[]; contractors?: Contractor[] }) {
+  const columns = useMemo(() => buildColumns(contractors), [contractors])
 
   return (
     <>
@@ -116,9 +121,9 @@ export function MenageTable({ data, contractors = [] }: { data: CleaningRow[]; c
                 })}
               </p>
               <p className="text-xs text-muted-foreground">
-                {row.booking.check_in
+                {row.booking
                   ? `${new Date(row.booking.check_in).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} → ${new Date(row.booking.check_out).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`
-                  : ""}
+                  : "—"}
               </p>
               <p className="text-xs text-muted-foreground">
                 {row.contractor ? row.contractor.nom : "Non assigné"}

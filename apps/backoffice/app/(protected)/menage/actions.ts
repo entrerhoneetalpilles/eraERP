@@ -10,7 +10,12 @@ export async function assignCleaningTaskAction(taskId: string, contractorId: str
   const session = await auth()
   if (!session?.user) return { error: "Non autorisé" }
 
-  const task = await assignContractor(taskId, contractorId)
+  let task: Awaited<ReturnType<typeof assignContractor>>
+  try {
+    task = await assignContractor(taskId, contractorId)
+  } catch {
+    return { error: "Tâche ou prestataire introuvable" }
+  }
 
   if (task.contractor?.email) {
     try {
@@ -36,6 +41,7 @@ export async function assignCleaningTaskAction(taskId: string, contractorId: str
       action: "MENAGE_ASSIGNED",
       entity_type: "CleaningTask",
       entity_id: taskId,
+      user_id: session.user.id,
     },
   })
 
