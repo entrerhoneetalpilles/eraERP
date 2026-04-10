@@ -28,6 +28,17 @@ export async function GET(req: NextRequest) {
     byOwner.get(key)!.docs.push(doc)
   }
 
+  // Group by contractor email
+  const byContractor = new Map<string, { email: string; nom: string; docs: Array<(typeof docs)[number]> }>()
+  for (const doc of docs) {
+    if (!doc.contractor?.email) continue
+    const key = doc.contractor.email
+    if (!byContractor.has(key)) {
+      byContractor.set(key, { email: doc.contractor.email, nom: doc.contractor.nom, docs: [] })
+    }
+    byContractor.get(key)!.docs.push(doc)
+  }
+
   let sent = 0
   let errors = 0
 
@@ -57,6 +68,32 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  for (const { email, nom, docs: contractorDocs } of byContractor.values()) {
+    try {
+      const docList = contractorDocs
+        .map(d => {
+          const exp = d.date_expiration
+            ? new Date(d.date_expiration).toLocaleDateString("fr-FR")
+            : "?"
+          return `${d.nom} (${d.type}) — expire le ${exp}`
+        })
+        .join(", ")
+
+      await sendNouveauMessageEmail({
+        to: email,
+        recipientName: nom ?? email,
+        senderName: "Entre Rhône et Alpilles",
+        preview: `${contractorDocs.length} document${contractorDocs.length > 1 ? "s" : ""} arrivent à expiration : ${docList}`.slice(0, 200),
+        mailboxUrl: process.env.PORTAL_URL ?? "https://portail.entre-rhone-alpilles.fr",
+      })
+
+      sent++
+    } catch (err) {
+      errors++
+      console.error(`[document-expiry] Erreur email ${email}:`, err)
+    }
+  }
+
   try {
     await db.auditLog.create({
       data: {
@@ -69,5 +106,5 @@ export async function GET(req: NextRequest) {
     console.error("[document-expiry] Audit log failed:", err)
   }
 
-  return NextResponse.json({ docs: docs.length, owners: byOwner.size, sent, errors })
+  return NextResponse.json({ docs: docs.length, owners: byOwner.size, contractors: byContractor.size, sent, errors })
 }

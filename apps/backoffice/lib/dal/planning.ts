@@ -7,7 +7,7 @@ export interface PlanningEvent {
   end: Date
   color: string
   url: string
-  type: "booking" | "cleaning"
+  type: "booking" | "cleaning" | "blocked"
 }
 
 const BOOKING_COLORS: Record<string, string> = {
@@ -32,7 +32,7 @@ export async function getPlanningEvents(
 ): Promise<PlanningEvent[]> {
   const propertyFilter = property_id ? { property_id } : {}
 
-  const [bookings, cleaningTasks] = await Promise.all([
+  const [bookings, cleaningTasks, blockedDates] = await Promise.all([
     db.booking.findMany({
       where: {
         ...propertyFilter,
@@ -52,6 +52,19 @@ export async function getPlanningEvents(
       where: {
         ...propertyFilter,
         date_prevue: { gte: from, lte: to },
+      },
+      include: {
+        property: { select: { nom: true } },
+      },
+    }),
+    db.blockedDate.findMany({
+      where: {
+        ...(property_id ? { property_id } : {}),
+        OR: [
+          { date_debut: { gte: from, lte: to } },
+          { date_fin: { gte: from, lte: to } },
+          { date_debut: { lte: from }, date_fin: { gte: to } },
+        ],
       },
       include: {
         property: { select: { nom: true } },
@@ -86,6 +99,18 @@ export async function getPlanningEvents(
       color: CLEANING_COLORS[t.statut] ?? "#7dd3fc",
       url: `/menage/${t.id}`,
       type: "cleaning",
+    })
+  }
+
+  for (const bl of blockedDates) {
+    events.push({
+      id: bl.id,
+      title: bl.notes ?? `Indisponible — ${bl.property.nom}`,
+      start: new Date(bl.date_debut),
+      end: new Date(bl.date_fin),
+      color: "#6b7280",
+      url: "",
+      type: "blocked",
     })
   }
 

@@ -48,30 +48,32 @@ interface Task {
   id: string
   date_prevue: Date | string
   statut: string
+  prestataire_id?: string | null
   property: { nom: string }
 }
 
-export function MenageCalendar({ tasks }: { tasks: Task[] }) {
+export function MenageCalendar({ tasks, contractorFilter }: { tasks: Task[]; contractorFilter?: string }) {
   const router = useRouter()
 
-  const events = useMemo<CalEvent[]>(
-    () =>
-      tasks.map((t) => {
-        const start = new Date(t.date_prevue as string)
-        const end = new Date(start)
-        // Default 3h duration — actual duration not stored on CleaningTask
-        end.setHours(end.getHours() + 3)
-        return {
-          id: t.id,
-          title: `Ménage — ${t.property.nom}`,
-          start,
-          end,
-          color: STATUS_COLORS[t.statut] ?? "#7dd3fc",
-          url: `/menage/${t.id}`,
-        }
-      }),
-    [tasks]
-  )
+  const events = useMemo<CalEvent[]>(() => {
+    const filtered = contractorFilter
+      ? tasks.filter(t => t.prestataire_id === contractorFilter)
+      : tasks
+    return filtered.map((t) => {
+      const start = new Date(t.date_prevue as string)
+      const end = new Date(start)
+      // Default 3h duration — actual duration not stored on CleaningTask
+      end.setHours(end.getHours() + 3)
+      return {
+        id: t.id,
+        title: `Ménage — ${t.property.nom}`,
+        start,
+        end,
+        color: STATUS_COLORS[t.statut] ?? "#7dd3fc",
+        url: `/menage/${t.id}`,
+      }
+    })
+  }, [tasks, contractorFilter])
 
   return (
     <div className="h-[600px] bg-card rounded-lg border border-border p-4">

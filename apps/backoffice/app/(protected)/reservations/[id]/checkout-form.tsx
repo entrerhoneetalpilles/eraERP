@@ -38,7 +38,7 @@ export function CheckoutForm({ bookingId, guestId }: { bookingId: string; guestI
       <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 space-y-2">
         <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Check-out validé</p>
         <Link
-          href={`/voyageurs/${guestId}/edit`}
+          href={`/voyageurs/${guestId}/edit${observations ? `?observations=${encodeURIComponent(observations)}` : ""}`}
           className="text-xs text-primary hover:underline"
         >
           Mettre à jour la fiche voyageur →

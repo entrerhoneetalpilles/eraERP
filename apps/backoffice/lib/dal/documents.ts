@@ -86,6 +86,7 @@ export async function getExpiringDocuments(withinDays: number) {
     },
     include: {
       owner: { select: { id: true, nom: true, email: true } },
+      contractor: { select: { id: true, nom: true, email: true } },
     },
     orderBy: { date_expiration: "asc" },
     take: 200,

@@ -10,6 +10,7 @@ type Contractor = { id: string; nom: string }
 
 export function MenageTabs({ tasks, contractors }: { tasks: Task[]; contractors: Contractor[] }) {
   const [view, setView] = useState<"list" | "calendar">("list")
+  const [contractorFilter, setContractorFilter] = useState<string>("")
 
   return (
     <div className="space-y-4">
@@ -17,7 +18,7 @@ export function MenageTabs({ tasks, contractors }: { tasks: Task[]; contractors:
         {(["list", "calendar"] as const).map((v) => (
           <button
             key={v}
-            onClick={() => setView(v)}
+            onClick={() => { setView(v); if (v === "list") setContractorFilter("") }}
             aria-pressed={view === v}
             className={`px-4 py-1.5 text-sm rounded-sm transition-colors cursor-pointer ${
               view === v
@@ -30,10 +31,24 @@ export function MenageTabs({ tasks, contractors }: { tasks: Task[]; contractors:
         ))}
       </div>
 
+      {view === "calendar" && contractors.length > 0 && (
+        <select
+          value={contractorFilter}
+          onChange={e => setContractorFilter(e.target.value)}
+          className="text-sm border border-border rounded-md px-2.5 py-1.5 bg-background"
+          aria-label="Filtrer par prestataire"
+        >
+          <option value="">Tous les prestataires</option>
+          {contractors.map(c => (
+            <option key={c.id} value={c.id}>{c.nom}</option>
+          ))}
+        </select>
+      )}
+
       {view === "list" ? (
         <MenageTable data={tasks} contractors={contractors} />
       ) : (
-        <MenageCalendar tasks={tasks} />
+        <MenageCalendar tasks={tasks} contractorFilter={contractorFilter || undefined} />
       )}
     </div>
   )
