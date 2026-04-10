@@ -55,7 +55,10 @@ export function PlanningCalendar({ events }: { events: PlanningEvent[] }) {
             padding: "2px 4px",
           },
         })}
-        onSelectEvent={(event) => router.push((event as unknown as PlanningEvent).url)}
+        onSelectEvent={(event) => {
+          const url = (event as unknown as PlanningEvent).url
+          if (url) router.push(url)
+        }}
       />
     </div>
   )

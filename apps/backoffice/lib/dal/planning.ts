@@ -105,7 +105,7 @@ export async function getPlanningEvents(
   for (const bl of blockedDates) {
     events.push({
       id: bl.id,
-      title: bl.notes ?? `Indisponible — ${bl.property.nom}`,
+      title: bl.notes || `Indisponible — ${bl.property.nom}`,
       start: new Date(bl.date_debut),
       end: new Date(bl.date_fin),
       color: "#6b7280",

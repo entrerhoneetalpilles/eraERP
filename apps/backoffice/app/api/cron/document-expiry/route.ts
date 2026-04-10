@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
   const byContractor = new Map<string, { email: string; nom: string; docs: Array<(typeof docs)[number]> }>()
   for (const doc of docs) {
     if (!doc.contractor?.email) continue
+    if (doc.owner?.email) continue  // already notified via owner loop
     const key = doc.contractor.email
     if (!byContractor.has(key)) {
       byContractor.set(key, { email: doc.contractor.email, nom: doc.contractor.nom, docs: [] })
