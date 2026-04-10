@@ -48,63 +48,62 @@ export async function getOwnerProperties(ownerId: string) {
 }
 
 export async function getOwnerPropertyById(ownerId: string, propertyId: string) {
-  const mandate = await db.mandate.findFirst({
-    where: { owner_id: ownerId, property_id: propertyId, statut: "ACTIF" },
-  })
-  if (!mandate) return null
-
   const now = new Date()
   const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+  const lastOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1) // exclusive
 
-  const property = await db.property.findUnique({
-    where: { id: propertyId },
+  const mandate = await db.mandate.findFirst({
+    where: { owner_id: ownerId, property_id: propertyId, statut: "ACTIF" },
     include: {
-      bookings: {
-        where: {
-          statut: { notIn: ["CANCELLED"] },
-          OR: [
-            { check_in: { gte: firstOfMonth } },
-            { check_out: { lte: lastOfMonth } },
-          ],
-        },
+      property: {
         include: {
-          guest: { select: { prenom: true, nom: true } },
-        },
-        orderBy: { check_in: "desc" },
-        take: 10,
-      },
-      cleaningTasks: {
-        where: {
-          date_prevue: { gte: firstOfMonth, lte: lastOfMonth },
-        },
-        orderBy: { date_prevue: "asc" },
-      },
-      blockedDates: {
-        where: {
-          OR: [
-            { date_debut: { gte: firstOfMonth, lte: lastOfMonth } },
-            { date_fin: { gte: firstOfMonth, lte: lastOfMonth } },
-          ],
+          bookings: {
+            where: {
+              statut: { notIn: ["CANCELLED"] },
+              OR: [
+                { check_in: { gte: firstOfMonth, lt: lastOfMonth } },
+                { check_out: { gte: firstOfMonth, lt: lastOfMonth } },
+                { check_in: { lte: firstOfMonth }, check_out: { gte: lastOfMonth } },
+              ],
+            },
+            include: {
+              guest: { select: { prenom: true, nom: true } },
+            },
+            orderBy: { check_in: "desc" },
+            take: 10,
+          },
+          cleaningTasks: {
+            where: {
+              date_prevue: { gte: firstOfMonth, lt: lastOfMonth },
+            },
+            orderBy: { date_prevue: "asc" },
+          },
+          blockedDates: {
+            where: {
+              OR: [
+                { date_debut: { gte: firstOfMonth, lt: lastOfMonth } },
+                { date_fin: { gte: firstOfMonth, lt: lastOfMonth } },
+              ],
+            },
+          },
         },
       },
     },
   })
 
-  if (!property) return null
+  if (!mandate) return null
 
   const revenusThisMonth = await db.booking.aggregate({
     where: {
       property_id: propertyId,
       statut: "CHECKEDOUT",
-      check_in: { gte: firstOfMonth },
-      check_out: { lte: lastOfMonth },
+      check_out: { gte: firstOfMonth, lt: lastOfMonth },
     },
     _sum: { revenu_net_proprietaire: true },
   })
 
   return {
-    ...property,
+    ...mandate.property,
     revenusThisMonth: revenusThisMonth._sum.revenu_net_proprietaire ?? 0,
   }
 }
