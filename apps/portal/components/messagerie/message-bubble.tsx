@@ -13,14 +13,18 @@ interface MessageBubbleProps {
   authorType: "USER" | "OWNER"
   createdAt: Date
   attachments: Attachment[]
+  authorName?: string
 }
 
-export function MessageBubble({ contenu, authorType, createdAt, attachments }: MessageBubbleProps) {
+export function MessageBubble({ contenu, authorType, createdAt, attachments, authorName }: MessageBubbleProps) {
   const isOwner = authorType === "OWNER"
   const time = format(createdAt, "HH:mm", { locale: fr })
 
   return (
     <div className={`flex flex-col gap-1 max-w-[80%] ${isOwner ? "items-end self-end" : "items-start self-start"}`}>
+      {!isOwner && authorName && (
+        <p className="text-[10px] text-garrigue-400 font-medium px-1">{authorName}</p>
+      )}
       <div
         className={`px-4 py-3 text-sm leading-relaxed ${
           isOwner
