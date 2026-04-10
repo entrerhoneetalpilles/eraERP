@@ -1,0 +1,107 @@
+import { auth } from "@/auth"
+import { notFound, redirect } from "next/navigation"
+import { getOwnerPropertyById } from "@/lib/dal/properties"
+import Link from "next/link"
+import { ArrowLeft, Home } from "lucide-react"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+
+function extractVille(adresse: unknown): string | null {
+  if (adresse && typeof adresse === "object") {
+    const addr = adresse as Record<string, unknown>
+    if (typeof addr.ville === "string") return addr.ville
+    if (typeof addr.city === "string") return addr.city
+  }
+  return null
+}
+
+const STATUT_LABELS: Record<string, string> = {
+  CONFIRMED: "Confirmé",
+  CHECKEDIN: "En cours",
+  CHECKEDOUT: "Terminé",
+  PENDING: "En attente",
+}
+
+const STATUT_STYLES: Record<string, string> = {
+  CONFIRMED: "bg-blue-50 text-blue-600",
+  CHECKEDIN: "bg-emerald-50 text-emerald-600",
+  CHECKEDOUT: "bg-gray-100 text-gray-500",
+  PENDING: "bg-amber-50 text-amber-600",
+}
+
+export default async function BienDetailPage({ params }: { params: { id: string } }) {
+  const session = await auth()
+  if (!session?.user?.ownerId) redirect("/login")
+
+  const property = await getOwnerPropertyById(session.user.ownerId, params.id)
+  if (!property) notFound()
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n)
+
+  const recentBookings = property.bookings.slice(0, 3)
+  const ville = extractVille(property.adresse)
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <div className="flex items-center gap-3">
+        <Link href="/biens" className="text-garrigue-400 hover:text-garrigue-700 transition-colors">
+          <ArrowLeft size={20} />
+        </Link>
+        <h1 className="font-serif text-2xl text-garrigue-900">{property.nom}</h1>
+      </div>
+
+      <div className="bg-white rounded-xl p-5 shadow-soft">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-calcaire-100 rounded-lg">
+            <Home size={20} className="text-garrigue-500" />
+          </div>
+          <div>
+            <p className="font-medium text-garrigue-900">{property.nom}</p>
+            {ville && <p className="text-sm text-garrigue-400">{ville}</p>}
+            {property.superficie && (
+              <p className="text-sm text-garrigue-400">{property.superficie} m²</p>
+            )}
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-border">
+          <p className="text-xs text-garrigue-400 mb-1">Revenus du mois</p>
+          <p className="font-serif text-xl text-garrigue-900">{fmt(property.revenusThisMonth)}</p>
+        </div>
+      </div>
+
+      {recentBookings.length > 0 && (
+        <section>
+          <h2 className="text-xs font-semibold text-garrigue-400 uppercase tracking-wider mb-3">
+            Réservations récentes
+          </h2>
+          <div className="space-y-2">
+            {recentBookings.map((b) => (
+              <div
+                key={b.id}
+                className="bg-white rounded-xl px-4 py-3 shadow-soft flex items-center justify-between"
+              >
+                <div>
+                  <p className="text-sm font-medium text-garrigue-900">
+                    {b.guest.prenom} {b.guest.nom}
+                  </p>
+                  <p className="text-xs text-garrigue-400">
+                    {format(b.check_in, "d MMM", { locale: fr })} →{" "}
+                    {format(b.check_out, "d MMM yyyy", { locale: fr })}
+                  </p>
+                </div>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    STATUT_STYLES[String(b.statut)] ?? "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {STATUT_LABELS[String(b.statut)] ?? String(b.statut)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
