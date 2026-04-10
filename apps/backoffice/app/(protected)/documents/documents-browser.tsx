@@ -84,11 +84,15 @@ function TypeBadge({ type }: { type: string }) {
   )
 }
 
+function toDateOnly(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
 function getExpiryBadge(dateExpiration: Date | string | null | undefined) {
   if (!dateExpiration) return null
-  const now = new Date()
-  const exp = new Date(dateExpiration)
-  const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  const today = toDateOnly(new Date())
+  const expDay = toDateOnly(new Date(dateExpiration))
+  const diffDays = Math.round((expDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
   if (diffDays < 0) {
     return <span className="text-xs px-1.5 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded font-medium">Expiré</span>
   }

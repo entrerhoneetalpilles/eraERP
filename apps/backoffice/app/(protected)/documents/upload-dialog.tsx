@@ -95,14 +95,14 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
     setUploading(false)
     if (errors === 0) {
       toast.success(`${files.length} fichier${files.length > 1 ? "s" : ""} importé${files.length > 1 ? "s" : ""}`)
+      setFiles([])
+      setDateExpiration("")
+      onUploaded()
+      onOpenChange(false)
     } else {
       toast.error(`${errors} erreur${errors > 1 ? "s" : ""} lors de l'import`)
+      // Keep dialog open and files for retry — do NOT call onOpenChange(false)
     }
-
-    setFiles([])
-    setDateExpiration("")
-    onUploaded()
-    onOpenChange(false)
   }
 
   return (
@@ -137,6 +137,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
               name="date_expiration"
               value={dateExpiration}
               onChange={(e) => setDateExpiration(e.target.value)}
+              min={new Date().toISOString().slice(0, 10)}
               className="w-full text-sm border border-border rounded-md px-2.5 py-1.5 bg-background"
             />
           </div>
@@ -172,7 +173,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
           {files.length > 0 && (
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {files.map((file, i) => (
-                <div key={i} className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2 bg-card">
+                <div key={`${file.name}-${file.size}`} className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2 bg-card">
                   {fileIcon(file.type)}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{file.name}</p>
