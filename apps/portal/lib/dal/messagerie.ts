@@ -1,5 +1,4 @@
 import { db } from "@conciergerie/db"
-import { revalidatePath } from "next/cache"
 
 export async function getOwnerThreads(ownerId: string) {
   return db.messageThread.findMany({
@@ -45,8 +44,6 @@ export async function getOwnerThread(ownerId: string, threadId: string) {
     },
     data: { lu_at: new Date() },
   })
-  revalidatePath("/messagerie")
-
   return thread
 }
 

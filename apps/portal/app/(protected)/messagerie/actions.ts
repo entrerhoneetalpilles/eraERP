@@ -30,8 +30,11 @@ export async function sendOwnerMessageAction(threadId: string, contenu: string) 
     } catch (e) {
       console.error("[sendOwnerMessage] email failed:", e)
     }
+  } else {
+    console.warn("[sendOwnerMessage] no gestionnaire email configured")
   }
 
   revalidatePath(`/messagerie/${threadId}`)
+  revalidatePath("/messagerie")
   return { success: true }
 }
