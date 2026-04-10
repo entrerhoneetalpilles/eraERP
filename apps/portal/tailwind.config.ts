@@ -35,9 +35,10 @@ const config: Config = {
         },
         olivier: {
           DEFAULT: "#9BA88D",
+          50: "#f2f4ef",
           400: "#9BA88D",
           500: "#879473",
-          600: "#6b7660",
+          600: "#6b7760",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
