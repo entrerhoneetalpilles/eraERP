@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { FileText, Download, AlertTriangle } from "lucide-react"
+import { FileText, FileImage, File, Download, AlertTriangle } from "lucide-react"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 import { getDocumentViewUrlAction } from "@/app/(protected)/documents/actions"
 
 const TYPE_LABELS: Record<string, string> = {
@@ -9,21 +11,40 @@ const TYPE_LABELS: Record<string, string> = {
   AVENANT: "Avenant",
   FACTURE: "Facture",
   CRG: "CRG",
-  ATTESTATION_FISCALE: "Attestation fiscale",
+  ATTESTATION_FISCALE: "Attestation",
   DIAGNOSTIC: "Diagnostic",
-  AUTRE: "Autre",
+  AUTRE: "Document",
 }
 
-function getExpiryBadge(dateExp: Date | null): { label: string; cls: string } | null {
-  if (!dateExp) return null
+function DocIcon({ mimeType }: { mimeType?: string | null }) {
+  if (mimeType?.startsWith("image/")) return <FileImage size={20} strokeWidth={1.6} />
+  if (mimeType === "application/pdf") return <FileText size={20} strokeWidth={1.6} />
+  return <FileText size={20} strokeWidth={1.6} />
+}
+
+function ExpiryBadge({ date }: { date: Date | null }) {
+  if (!date) return null
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const exp = new Date(dateExp)
+  const exp = new Date(date)
   exp.setHours(0, 0, 0, 0)
-  const days = Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-  if (days < 0) return { label: "Expiré", cls: "bg-red-50 text-red-600 border-red-200" }
-  if (days <= 30)
-    return { label: `Expire dans ${days}j`, cls: "bg-amber-50 text-amber-700 border-amber-200" }
+  const daysLeft = Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  if (daysLeft < 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
+        <AlertTriangle size={10} />
+        Expiré
+      </span>
+    )
+  }
+  if (daysLeft <= 30) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-or-600 bg-or-300/15 border border-or-300/40 px-2 py-0.5 rounded-full shrink-0">
+        <AlertTriangle size={10} />
+        {daysLeft}j
+      </span>
+    )
+  }
   return null
 }
 
@@ -31,13 +52,13 @@ interface DocumentCardProps {
   id: string
   nom: string
   type: string
+  mime_type?: string | null
   createdAt: Date
   date_expiration: Date | null
 }
 
-export function DocumentCard({ id, nom, type, createdAt, date_expiration }: DocumentCardProps) {
+export function DocumentCard({ id, nom, type, mime_type, createdAt, date_expiration }: DocumentCardProps) {
   const [loading, setLoading] = useState(false)
-  const expiryBadge = getExpiryBadge(date_expiration)
 
   const handleDownload = async () => {
     setLoading(true)
@@ -47,35 +68,38 @@ export function DocumentCard({ id, nom, type, createdAt, date_expiration }: Docu
   }
 
   return (
-    <div className="bg-white rounded-xl px-4 py-3 shadow-soft flex items-center gap-3">
-      <div className="p-2 bg-calcaire-100 rounded-lg shrink-0">
-        <FileText size={18} className="text-garrigue-500" />
+    <div className="flex items-start gap-4 bg-white rounded-xl p-4 shadow-luxury-card border border-argile-200/40 hover:shadow-luxury transition-smooth group">
+      {/* Icon */}
+      <div className="w-10 h-10 rounded-lg bg-calcaire-100 flex items-center justify-center shrink-0 text-garrigue-400">
+        <DocIcon mimeType={mime_type} />
       </div>
+
+      {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-garrigue-900 truncate">{nom}</p>
-        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-          <span className="text-xs text-garrigue-400">{TYPE_LABELS[type] ?? type}</span>
-          <span className="text-xs text-garrigue-300">·</span>
-          <span className="text-xs text-garrigue-400">
-            {new Intl.DateTimeFormat("fr-FR").format(createdAt)}
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-medium text-garrigue-900 truncate leading-snug">
+            {nom}
+          </p>
+          <ExpiryBadge date={date_expiration} />
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[10px] font-medium text-garrigue-400 bg-calcaire-200 px-2 py-0.5 rounded-full">
+            {TYPE_LABELS[type] ?? type}
           </span>
-          {expiryBadge && (
-            <span
-              className={`text-xs px-1.5 py-0.5 rounded border font-medium flex items-center gap-1 ${expiryBadge.cls}`}
-            >
-              <AlertTriangle size={10} />
-              {expiryBadge.label}
-            </span>
-          )}
+          <span className="text-[10px] text-garrigue-400">
+            {format(createdAt, "d MMM yyyy", { locale: fr })}
+          </span>
         </div>
       </div>
+
+      {/* Download */}
       <button
         onClick={handleDownload}
         disabled={loading}
         aria-label={`Télécharger ${nom}`}
-        className="p-2 rounded-full hover:bg-calcaire-100 transition-colors text-garrigue-400 disabled:opacity-50"
+        className="w-8 h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 hover:bg-calcaire-100 text-garrigue-400 hover:text-olivier-600 transition-fast cursor-pointer shrink-0 disabled:opacity-50"
       >
-        <Download size={16} />
+        <Download size={15} />
       </button>
     </div>
   )

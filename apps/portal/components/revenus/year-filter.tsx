@@ -4,16 +4,22 @@ import { useRouter } from "next/navigation"
 
 export function YearFilter({ years, selected }: { years: number[]; selected: number }) {
   const router = useRouter()
+
   return (
-    <select
-      value={selected}
-      onChange={(e) => router.push(`/revenus?annee=${e.target.value}`)}
-      className="text-sm border border-border rounded-md px-3 py-1.5 bg-white text-garrigue-700"
-      aria-label="Filtrer par année"
-    >
+    <div className="flex gap-1 bg-calcaire-200 rounded-xl p-1 w-fit">
       {years.map((y) => (
-        <option key={y} value={y}>{y}</option>
+        <button
+          key={y}
+          onClick={() => router.push(`/revenus?annee=${y}`)}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-fast cursor-pointer ${
+            y === selected
+              ? "bg-white shadow-luxury text-garrigue-900"
+              : "text-garrigue-400 hover:text-garrigue-700"
+          }`}
+        >
+          {y}
+        </button>
       ))}
-    </select>
+    </div>
   )
 }

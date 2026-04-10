@@ -42,15 +42,15 @@ export default async function DocumentsPage({
 
   return (
     <div className="space-y-5 max-w-2xl">
-      <h1 className="font-serif text-2xl text-garrigue-900">Documents</h1>
+      <h1 className="font-serif text-4xl text-garrigue-900 font-light italic">Documents.</h1>
 
       <div className="flex gap-2 flex-wrap">
         <a
           href="/documents"
-          className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+          className={`cursor-pointer transition-fast rounded-full px-3 py-1.5 text-xs font-medium ${
             !activeType
-              ? "bg-olivier-600 text-white border-olivier-600"
-              : "bg-white text-garrigue-500 border-border hover:border-olivier-400"
+              ? "bg-garrigue-900 text-white shadow-luxury"
+              : "bg-calcaire-200 text-garrigue-500 hover:text-garrigue-900"
           }`}
         >
           Tous
@@ -59,10 +59,10 @@ export default async function DocumentsPage({
           <a
             key={t}
             href={`/documents?type=${t}`}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+            className={`cursor-pointer transition-fast rounded-full px-3 py-1.5 text-xs font-medium ${
               activeType === t
-                ? "bg-olivier-600 text-white border-olivier-600"
-                : "bg-white text-garrigue-500 border-border hover:border-olivier-400"
+                ? "bg-garrigue-900 text-white shadow-luxury"
+                : "bg-calcaire-200 text-garrigue-500 hover:text-garrigue-900"
             }`}
           >
             {TYPE_LABELS[t]}
