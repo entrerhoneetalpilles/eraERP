@@ -18,6 +18,7 @@ export function MenageTabs({ tasks, contractors }: { tasks: Task[]; contractors:
           <button
             key={v}
             onClick={() => setView(v)}
+            aria-pressed={view === v}
             className={`px-4 py-1.5 text-sm rounded-sm transition-colors cursor-pointer ${
               view === v
                 ? "bg-background text-foreground shadow-sm"

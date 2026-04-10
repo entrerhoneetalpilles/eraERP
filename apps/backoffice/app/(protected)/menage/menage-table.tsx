@@ -33,6 +33,7 @@ const columns: ColumnDef<CleaningRow>[] = [
     header: "Séjour",
     cell: ({ row }) => {
       const b = row.original.booking
+      if (!b) return <span className="text-xs text-muted-foreground">—</span>
       return (
         <Link href={`/reservations/${b.id}`} className="text-muted-foreground hover:text-primary text-xs cursor-pointer">
           {new Date(b.check_in).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
@@ -83,7 +84,9 @@ const columns: ColumnDef<CleaningRow>[] = [
   },
 ]
 
-export function MenageTable({ data, contractors: _contractors = [] }: { data: CleaningRow[]; contractors?: Contractor[] }) {
+// contractors is passed through and will be consumed by AssignButton in B-Task 5
+export function MenageTable({ data, contractors = [] }: { data: CleaningRow[]; contractors?: Contractor[] }) {
+  void contractors // B-Task 5
   return (
     <>
       {/* Desktop */}

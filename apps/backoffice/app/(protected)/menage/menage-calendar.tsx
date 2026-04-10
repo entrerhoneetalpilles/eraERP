@@ -75,7 +75,7 @@ export function MenageCalendar({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="h-[600px] bg-card rounded-lg border border-border p-4">
-      <Calendar
+      <Calendar<CalEvent>
         localizer={localizer}
         events={events}
         defaultView={Views.MONTH}
@@ -84,14 +84,14 @@ export function MenageCalendar({ tasks }: { tasks: Task[] }) {
         messages={MESSAGES}
         eventPropGetter={(event) => ({
           style: {
-            backgroundColor: (event as unknown as CalEvent).color,
+            backgroundColor: event.color,
             border: "none",
             borderRadius: "4px",
             fontSize: "11px",
             padding: "2px 4px",
           },
         })}
-        onSelectEvent={(event) => router.push((event as unknown as CalEvent).url)}
+        onSelectEvent={(event) => router.push(event.url)}
       />
     </div>
   )
