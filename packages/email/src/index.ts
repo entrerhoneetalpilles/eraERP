@@ -9,6 +9,7 @@ export { TravauxNotificationEmail } from "./templates/travaux-notification"
 export { VirementEffectueEmail } from "./templates/virement-effectue"
 export { ResetPasswordEmail } from "./templates/reset-password"
 export { NouveauMessageEmail } from "./templates/nouveau-message"
+export { MenageAssignEmail } from "./templates/menage-assign"
 export {
   sendWelcomeEmail,
   sendBookingConfirmedEmail,
@@ -20,4 +21,5 @@ export {
   sendVirementEffectueEmail,
   sendResetPasswordEmail,
   sendNouveauMessageEmail,
+  sendMenageAssignEmail,
 } from "./render"

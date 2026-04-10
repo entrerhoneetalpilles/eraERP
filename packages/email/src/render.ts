@@ -11,6 +11,7 @@ import { TravauxNotificationEmail } from "./templates/travaux-notification"
 import { VirementEffectueEmail } from "./templates/virement-effectue"
 import { ResetPasswordEmail } from "./templates/reset-password"
 import { NouveauMessageEmail } from "./templates/nouveau-message"
+import { MenageAssignEmail } from "./templates/menage-assign"
 
 const FROM = "Entre Rhône et Alpilles <contact@entre-rhone-alpilles.fr>"
 
@@ -145,4 +146,16 @@ export async function sendNouveauMessageEmail(props: {
   const { to, ...rest } = props
   const html = await render(NouveauMessageEmail(rest))
   return sendEmail({ to, subject: `Nouveau message de ${props.senderName}`, html, from: FROM })
+}
+
+export async function sendMenageAssignEmail(props: {
+  to: string
+  contractorName: string
+  propertyName: string
+  datePrevue: string
+  notes?: string
+}) {
+  const { to, ...rest } = props
+  const html = await render(MenageAssignEmail(rest))
+  return sendEmail({ to, subject: `Tâche ménage assignée — ${props.propertyName}`, html, from: FROM })
 }

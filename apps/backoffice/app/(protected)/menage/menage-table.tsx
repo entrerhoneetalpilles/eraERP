@@ -5,88 +5,87 @@ import type { ColumnDef } from "@tanstack/react-table"
 import type { getCleaningTasks } from "@/lib/dal/menage"
 import { DataTable } from "@/components/ui/data-table"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { AssignButton } from "./assign-form"
 
 type CleaningRow = Awaited<ReturnType<typeof getCleaningTasks>>[number]
 type Contractor = { id: string; nom: string }
 
-const columns: ColumnDef<CleaningRow>[] = [
-  {
-    accessorKey: "date_prevue",
-    header: "Date prévue",
-    cell: ({ row }) =>
-      new Date(row.original.date_prevue).toLocaleDateString("fr-FR", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }),
-  },
-  {
-    accessorKey: "property.nom",
-    header: "Bien",
-    cell: ({ row }) => (
-      <Link href={`/biens/${row.original.property.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
-        {row.original.property.nom}
-      </Link>
-    ),
-  },
-  {
-    header: "Séjour",
-    cell: ({ row }) => {
-      const b = row.original.booking
-      if (!b) return <span className="text-xs text-muted-foreground">—</span>
-      return (
-        <Link href={`/reservations/${b.id}`} className="text-muted-foreground hover:text-primary text-xs cursor-pointer">
-          {new Date(b.check_in).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-          {" → "}
-          {new Date(b.check_out).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-        </Link>
-      )
-    },
-  },
-  {
-    header: "Prestataire",
-    cell: ({ row }) => {
-      const t = row.original
-      const overrun =
-        t.duree_reelle != null &&
-        t.duree_estimee != null &&
-        t.duree_reelle > t.duree_estimee * 1.3
-      return (
-        <div className="space-y-1">
-          {t.contractor ? (
-            <span className="text-sm text-foreground">
-              {t.contractor.nom}
-            </span>
-          ) : (
-            <span className="text-xs text-muted-foreground">Non assigné</span>
-          )}
-          {overrun && (
-            <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 rounded font-medium block w-fit">
-              Dépassement +{Math.round(t.duree_reelle! - t.duree_estimee!)}min
-            </span>
-          )}
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "statut",
-    header: "Statut",
-    cell: ({ row }) => <StatusBadge status={row.original.statut} />,
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <Link href={`/menage/${row.original.id}`} className="text-xs text-primary hover:underline cursor-pointer">
-        Voir
-      </Link>
-    ),
-  },
-]
-
-// contractors is passed through and will be consumed by AssignButton in B-Task 5
 export function MenageTable({ data, contractors = [] }: { data: CleaningRow[]; contractors?: Contractor[] }) {
-  void contractors // B-Task 5
+  const columns: ColumnDef<CleaningRow>[] = [
+    {
+      accessorKey: "date_prevue",
+      header: "Date prévue",
+      cell: ({ row }) =>
+        new Date(row.original.date_prevue).toLocaleDateString("fr-FR", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        }),
+    },
+    {
+      accessorKey: "property.nom",
+      header: "Bien",
+      cell: ({ row }) => (
+        <Link href={`/biens/${row.original.property.id}`} className="font-medium text-foreground hover:text-primary cursor-pointer">
+          {row.original.property.nom}
+        </Link>
+      ),
+    },
+    {
+      header: "Séjour",
+      cell: ({ row }) => {
+        const b = row.original.booking
+        if (!b) return <span className="text-xs text-muted-foreground">—</span>
+        return (
+          <Link href={`/reservations/${b.id}`} className="text-muted-foreground hover:text-primary text-xs cursor-pointer">
+            {new Date(b.check_in).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+            {" → "}
+            {new Date(b.check_out).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+          </Link>
+        )
+      },
+    },
+    {
+      header: "Prestataire",
+      cell: ({ row }) => {
+        const t = row.original
+        const overrun =
+          t.duree_reelle != null &&
+          t.duree_estimee != null &&
+          t.duree_reelle > t.duree_estimee * 1.3
+        return (
+          <div className="space-y-1">
+            {t.contractor ? (
+              <span className="text-sm text-foreground">
+                {t.contractor.nom}
+              </span>
+            ) : (
+              <AssignButton taskId={t.id} contractors={contractors} />
+            )}
+            {overrun && (
+              <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 rounded font-medium block w-fit">
+                Dépassement +{Math.round(t.duree_reelle! - t.duree_estimee!)}min
+              </span>
+            )}
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "statut",
+      header: "Statut",
+      cell: ({ row }) => <StatusBadge status={row.original.statut} />,
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <Link href={`/menage/${row.original.id}`} className="text-xs text-primary hover:underline cursor-pointer">
+          Voir
+        </Link>
+      ),
+    },
+  ]
+
   return (
     <>
       {/* Desktop */}
@@ -131,4 +130,3 @@ export function MenageTable({ data, contractors = [] }: { data: CleaningRow[]; c
     </>
   )
 }
-
