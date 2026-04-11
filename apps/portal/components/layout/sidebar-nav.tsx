@@ -32,11 +32,13 @@ interface SidebarNavProps {
 export function SidebarNav({ userName, userEmail }: SidebarNavProps) {
   const pathname = usePathname()
   const initials = userName
-    .split(" ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
     .map((w) => w[0])
     .slice(0, 2)
     .join("")
-    .toUpperCase()
+    .toUpperCase() || "?"
 
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 bg-white border-r border-argile-200/60 min-h-screen">
@@ -61,6 +63,7 @@ export function SidebarNav({ userName, userEmail }: SidebarNavProps) {
               <li key={href}>
                 <Link
                   href={href}
+                  aria-current={active ? "page" : undefined}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-fast cursor-pointer group relative ${
                     active
                       ? "bg-garrigue-900 text-white shadow-luxury"
@@ -96,6 +99,7 @@ export function SidebarNav({ userName, userEmail }: SidebarNavProps) {
           </div>
         </div>
         <button
+          type="button"
           onClick={() => signOut({ callbackUrl: "/login" })}
           className="flex w-full items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-garrigue-500 hover:bg-red-50 hover:text-red-600 transition-fast cursor-pointer"
         >

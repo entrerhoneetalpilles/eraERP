@@ -12,7 +12,7 @@ export default async function PortalProtectedLayout({
   const session = await auth()
 
   if (!session?.user) redirect("/login")
-  if ((session.user as any).mfaRequired && !(session.user as any).mfaVerified) redirect("/login/mfa")
+  if (session.user.mfaRequired && !session.user.mfaVerified) redirect("/login/mfa")
 
   return (
     <div className="flex min-h-screen bg-calcaire-100">
