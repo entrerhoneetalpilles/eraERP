@@ -10,12 +10,16 @@ export const authConfig: NextAuthConfig = {
     authorized({ auth }) {
       return !!auth?.user
     },
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id!
         token.ownerId = (user as any).ownerId
         token.mfaRequired = (user as any).mfaRequired
         token.mfaVerified = (user as any).mfaVerified ?? false
+      }
+      // Handle session.update() calls — used by MFA verification
+      if (trigger === "update" && session?.user?.mfaVerified === true) {
+        token.mfaVerified = true
       }
       return token
     },
