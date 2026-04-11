@@ -70,9 +70,9 @@ export default async function OwnerDashboardPage() {
   }).format(now)
 
   return (
-    <div className="space-y-8 max-w-2xl animate-fade-up">
+    <div className="max-w-5xl animate-fade-up">
       {/* Hero greeting */}
-      <div className="space-y-1">
+      <div className="space-y-1 mb-8">
         <p className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.14em] capitalize">
           {today}
         </p>
@@ -81,39 +81,46 @@ export default async function OwnerDashboardPage() {
         </h1>
       </div>
 
-      {/* KPI cards */}
-      <SoldeCard
-        solde={account?.solde_courant ?? 0}
-        sequestre={account?.solde_sequestre ?? 0}
-        dernierVirement={dernierVirement}
-      />
+      {/* 2-col layout on lg+ */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+        {/* Left col — KPI + alerts */}
+        <div className="lg:col-span-3 space-y-6">
+          <SoldeCard
+            solde={account?.solde_courant ?? 0}
+            sequestre={account?.solde_sequestre ?? 0}
+            dernierVirement={dernierVirement}
+          />
+          <AlertBanner alerts={alerts} />
+        </div>
 
-      {/* Upcoming events */}
-      {upcomingBookings.length > 0 && (
-        <section>
-          <h2 className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em] mb-3">
+        {/* Right col — Upcoming events */}
+        <div className="lg:col-span-2 space-y-3">
+          <h2 className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em]">
             Prochains événements
           </h2>
-          <div className="space-y-2">
-            {(() => {
-              const events: { key: string; type: "checkin" | "checkout"; propertyName: string; date: Date }[] = []
-              for (const b of upcomingBookings) {
-                if (b.check_in >= now && b.check_in <= in7days)
-                  events.push({ key: `${b.id}-in`, type: "checkin", propertyName: b.property.nom, date: b.check_in })
-                if (b.check_out >= now && b.check_out <= in7days)
-                  events.push({ key: `${b.id}-out`, type: "checkout", propertyName: b.property.nom, date: b.check_out })
-              }
-              events.sort((a, b) => a.date.getTime() - b.date.getTime())
-              return events.map((e) => (
-                <EventCard key={e.key} type={e.type} propertyName={e.propertyName} date={e.date} />
-              ))
-            })()}
-          </div>
-        </section>
-      )}
-
-      {/* Alerts */}
-      <AlertBanner alerts={alerts} />
+          {upcomingBookings.length === 0 ? (
+            <p className="text-sm text-garrigue-400 font-light italic py-4">
+              Aucun événement dans les 7 prochains jours.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {(() => {
+                const events: { key: string; type: "checkin" | "checkout"; propertyName: string; date: Date }[] = []
+                for (const b of upcomingBookings) {
+                  if (b.check_in >= now && b.check_in <= in7days)
+                    events.push({ key: `${b.id}-in`, type: "checkin", propertyName: b.property.nom, date: b.check_in })
+                  if (b.check_out >= now && b.check_out <= in7days)
+                    events.push({ key: `${b.id}-out`, type: "checkout", propertyName: b.property.nom, date: b.check_out })
+                }
+                events.sort((a, b) => a.date.getTime() - b.date.getTime())
+                return events.map((e) => (
+                  <EventCard key={e.key} type={e.type} propertyName={e.propertyName} date={e.date} />
+                ))
+              })()}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

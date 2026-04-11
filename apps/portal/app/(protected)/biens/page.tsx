@@ -11,7 +11,7 @@ export default async function BienListPage() {
   const properties = await getOwnerProperties(session.user.ownerId)
 
   return (
-    <div className="space-y-4 max-w-2xl">
+    <div className="max-w-5xl">
       <div className="mb-8">
         <h1 className="font-serif text-4xl text-garrigue-900 font-light italic">
           Mes biens.
@@ -26,7 +26,7 @@ export default async function BienListPage() {
           <p className="text-sm">Aucun bien actif</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {properties.map((p) => (
             <PropertyCard
               key={p.id}

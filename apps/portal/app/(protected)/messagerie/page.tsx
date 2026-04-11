@@ -13,7 +13,7 @@ export default async function MessageriePage() {
   const threads = await getOwnerThreads(session.user.ownerId)
 
   return (
-    <div className="space-y-4 max-w-2xl">
+    <div className="space-y-4 max-w-3xl">
       <h1 className="font-serif text-4xl text-garrigue-900 font-light italic mb-6">Messages.</h1>
       {threads.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-garrigue-400">

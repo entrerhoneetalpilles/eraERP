@@ -41,7 +41,7 @@ export default async function DocumentsPage({
   )
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="space-y-5 max-w-5xl">
       <h1 className="font-serif text-4xl text-garrigue-900 font-light italic">Documents.</h1>
 
       <div className="flex gap-2 flex-wrap">
@@ -76,7 +76,7 @@ export default async function DocumentsPage({
           <p className="text-sm">Aucun document</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {documents.map((d) => (
             <DocumentCard
               key={d.id}

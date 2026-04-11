@@ -20,7 +20,7 @@ export default async function RevenusPage({
   const reports = await getOwnerReports(session.user.ownerId, selectedYear)
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="space-y-5 max-w-4xl">
       <div className="flex items-start justify-between gap-4">
         <div className="mb-8">
           <h1 className="font-serif text-4xl text-garrigue-900 font-light italic">Vos revenus.</h1>
