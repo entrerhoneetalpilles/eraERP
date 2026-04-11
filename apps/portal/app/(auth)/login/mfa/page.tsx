@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState } from "react"
+import { useTransition } from "react"
+import { useFormState } from "react-dom"
 import { verifyMfaAction } from "@/app/actions/mfa"
 import { Loader2, ShieldCheck } from "lucide-react"
 import { Input, Label } from "@conciergerie/ui"
@@ -8,7 +9,8 @@ import { Input, Label } from "@conciergerie/ui"
 const initialState = { error: null }
 
 export default function MfaPage() {
-  const [state, formAction, isPending] = useActionState(verifyMfaAction, initialState)
+  const [isPending, startTransition] = useTransition()
+  const [state, formAction] = useFormState(verifyMfaAction, initialState)
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -63,11 +65,17 @@ export default function MfaPage() {
               Code de vérification.
             </h2>
             <p className="text-garrigue-500 text-sm mt-2 leading-relaxed">
-              Entrez le code à 6 chiffres généré par votre application d'authentification.
+              Entrez le code à 6 chiffres généré par votre application d&apos;authentification.
             </p>
           </div>
 
-          <form action={formAction} className="space-y-5">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              startTransition(() => formAction(new FormData(e.currentTarget)))
+            }}
+            className="space-y-5"
+          >
             <div className="space-y-1.5">
               <Label htmlFor="code" className="sr-only">Code à 6 chiffres</Label>
               <Input
@@ -80,6 +88,7 @@ export default function MfaPage() {
                 autoComplete="one-time-code"
                 placeholder="000 000"
                 autoFocus
+                disabled={isPending}
                 className="h-14 text-center text-2xl tracking-[0.3em] border-argile-300 focus:border-garrigue-900 focus-visible:ring-0 rounded-xl text-garrigue-900 font-light"
               />
               {state.error && (
