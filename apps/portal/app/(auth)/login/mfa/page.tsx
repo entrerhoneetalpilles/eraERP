@@ -3,7 +3,7 @@
 import { useActionState } from "react"
 import { verifyMfaAction } from "@/app/actions/mfa"
 import { Loader2, ShieldCheck } from "lucide-react"
-import { Input } from "@conciergerie/ui"
+import { Input, Label } from "@conciergerie/ui"
 
 const initialState = { error: null }
 
@@ -69,6 +69,7 @@ export default function MfaPage() {
 
           <form action={formAction} className="space-y-5">
             <div className="space-y-1.5">
+              <Label htmlFor="code" className="sr-only">Code à 6 chiffres</Label>
               <Input
                 id="code"
                 name="code"
