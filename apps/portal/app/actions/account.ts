@@ -71,13 +71,16 @@ export async function generateMfaSecretAction(): Promise<{
     secret
   )
 
-  // Temporarily store the pending secret (not activated yet)
-  await db.ownerUser.update({
-    where: { id: session.user.id },
-    data: { mfa_secret: secret }, // saved but mfa_active stays false until verified
-  })
-
-  return { secret, otpauthUrl, error: null }
+  try {
+    // Temporarily store the pending secret (not activated yet)
+    await db.ownerUser.update({
+      where: { id: session.user.id },
+      data: { mfa_secret: secret }, // saved but mfa_active stays false until verified
+    })
+    return { secret, otpauthUrl, error: null }
+  } catch {
+    return { secret: null, otpauthUrl: null, error: "Erreur lors de la sauvegarde du secret" }
+  }
 }
 
 // ── Enable MFA (verify + activate) ──────────────────────────────

@@ -18,6 +18,7 @@ export function MfaSection({ mfaActive: initialMfaActive }: MfaSectionProps) {
   const [pendingSecret, setPendingSecret] = useState<{ secret: string; otpauthUrl: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generateError, setGenerateError] = useState<string | null>(null)
 
   const [enableState, enableAction, enablePending] = useActionState(
     async (prev: typeof enableInitial, formData: FormData) => {
@@ -42,9 +43,13 @@ export function MfaSection({ mfaActive: initialMfaActive }: MfaSectionProps) {
 
   async function handleGenerate() {
     setIsGenerating(true)
+    setGenerateError(null)
     const result = await generateMfaSecretAction()
     setIsGenerating(false)
-    if (result.error || !result.secret || !result.otpauthUrl) return
+    if (result.error || !result.secret || !result.otpauthUrl) {
+      setGenerateError(result.error ?? "Erreur inattendue")
+      return
+    }
     setPendingSecret({ secret: result.secret, otpauthUrl: result.otpauthUrl })
   }
 
@@ -113,16 +118,23 @@ export function MfaSection({ mfaActive: initialMfaActive }: MfaSectionProps) {
       </div>
 
       {!pendingSecret ? (
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={isGenerating}
-          className="h-11 px-6 border border-garrigue-900 text-garrigue-900 hover:bg-garrigue-900 hover:text-white rounded-xl text-sm font-medium tracking-wide transition-smooth cursor-pointer flex items-center gap-2 disabled:opacity-50"
-        >
-          {isGenerating && <Loader2 size={14} className="animate-spin" />}
-          <ShieldCheck size={14} />
-          Activer l&apos;authentification à deux facteurs
-        </button>
+        <div className="space-y-3">
+          {generateError && (
+            <p className="text-sm text-destructive bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+              {generateError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className="h-11 px-6 border border-garrigue-900 text-garrigue-900 hover:bg-garrigue-900 hover:text-white rounded-xl text-sm font-medium tracking-wide transition-smooth cursor-pointer flex items-center gap-2 disabled:opacity-50"
+          >
+            {isGenerating && <Loader2 size={14} className="animate-spin" />}
+            <ShieldCheck size={14} />
+            Activer l&apos;authentification à deux facteurs
+          </button>
+        </div>
       ) : (
         <div className="space-y-5 max-w-sm">
           <div className="space-y-3">
