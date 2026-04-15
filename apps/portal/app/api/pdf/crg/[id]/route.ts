@@ -7,14 +7,17 @@ import { CrgPDF } from "@/lib/pdf/crg-template"
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth()
   if (!session?.user?.ownerId) {
     return new NextResponse("Non autorisé", { status: 401 })
   }
 
-  const report = await getOwnerReportForPdf(session.user.ownerId, params.id)
+  const ownerId = session.user.ownerId as string
+  const { id } = await params
+
+  const report = await getOwnerReportForPdf(ownerId, id)
   if (!report) {
     return new NextResponse("CRG introuvable", { status: 404 })
   }
@@ -27,7 +30,14 @@ export async function GET(
     month: "long",
     year: "numeric",
   })
-  const filename = `CRG-${mois}-${report.account.owner.nom.replace(/\s+/g, "-")}.pdf`
+
+  const safe = (s: string) =>
+    s.normalize("NFD")
+     .replace(/[\u0300-\u036f]/g, "")
+     .replace(/[^a-zA-Z0-9-]/g, "-")
+     .replace(/-{2,}/g, "-")
+     .replace(/^-|-$/g, "")
+  const filename = `CRG-${safe(mois)}-${safe(report.account.owner.nom)}.pdf`
 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
