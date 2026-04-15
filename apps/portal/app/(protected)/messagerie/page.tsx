@@ -43,6 +43,10 @@ export default async function MessageriePage() {
                     </span>
                   )}
                 </div>
+                {/* Contact name */}
+                <p className="text-xs text-garrigue-400 mt-0.5 font-medium">
+                  {t.to_name ?? "Équipe ERA"}
+                </p>
                 {lastMessage && (
                   <p className="text-xs text-garrigue-400 mt-1 truncate">{lastMessage.contenu}</p>
                 )}

@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Building2, TrendingUp, FileText, MessageCircle } from "lucide-react"
+import { LayoutDashboard, Building2, TrendingUp, Calendar, MessageCircle } from "lucide-react"
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Accueil" },
   { href: "/biens", icon: Building2, label: "Biens" },
   { href: "/revenus", icon: TrendingUp, label: "Revenus" },
-  { href: "/documents", icon: FileText, label: "Docs" },
+  { href: "/planning", icon: Calendar, label: "Planning" },
   { href: "/messagerie", icon: MessageCircle, label: "Messages" },
 ]
 
@@ -28,6 +28,7 @@ export function BottomNav() {
             <li key={href} className="flex-1">
               <Link
                 href={href}
+                aria-current={active ? "page" : undefined}
                 className={`flex flex-col items-center justify-center h-full gap-0.5 transition-fast cursor-pointer relative ${
                   active ? "text-or-500" : "text-garrigue-400 hover:text-garrigue-700"
                 }`}
