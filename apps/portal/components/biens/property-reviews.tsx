@@ -1,20 +1,19 @@
 import { Star } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import type { Prisma } from "@conciergerie/db"
 
-interface Review {
-  id: string
-  note_globale: number
-  note_proprete: number | null
-  note_communication: number | null
-  commentaire_voyageur: string | null
-  date_avis: Date
-  booking: {
-    check_in: Date
-    check_out: Date
-    guest: { prenom: string }
+type Review = Prisma.ReviewGetPayload<{
+  include: {
+    booking: {
+      select: {
+        check_in: true
+        check_out: true
+        guest: { select: { prenom: true } }
+      }
+    }
   }
-}
+}>
 
 interface PropertyReviewsProps {
   reviews: Review[]
