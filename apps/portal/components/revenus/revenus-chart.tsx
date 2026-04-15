@@ -16,7 +16,6 @@ interface ReportEntry {
   id: string
   periode_debut: Date
   montant_reverse: number
-  revenus_sejours: number
 }
 
 interface RevenusChartProps {
@@ -56,7 +55,7 @@ export function RevenusChart({ reports }: RevenusChartProps) {
     .sort((a, b) => a.periode_debut.getTime() - b.periode_debut.getTime())
     .map((r) => ({
       mois: format(r.periode_debut, "MMM", { locale: fr }),
-      reversé: Math.round(r.montant_reverse),
+      montant_reverse: Math.round(r.montant_reverse),
     }))
 
   return (
@@ -82,7 +81,7 @@ export function RevenusChart({ reports }: RevenusChartProps) {
             axisLine={false}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f5f2ed", radius: 6 }} />
-          <Bar dataKey="reversé" fill="#C9A84C" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="montant_reverse" fill="#C9A84C" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
