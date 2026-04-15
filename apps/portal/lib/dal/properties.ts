@@ -73,9 +73,7 @@ export async function getOwnerPropertyById(ownerId: string, propertyId: string) 
             take: 10,
           },
           cleaningTasks: {
-            where: {
-              date_prevue: { gte: firstOfMonth, lt: lastOfMonth },
-            },
+            where: { date_prevue: { gte: firstOfMonth, lt: lastOfMonth } },
             orderBy: { date_prevue: "asc" },
           },
           blockedDates: {
@@ -86,6 +84,7 @@ export async function getOwnerPropertyById(ownerId: string, propertyId: string) 
               ],
             },
           },
+          access: true,
         },
       },
     },
@@ -93,17 +92,34 @@ export async function getOwnerPropertyById(ownerId: string, propertyId: string) 
 
   if (!mandate) return null
 
-  const revenusThisMonth = await db.booking.aggregate({
-    where: {
-      property_id: propertyId,
-      statut: "CHECKEDOUT",
-      check_out: { gte: firstOfMonth, lt: lastOfMonth },
-    },
-    _sum: { revenu_net_proprietaire: true },
-  })
+  const [revenusThisMonth, reviews] = await Promise.all([
+    db.booking.aggregate({
+      where: {
+        property_id: propertyId,
+        statut: "CHECKEDOUT",
+        check_out: { gte: firstOfMonth, lt: lastOfMonth },
+      },
+      _sum: { revenu_net_proprietaire: true },
+    }),
+    db.review.findMany({
+      where: { booking: { property_id: propertyId } },
+      orderBy: { date_avis: "desc" },
+      take: 5,
+      include: {
+        booking: {
+          select: {
+            check_in: true,
+            check_out: true,
+            guest: { select: { prenom: true } },
+          },
+        },
+      },
+    }),
+  ])
 
   return {
     ...mandate.property,
     revenusThisMonth: revenusThisMonth._sum.revenu_net_proprietaire ?? 0,
+    reviews,
   }
 }

@@ -1,6 +1,8 @@
 import { auth } from "@/auth"
 import { notFound, redirect } from "next/navigation"
 import { getOwnerPropertyById } from "@/lib/dal/properties"
+import { PropertyAccessCard } from "@/components/biens/property-access-card"
+import { PropertyReviews } from "@/components/biens/property-reviews"
 import Link from "next/link"
 import { ArrowLeft, Home } from "lucide-react"
 import { format } from "date-fns"
@@ -45,13 +47,20 @@ export default async function BienDetailPage({ params }: { params: { id: string 
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-3">
-        <Link href="/biens" className="text-garrigue-400 hover:text-garrigue-700 transition-colors">
+        <Link
+          href="/biens"
+          className="text-garrigue-400 hover:text-garrigue-700 transition-colors"
+          aria-label="Retour aux biens"
+        >
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="font-serif text-3xl text-garrigue-900 font-light italic">{property.nom}</h1>
+        <h1 className="font-serif text-3xl text-garrigue-900 font-light italic">
+          {property.nom}
+        </h1>
       </div>
 
-      <div className="bg-white rounded-xl p-5 shadow-soft">
+      {/* Property info + monthly revenue */}
+      <div className="bg-white rounded-2xl shadow-luxury-card border border-argile-200/40 p-5">
         <div className="flex items-start gap-3">
           <div className="p-2 bg-calcaire-100 rounded-lg">
             <Home size={20} className="text-garrigue-500" />
@@ -64,12 +73,15 @@ export default async function BienDetailPage({ params }: { params: { id: string 
             )}
           </div>
         </div>
-        <div className="mt-4 pt-4 border-t border-border">
-          <p className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em] mb-1">Revenus du mois</p>
+        <div className="mt-4 pt-4 border-t border-argile-200/40">
+          <p className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em] mb-1">
+            Revenus du mois
+          </p>
           <p className="font-serif text-xl text-garrigue-900">{fmt(property.revenusThisMonth)}</p>
         </div>
       </div>
 
+      {/* Recent bookings */}
       {recentBookings.length > 0 && (
         <section>
           <h2 className="text-[11px] font-semibold text-garrigue-400 uppercase tracking-[0.12em] mb-3">
@@ -79,7 +91,7 @@ export default async function BienDetailPage({ params }: { params: { id: string 
             {recentBookings.map((b) => (
               <div
                 key={b.id}
-                className="bg-white rounded-xl px-4 py-3 shadow-soft flex items-center justify-between"
+                className="bg-white rounded-xl px-4 py-3 shadow-luxury-card border border-argile-200/40 flex items-center justify-between"
               >
                 <div>
                   <p className="text-sm font-medium text-garrigue-900">
@@ -102,6 +114,20 @@ export default async function BienDetailPage({ params }: { params: { id: string 
           </div>
         </section>
       )}
+
+      {/* Access info */}
+      {property.access && (
+        <PropertyAccessCard
+          wifi_nom={property.access.wifi_nom}
+          wifi_mdp={property.access.wifi_mdp}
+          code_acces={property.access.code_acces}
+          instructions_arrivee={property.access.instructions_arrivee}
+          notes_depart={property.access.notes_depart}
+        />
+      )}
+
+      {/* Guest reviews */}
+      <PropertyReviews reviews={property.reviews} />
     </div>
   )
 }
