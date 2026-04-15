@@ -120,14 +120,16 @@ export function CalendarPortal({ bookings, cleanings, blockedDates }: CalendarPo
     return result
   }, [bookings, cleanings, blockedDates])
 
-  const handleSelectEvent = useCallback((event: object) => {
-    setSelectedMeta((event as CalEvent).meta)
+  const handleSelectEvent = useCallback((event: CalEvent) => {
+    setSelectedMeta(event.meta)
   }, [])
+
+  const handleClose = useCallback(() => setSelectedMeta(null), [])
 
   return (
     <>
       <div className="bg-white rounded-xl shadow-soft p-4" style={{ height: 600 }}>
-        <Calendar
+        <Calendar<CalEvent>
           localizer={localizer}
           events={events}
           defaultView="month"
@@ -142,8 +144,8 @@ export function CalendarPortal({ bookings, cleanings, blockedDates }: CalendarPo
           }}
           eventPropGetter={(event) => ({
             style: {
-              backgroundColor: (event as CalEvent).color,
-              borderColor: (event as CalEvent).color,
+              backgroundColor: event.color,
+              borderColor: event.color,
               color: "#fff",
               cursor: "pointer",
             },
@@ -152,7 +154,7 @@ export function CalendarPortal({ bookings, cleanings, blockedDates }: CalendarPo
           style={{ height: "100%" }}
         />
       </div>
-      <EventDetailModal meta={selectedMeta} onClose={() => setSelectedMeta(null)} />
+      <EventDetailModal meta={selectedMeta} onClose={handleClose} />
     </>
   )
 }

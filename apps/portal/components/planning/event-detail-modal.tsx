@@ -173,11 +173,16 @@ const TITLE: Record<EventMeta["type"], string> = {
 export function EventDetailModal({ meta, onClose }: EventDetailModalProps) {
   useEffect(() => {
     if (!meta) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose()
     }
     window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener("keydown", onKey)
+    }
   }, [meta, onClose])
 
   return (
@@ -204,10 +209,10 @@ export function EventDetailModal({ meta, onClose }: EventDetailModalProps) {
             className="fixed z-50 bottom-0 inset-x-0 sm:inset-auto sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:w-[380px] bg-white sm:rounded-2xl rounded-t-2xl shadow-luxury px-6 pt-6 pb-8"
             role="dialog"
             aria-modal="true"
-            aria-label={TITLE[meta.type]}
+            aria-labelledby="event-modal-title"
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-serif text-2xl text-garrigue-900 font-light italic">
+              <h2 id="event-modal-title" className="font-serif text-2xl text-garrigue-900 font-light italic">
                 {TITLE[meta.type]}.
               </h2>
               <button
