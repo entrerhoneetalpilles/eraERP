@@ -10,7 +10,6 @@ interface Report {
   revenus_sejours: number
   honoraires_deduits: number
   montant_reverse: number
-  document_id: string | null
 }
 
 interface RevenusTableProps {
@@ -64,15 +63,15 @@ export function RevenusTable({ reports, year }: RevenusTableProps) {
             <p className="text-sm font-semibold text-garrigue-900 text-right tabular-nums">
               {fmtEur(r.montant_reverse)}
             </p>
-            {r.document_id && (
-              <Link
-                href={`/api/pdf/crg/${r.id}`}
-                className="opacity-0 group-hover:opacity-100 transition-fast text-garrigue-400 hover:text-olivier-600"
-                title="Télécharger le CRG"
-              >
-                <Download size={14} />
-              </Link>
-            )}
+            <Link
+              href={`/api/pdf/crg/${r.id}`}
+              className="opacity-0 group-hover:opacity-100 transition-fast text-garrigue-400 hover:text-olivier-600"
+              title="Télécharger le CRG"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Download size={14} />
+            </Link>
           </div>
         </div>
       ))}
