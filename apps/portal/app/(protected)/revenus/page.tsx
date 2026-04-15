@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { getOwnerReports } from "@/lib/dal/revenus"
 import { RevenusTable } from "@/components/revenus/revenus-table"
+import { RevenusChart } from "@/components/revenus/revenus-chart"
 import { YearFilter } from "@/components/revenus/year-filter"
 
 export default async function RevenusPage({
@@ -28,6 +29,7 @@ export default async function RevenusPage({
         </div>
         <YearFilter years={years} selected={selectedYear} />
       </div>
+      <RevenusChart reports={reports} />
       <RevenusTable reports={reports} year={selectedYear} />
     </div>
   )
