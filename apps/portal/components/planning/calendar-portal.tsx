@@ -128,7 +128,7 @@ export function CalendarPortal({ bookings, cleanings, blockedDates }: CalendarPo
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-soft p-4" style={{ height: 600 }}>
+      <div style={{ height: 600 }}>
         <Calendar<CalEvent>
           localizer={localizer}
           events={events}

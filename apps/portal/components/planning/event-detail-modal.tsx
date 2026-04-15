@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, User, Calendar, Home, Clock, BedDouble } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { STATUT_LABELS, STATUT_STYLES } from "@/lib/booking-statuts"
 
 export type BookingMeta = {
   type: "booking"
@@ -37,19 +38,6 @@ interface EventDetailModalProps {
   onClose: () => void
 }
 
-const STATUT_LABELS: Record<string, string> = {
-  CONFIRMED: "Confirmée",
-  CHECKEDIN: "En cours",
-  CHECKEDOUT: "Terminée",
-  PENDING: "En attente",
-}
-
-const STATUT_STYLES: Record<string, string> = {
-  CONFIRMED: "bg-blue-50 text-blue-600",
-  CHECKEDIN: "bg-olivier-50 text-olivier-600",
-  CHECKEDOUT: "bg-gray-100 text-gray-500",
-  PENDING: "bg-amber-50 text-amber-600",
-}
 
 function fmtDate(d: Date) {
   return format(d, "d MMMM yyyy", { locale: fr })

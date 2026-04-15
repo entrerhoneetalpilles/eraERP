@@ -7,6 +7,7 @@ import Link from "next/link"
 import { ArrowLeft, Home } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { STATUT_LABELS, STATUT_STYLES } from "@/lib/booking-statuts"
 
 function extractVille(adresse: unknown): string | null {
   if (adresse && typeof adresse === "object") {
@@ -17,19 +18,6 @@ function extractVille(adresse: unknown): string | null {
   return null
 }
 
-const STATUT_LABELS: Record<string, string> = {
-  CONFIRMED: "Confirmé",
-  CHECKEDIN: "En cours",
-  CHECKEDOUT: "Terminé",
-  PENDING: "En attente",
-}
-
-const STATUT_STYLES: Record<string, string> = {
-  CONFIRMED: "bg-blue-50 text-blue-600",
-  CHECKEDIN: "bg-emerald-50 text-emerald-600",
-  CHECKEDOUT: "bg-gray-100 text-gray-500",
-  PENDING: "bg-amber-50 text-amber-600",
-}
 
 export default async function BienDetailPage({ params }: { params: { id: string } }) {
   const session = await auth()

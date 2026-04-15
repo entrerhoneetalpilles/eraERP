@@ -52,7 +52,7 @@ export function PropertyAccessCard({
                   <button
                     type="button"
                     onClick={() => setShowWifi((v) => !v)}
-                    className="text-garrigue-400 hover:text-garrigue-700 transition-fast cursor-pointer"
+                    className="text-garrigue-400 hover:text-garrigue-700 transition-fast cursor-pointer focus-visible:ring-2 focus-visible:ring-or-400 focus-visible:ring-offset-1 rounded-sm outline-none"
                     aria-label={showWifi ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                   >
                     {showWifi ? <EyeOff size={13} /> : <Eye size={13} />}
@@ -79,7 +79,7 @@ export function PropertyAccessCard({
                 <button
                   type="button"
                   onClick={() => setShowCode((v) => !v)}
-                  className="text-garrigue-400 hover:text-garrigue-700 transition-fast cursor-pointer"
+                  className="text-garrigue-400 hover:text-garrigue-700 transition-fast cursor-pointer focus-visible:ring-2 focus-visible:ring-or-400 focus-visible:ring-offset-1 rounded-sm outline-none"
                   aria-label={showCode ? "Masquer le code" : "Afficher le code"}
                 >
                   {showCode ? <EyeOff size={13} /> : <Eye size={13} />}
