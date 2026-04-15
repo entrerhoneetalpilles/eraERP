@@ -1,17 +1,15 @@
 "use server"
 
 import { auth } from "@/auth"
-import { db } from "@conciergerie/db"
+import { getOwnerDocument } from "@/lib/dal/documents"
 import { getPresignedDownloadUrl } from "@conciergerie/storage"
 
 export async function getDocumentViewUrlAction(id: string) {
   const session = await auth()
   if (!session?.user?.ownerId) return { error: "Non autorisé" }
 
-  const doc = await db.document.findUnique({ where: { id } })
-  if (!doc) return { error: "Document introuvable" }
-
-  if (doc.owner_id !== session.user.ownerId) return { error: "Accès refusé" }
+  const doc = await getOwnerDocument(session.user.ownerId, id)
+  if (!doc) return { error: "Document introuvable ou accès refusé" }
 
   const publicBase = process.env.S3_PUBLIC_URL
   if (publicBase && doc.url_storage.startsWith(publicBase)) {
