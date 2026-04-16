@@ -9,7 +9,7 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "bones": "boneyard-js build"
+    "bones": "boneyard-js build http://localhost:3001/boneyard"
   },
   "dependencies": {
     "@auth/core": "0.41.1",
