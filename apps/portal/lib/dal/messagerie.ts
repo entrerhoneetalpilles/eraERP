@@ -73,3 +73,40 @@ export async function sendOwnerMessage(
 
   return message
 }
+
+export async function getOwnerUnreadCount(ownerId: string): Promise<number> {
+  return db.message.count({
+    where: {
+      thread: { owner_id: ownerId },
+      author_type: "USER",
+      lu_at: null,
+    },
+  })
+}
+
+export async function createOwnerThread(
+  ownerId: string,
+  subject: string,
+  contenu: string
+) {
+  return db.$transaction(async (tx) => {
+    const thread = await tx.messageThread.create({
+      data: {
+        owner_id: ownerId,
+        subject,
+        to_name: "Équipe ERA",
+        contact_type: "autre",
+        folder: "inbox",
+      },
+    })
+    await tx.message.create({
+      data: {
+        thread_id: thread.id,
+        author_type: "OWNER",
+        author_id: ownerId,
+        contenu,
+      },
+    })
+    return thread
+  })
+}

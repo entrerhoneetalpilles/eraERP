@@ -3,6 +3,8 @@ import { redirect } from "next/navigation"
 import { PortalHeader } from "@/components/layout/portal-header"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { SidebarNav } from "@/components/layout/sidebar-nav"
+import { getOwnerUnreadCount } from "@/lib/dal/messagerie"
+import { getPendingDevisForOwner } from "@/lib/dal/travaux"
 
 export default async function PortalProtectedLayout({
   children,
@@ -14,11 +16,20 @@ export default async function PortalProtectedLayout({
   if (!session?.user) redirect("/login")
   if (session.user.mfaRequired && !session.user.mfaVerified) redirect("/login/mfa")
 
+  const ownerId = session.user.ownerId ?? null
+
+  const [unreadCount, pendingDevis] = await Promise.all([
+    ownerId ? getOwnerUnreadCount(ownerId) : Promise.resolve(0),
+    ownerId ? getPendingDevisForOwner(ownerId) : Promise.resolve([]),
+  ])
+
   return (
     <div className="flex min-h-screen bg-calcaire-100">
       <SidebarNav
         userName={session.user.name ?? "Propriétaire"}
         userEmail={session.user.email ?? ""}
+        unreadCount={unreadCount}
+        pendingDevisCount={pendingDevis.length}
       />
       <div className="flex flex-col flex-1 min-w-0">
         <PortalHeader />
@@ -26,7 +37,7 @@ export default async function PortalProtectedLayout({
           {children}
         </main>
       </div>
-      <BottomNav />
+      <BottomNav unreadCount={unreadCount} />
     </div>
   )
 }

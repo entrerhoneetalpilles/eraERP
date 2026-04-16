@@ -12,7 +12,11 @@ const NAV_ITEMS = [
   { href: "/messagerie", icon: MessageCircle, label: "Messages" },
 ]
 
-export function BottomNav() {
+interface BottomNavProps {
+  unreadCount: number
+}
+
+export function BottomNav({ unreadCount }: BottomNavProps) {
   const pathname = usePathname()
 
   return (
@@ -24,6 +28,8 @@ export function BottomNav() {
       <ul className="flex h-16 bg-white/95 backdrop-blur-xl rounded-2xl shadow-luxury-card border border-argile-200/60 overflow-hidden">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
           const active = pathname === href || pathname.startsWith(href + "/")
+          const isMessages = href === "/messagerie"
+          const showBadge = isMessages && unreadCount > 0
           return (
             <li key={href} className="flex-1">
               <Link
@@ -33,11 +39,18 @@ export function BottomNav() {
                   active ? "text-or-500" : "text-garrigue-400 hover:text-garrigue-700"
                 }`}
               >
-                <Icon
-                  size={20}
-                  strokeWidth={active ? 2 : 1.6}
-                  className="transition-fast"
-                />
+                <div className="relative">
+                  <Icon
+                    size={20}
+                    strokeWidth={active ? 2 : 1.6}
+                    className="transition-fast"
+                  />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1.5 text-[8px] font-bold text-white bg-or-500 rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 tabular-nums">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span className={`text-[10px] font-medium tracking-wide transition-fast ${
                   active ? "text-or-500" : "text-garrigue-400"
                 }`}>
