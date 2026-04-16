@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Cormorant_Garamond, Inter } from "next/font/google"
 import { Toaster } from "sonner"
 import "./globals.css"
-import "../bones/registry"
+import { BonesProvider } from "@/components/bones-provider"
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${cormorant.variable} ${inter.variable} font-sans antialiased`}>
+        <BonesProvider />
         {children}
         <Toaster
           position="top-center"

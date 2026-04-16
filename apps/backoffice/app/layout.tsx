@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Toaster } from "sonner"
 import "./globals.css"
-import "../bones/registry"
+import { BonesProvider } from "@/components/bones-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -19,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <BonesProvider />
         {children}
         <Toaster richColors position="top-right" />
       </body>
