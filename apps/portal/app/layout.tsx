@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Cormorant_Garamond, Inter } from "next/font/google"
 import { Toaster } from "sonner"
 import "./globals.css"
+import "../bones/registry"
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],

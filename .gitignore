@@ -34,3 +34,6 @@ Thumbs.db
 coverage/
 packages/db/.env
 arborescence.txt
+
+# boneyard generated bone files (regenerate with pnpm bones)
+apps/*/bones/
