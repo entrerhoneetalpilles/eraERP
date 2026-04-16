@@ -21,7 +21,7 @@ export async function getWorkOrderForOwner(ownerId: string, workOrderId: string)
       property: { mandate: { owner_id: ownerId } },
     },
     include: {
-      property: { select: { nom: true, adresse: true } },
+      property: { select: { nom: true } },
       contractor: { select: { nom: true, metier: true, telephone: true } },
     },
   })
