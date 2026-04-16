@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { getOwnerThreads } from "@/lib/dal/messagerie"
+import { NewThreadButton } from "@/components/messagerie/new-thread-button"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -14,7 +15,11 @@ export default async function MessageriePage() {
 
   return (
     <div className="space-y-4 max-w-3xl">
-      <h1 className="font-serif text-4xl text-garrigue-900 font-light italic mb-6">Messages.</h1>
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <h1 className="font-serif text-4xl text-garrigue-900 font-light italic">Messages.</h1>
+        <NewThreadButton />
+      </div>
+
       {threads.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-garrigue-400">
           <MessageCircle size={40} />
@@ -30,7 +35,7 @@ export default async function MessageriePage() {
                 key={t.id}
                 href={`/messagerie/${t.id}`}
                 className={`block bg-white rounded-xl p-4 shadow-luxury-card border transition-smooth hover:shadow-luxury cursor-pointer ${
-                  unread > 0 ? "border-l-4 border-l-or-400" : ""
+                  unread > 0 ? "border-l-4 border-l-or-400" : "border-argile-200/40"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -43,7 +48,6 @@ export default async function MessageriePage() {
                     </span>
                   )}
                 </div>
-                {/* Contact name */}
                 <p className="text-xs text-garrigue-400 mt-0.5 font-medium">
                   {t.to_name ?? "Équipe ERA"}
                 </p>
