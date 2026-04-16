@@ -12,6 +12,8 @@ import { VirementEffectueEmail } from "./templates/virement-effectue"
 import { ResetPasswordEmail } from "./templates/reset-password"
 import { NouveauMessageEmail } from "./templates/nouveau-message"
 import { MenageAssignEmail } from "./templates/menage-assign"
+import { AttestationFiscaleEmail } from "./templates/attestation-fiscale"
+import { MandatRenewalEmail } from "./templates/mandat-renewal"
 
 const FROM = "Entre Rhône et Alpilles <contact@entre-rhone-alpilles.fr>"
 
@@ -158,4 +160,41 @@ export async function sendMenageAssignEmail(props: {
   const { to, ...rest } = props
   const html = await render(MenageAssignEmail(rest))
   return sendEmail({ to, subject: `Tâche ménage assignée — ${props.propertyName}`, html, from: FROM })
+}
+
+export async function sendAttestationFiscaleEmail(props: {
+  to: string
+  ownerName: string
+  annee: number
+  totalLoyers: number
+  totalHonoraires: number
+  totalCharges: number
+  totalVerse: number
+  portalUrl: string
+}) {
+  const fmt = (n: number) =>
+    n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 })
+  const { to, annee, totalLoyers, totalHonoraires, totalCharges, totalVerse, ...rest } = props
+  const html = await render(AttestationFiscaleEmail({
+    ...rest,
+    annee,
+    totalLoyers: fmt(totalLoyers),
+    totalHonoraires: fmt(totalHonoraires),
+    totalCharges: fmt(totalCharges),
+    totalVerse: fmt(totalVerse),
+  }))
+  return sendEmail({ to, subject: `Votre attestation fiscale ${annee}`, html, from: FROM })
+}
+
+export async function sendMandatRenewalEmail(props: {
+  to: string
+  ownerName: string
+  numeroMandat: string
+  dateExpiration: string
+  joursRestants: number
+  backofficeUrl: string
+}) {
+  const { to, ...rest } = props
+  const html = await render(MandatRenewalEmail(rest))
+  return sendEmail({ to, subject: `Renouvellement mandat ${props.numeroMandat} — ${props.joursRestants}j restants`, html, from: FROM })
 }

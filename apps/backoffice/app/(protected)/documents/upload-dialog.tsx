@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { Button } from "@conciergerie/ui"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog"
 import { Upload, X, FileText, Image, File } from "lucide-react"
 import { toast } from "sonner"
-import { uploadDocumentAction } from "./actions"
+import { uploadDocumentAction, listOwnersForSelectAction } from "./actions"
 
 const DOC_TYPES = [
   { value: "MANDAT", label: "Mandat" },
@@ -34,6 +34,8 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+interface Owner { id: string; nom: string }
+
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -44,9 +46,17 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
   const [files, setFiles] = useState<File[]>([])
   const [type, setType] = useState<string>("AUTRE")
   const [dateExpiration, setDateExpiration] = useState<string>("")
+  const [ownerId, setOwnerId] = useState<string>("")
+  const [owners, setOwners] = useState<Owner[]>([])
   const [uploading, setUploading] = useState(false)
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (open && owners.length === 0) {
+      listOwnersForSelectAction().then(setOwners)
+    }
+  }, [open, owners.length])
 
   const addFiles = useCallback((newFiles: FileList | File[]) => {
     setFiles((prev) => {
@@ -87,6 +97,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
       fd.set("entity_type", "document")
       fd.set("entity_id", "misc")
       if (dateExpiration) fd.set("date_expiration", dateExpiration)
+      if (ownerId) fd.set("owner_id", ownerId)
 
       const result = await uploadDocumentAction(fd)
       if (result.error) errors++
@@ -97,6 +108,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
       toast.success(`${files.length} fichier${files.length > 1 ? "s" : ""} importé${files.length > 1 ? "s" : ""}`)
       setFiles([])
       setDateExpiration("")
+      setOwnerId("")
       onUploaded()
       onOpenChange(false)
     } else {
@@ -123,6 +135,23 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
             >
               {DOC_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Propriétaire */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">
+              Propriétaire <span className="font-normal text-muted-foreground">(optionnel)</span>
+            </label>
+            <select
+              value={ownerId}
+              onChange={(e) => setOwnerId(e.target.value)}
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">— Aucun —</option>
+              {owners.map((o) => (
+                <option key={o.id} value={o.id}>{o.nom}</option>
               ))}
             </select>
           </div>
@@ -189,7 +218,7 @@ export function UploadDialog({ open, onOpenChange, onUploaded }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => { onOpenChange(false); setFiles([]); setDateExpiration("") }}>
+          <Button variant="outline" onClick={() => { onOpenChange(false); setFiles([]); setDateExpiration(""); setOwnerId("") }}>
             Annuler
           </Button>
           <Button

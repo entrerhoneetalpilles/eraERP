@@ -131,6 +131,17 @@ export async function fetchDocumentsAction(filters?: {
   return getDocuments(filters)
 }
 
+// ─── List owners for upload dialog ────────────────────────────────────────────
+
+export async function listOwnersForSelectAction() {
+  const session = await auth()
+  if (!session?.user) return []
+  return db.owner.findMany({
+    select: { id: true, nom: true },
+    orderBy: { nom: "asc" },
+  })
+}
+
 // ─── Generate mandate PDF ──────────────────────────────────────────────────────
 
 export async function saveMandatePdfAction(mandateId: string) {

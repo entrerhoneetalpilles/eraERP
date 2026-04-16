@@ -10,6 +10,8 @@ export { VirementEffectueEmail } from "./templates/virement-effectue"
 export { ResetPasswordEmail } from "./templates/reset-password"
 export { NouveauMessageEmail } from "./templates/nouveau-message"
 export { MenageAssignEmail } from "./templates/menage-assign"
+export { AttestationFiscaleEmail } from "./templates/attestation-fiscale"
+export { MandatRenewalEmail } from "./templates/mandat-renewal"
 export {
   sendWelcomeEmail,
   sendBookingConfirmedEmail,
@@ -22,4 +24,6 @@ export {
   sendResetPasswordEmail,
   sendNouveauMessageEmail,
   sendMenageAssignEmail,
+  sendAttestationFiscaleEmail,
+  sendMandatRenewalEmail,
 } from "./render"

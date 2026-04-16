@@ -15,6 +15,14 @@
     {
       "path": "/api/cron/document-expiry",
       "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/attestation-fiscale",
+      "schedule": "0 9 31 1 *"
+    },
+    {
+      "path": "/api/cron/mandat-renewal",
+      "schedule": "0 8 * * *"
     }
   ]
 }
