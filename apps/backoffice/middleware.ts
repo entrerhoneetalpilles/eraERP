@@ -20,7 +20,8 @@ export default auth(async (req) => {
   const isAuthRoute = pathname.startsWith("/login")
   const isApiAuthRoute = pathname.startsWith("/api/auth")
   const isWebhookRoute = pathname.startsWith("/api/webhooks")
-  if (isAuthRoute || isApiAuthRoute || isWebhookRoute) return NextResponse.next()
+  const isBoneyardRoute = pathname === "/boneyard" && process.env.NODE_ENV === "development"
+  if (isAuthRoute || isApiAuthRoute || isWebhookRoute || isBoneyardRoute) return NextResponse.next()
 
   // Non authentifié → login
   if (!session?.user) {

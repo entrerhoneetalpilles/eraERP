@@ -12,7 +12,8 @@ export default auth((req) => {
   const isPublicRoute =
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/auth") ||
-    pathname === "/"
+    pathname === "/" ||
+    (pathname === "/boneyard" && process.env.NODE_ENV === "development")
 
   if (isPublicRoute) return NextResponse.next()
 
