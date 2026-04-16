@@ -1,5 +1,6 @@
+"use client"
 // Dev-only scan target for `npx boneyard-js build http://localhost:3001/boneyard`
-// Not accessible in production.
+// Must be a client component so <Skeleton> can mount and register __BONEYARD_SNAPSHOT.
 import { notFound } from "next/navigation"
 import { Skeleton } from "boneyard-js/react"
 import {
