@@ -22,7 +22,7 @@ function DocIcon({ mimeType }: { mimeType?: string | null }) {
   return <FileText size={20} strokeWidth={1.6} />
 }
 
-function ExpiryBadge({ date }: { date: Date | null }) {
+function ExpiryBadge({ date }: { date?: Date | null }) {
   if (!date) return null
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -54,13 +54,19 @@ interface DocumentCardProps {
   type: string
   mime_type?: string | null
   createdAt: Date
-  date_expiration: Date | null
+  date_expiration?: Date | null | undefined
+  /** Direct URL — used for invoices that stream from an API route */
+  pdfUrl?: string
 }
 
-export function DocumentCard({ id, nom, type, mime_type, createdAt, date_expiration }: DocumentCardProps) {
+export function DocumentCard({ id, nom, type, mime_type, createdAt, date_expiration, pdfUrl }: DocumentCardProps) {
   const [loading, setLoading] = useState(false)
 
   const handleDownload = async () => {
+    if (pdfUrl) {
+      window.open(pdfUrl, "_blank", "noopener,noreferrer")
+      return
+    }
     setLoading(true)
     const result = await getDocumentViewUrlAction(id)
     setLoading(false)
@@ -97,7 +103,7 @@ export function DocumentCard({ id, nom, type, mime_type, createdAt, date_expirat
         onClick={handleDownload}
         disabled={loading}
         aria-label={`Télécharger ${nom}`}
-        className="w-8 h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 hover:bg-calcaire-100 text-garrigue-400 hover:text-olivier-600 transition-fast cursor-pointer shrink-0 disabled:opacity-50"
+        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-calcaire-100 text-garrigue-400 hover:text-olivier-600 transition-fast cursor-pointer shrink-0 disabled:opacity-50"
       >
         <Download size={15} />
       </button>
