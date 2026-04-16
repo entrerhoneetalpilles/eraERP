@@ -9,6 +9,7 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
+    "bones": "boneyard-js build",
     "postinstall": "prisma generate --schema=../../packages/db/prisma/schema.prisma"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "@upstash/ratelimit": "^2.0.0",
     "@upstash/redis": "^1.34.0",
     "bcryptjs": "^2.4.3",
+    "boneyard-js": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^4.1.0",
