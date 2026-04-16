@@ -1,3 +1,4 @@
+"use client"
 import { Skeleton } from "boneyard-js/react"
 import { SkeletonStatCard, SkeletonTable } from "@/components/ui/skeleton"
 
