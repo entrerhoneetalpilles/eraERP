@@ -35,5 +35,16 @@ coverage/
 packages/db/.env
 arborescence.txt
 
-# boneyard generated bone files (regenerate with pnpm bones)
-apps/*/bones/
+# boneyard — bone JSON data is local measurements, regenerate with pnpm bones
+apps/*/bones/*.json
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# graphify knowledge graph output
+graphify-out/
+apps/*/graphify-out/
+
+# Claude Code IDE settings (personal, not project)
+.claude/settings.json
+.claude/settings.local.json
