@@ -7,6 +7,66 @@ import { createFeeInvoice, getNextInvoiceNumber } from "@/lib/dal/facturation"
 import { getOwnerById } from "@/lib/dal/owners"
 import { sendFactureEmail } from "@conciergerie/email"
 import { logEmail } from "@/lib/dal/email-log"
+import { auth } from "@/auth"
+import { db } from "@conciergerie/db"
+
+export interface RevenusItem {
+  propertyId: string
+  propertyName: string
+  taux: number
+  revenusNet: number
+  honoraires: number
+  nbSejours: number
+}
+
+export async function getRevenusForFactureAction(
+  ownerId: string,
+  periodStart: string,
+  periodEnd: string
+): Promise<{ error?: string; items?: RevenusItem[]; totalHonoraires?: number }> {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  if (!ownerId || !periodStart || !periodEnd) return { error: "Paramètres manquants" }
+
+  const bookings = await db.booking.findMany({
+    where: {
+      statut: { in: ["CONFIRMED", "CHECKEDIN", "CHECKEDOUT"] },
+      check_out: { gte: new Date(periodStart), lte: new Date(periodEnd) },
+      property: { mandate: { owner_id: ownerId } },
+    },
+    include: { property: { include: { mandate: true } } },
+  })
+
+  const byProperty = new Map<string, { nom: string; taux: number; revenu: number; nb: number }>()
+  for (const b of bookings) {
+    const mandate = b.property.mandate
+    if (!mandate) continue
+    const existing = byProperty.get(b.property_id)
+    if (existing) {
+      existing.revenu += b.revenu_net_proprietaire
+      existing.nb++
+    } else {
+      byProperty.set(b.property_id, {
+        nom: b.property.nom,
+        taux: mandate.taux_honoraires,
+        revenu: b.revenu_net_proprietaire,
+        nb: 1,
+      })
+    }
+  }
+
+  const items: RevenusItem[] = Array.from(byProperty.entries()).map(([propertyId, d]) => ({
+    propertyId,
+    propertyName: d.nom,
+    taux: d.taux,
+    revenusNet: Math.round(d.revenu * 100) / 100,
+    honoraires: Math.round(d.revenu * d.taux * 100) / 100,
+    nbSejours: d.nb,
+  }))
+
+  const totalHonoraires = items.reduce((s, i) => s + i.honoraires, 0)
+  return { items, totalHonoraires }
+}
 
 export async function createFactureAction(_prev: unknown, formData: FormData) {
   const raw = {

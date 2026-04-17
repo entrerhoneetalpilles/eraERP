@@ -5,8 +5,8 @@ import { useState, useCallback } from "react"
 import Link from "next/link"
 import { PageHeader } from "@/components/ui/page-header"
 import { Button, Input, Label } from "@conciergerie/ui"
-import { createFactureAction } from "./actions"
-import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react"
+import { createFactureAction, getRevenusForFactureAction, type RevenusItem } from "./actions"
+import { ArrowLeft, Plus, Trash2, Sparkles, Loader2 } from "lucide-react"
 import { computeLineItemHT, computeTotalsFromLineItems } from "@/lib/validations/facture"
 
 interface LineItem {
@@ -45,6 +45,45 @@ export function NewFactureForm({ owners, nextNumber }: Props) {
   const [globalHT, setGlobalHT] = useState("")
   const [globalTVA, setGlobalTVA] = useState(0.2)
   const [useLineItems, setUseLineItems] = useState(true)
+
+  // Auto-calc from bookings
+  const [selectedOwner, setSelectedOwner] = useState("")
+  const [dateDebut, setDateDebut] = useState("")
+  const [dateFin, setDateFin] = useState("")
+  const [autoCalcLoading, setAutoCalcLoading] = useState(false)
+  const [autoCalcResult, setAutoCalcResult] = useState<RevenusItem[] | null>(null)
+  const [autoCalcError, setAutoCalcError] = useState<string | null>(null)
+
+  async function handleAutoCalc() {
+    if (!selectedOwner || !dateDebut || !dateFin) return
+    setAutoCalcLoading(true)
+    setAutoCalcResult(null)
+    setAutoCalcError(null)
+    const result = await getRevenusForFactureAction(selectedOwner, dateDebut, dateFin)
+    setAutoCalcLoading(false)
+    if (result.error) {
+      setAutoCalcError(result.error)
+    } else {
+      setAutoCalcResult(result.items ?? [])
+    }
+  }
+
+  function injectAutoCalcLines() {
+    if (!autoCalcResult?.length) return
+    const currentTva = lines[0]?.tva_rate ?? 0
+    setLines(
+      autoCalcResult.map((item) => ({
+        id: String(nextId++),
+        description: `Honoraires de gestion ${Math.round(item.taux * 100)}% — ${item.propertyName}`,
+        quantite: 1,
+        unite: "forfait",
+        prix_unitaire: item.honoraires,
+        tva_rate: currentTva,
+      }))
+    )
+    setUseLineItems(true)
+    setAutoCalcResult(null)
+  }
 
   const updateLine = useCallback((id: string, field: keyof LineItem, value: string | number) => {
     setLines((prev) =>
@@ -119,7 +158,8 @@ export function NewFactureForm({ owners, nextNumber }: Props) {
             <div className="space-y-2">
               <Label htmlFor="owner_id" className="text-sm font-medium">Propriétaire *</Label>
               <select
-                id="owner_id" name="owner_id" defaultValue=""
+                id="owner_id" name="owner_id" value={selectedOwner}
+                onChange={(e) => { setSelectedOwner(e.target.value); setAutoCalcResult(null) }}
                 className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
               >
                 <option value="" disabled>Sélectionner un propriétaire…</option>
@@ -140,12 +180,18 @@ export function NewFactureForm({ owners, nextNumber }: Props) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label htmlFor="periode_debut" className="text-sm font-medium">Début *</Label>
-              <Input id="periode_debut" name="periode_debut" type="date" className="h-10" />
+              <Input
+                id="periode_debut" name="periode_debut" type="date" className="h-10"
+                value={dateDebut} onChange={(e) => { setDateDebut(e.target.value); setAutoCalcResult(null) }}
+              />
               {state?.error?.periode_debut && <p className="text-xs text-destructive">{state.error.periode_debut[0]}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="periode_fin" className="text-sm font-medium">Fin *</Label>
-              <Input id="periode_fin" name="periode_fin" type="date" className="h-10" />
+              <Input
+                id="periode_fin" name="periode_fin" type="date" className="h-10"
+                value={dateFin} onChange={(e) => { setDateFin(e.target.value); setAutoCalcResult(null) }}
+              />
               {state?.error?.periode_fin && <p className="text-xs text-destructive">{state.error.periode_fin[0]}</p>}
             </div>
             <div className="space-y-2 col-span-2">
@@ -155,6 +201,84 @@ export function NewFactureForm({ owners, nextNumber }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Section — Auto-calcul depuis les réservations */}
+        {selectedOwner && dateDebut && dateFin && (
+          <div className="px-6 py-4 border-t border-border bg-muted/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">Calcul automatique des honoraires</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Calcule les honoraires depuis les séjours confirmés (check-out dans la période)
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAutoCalc}
+                disabled={autoCalcLoading}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 cursor-pointer transition-colors"
+              >
+                {autoCalcLoading
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Calcul…</>
+                  : <><Sparkles className="w-3.5 h-3.5" /> Auto-calculer</>
+                }
+              </button>
+            </div>
+
+            {autoCalcError && (
+              <p className="mt-3 text-sm text-destructive">{autoCalcError}</p>
+            )}
+
+            {autoCalcResult !== null && (
+              <div className="mt-3 space-y-2">
+                {autoCalcResult.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucun séjour confirmé trouvé sur cette période pour ce propriétaire.</p>
+                ) : (
+                  <>
+                    <div className="rounded-md border border-border overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/40">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">Bien</th>
+                            <th className="px-3 py-2 text-right font-medium text-muted-foreground">Séjours</th>
+                            <th className="px-3 py-2 text-right font-medium text-muted-foreground">Revenus nets</th>
+                            <th className="px-3 py-2 text-right font-medium text-muted-foreground">Taux</th>
+                            <th className="px-3 py-2 text-right font-medium text-muted-foreground">Honoraires</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {autoCalcResult.map((item) => (
+                            <tr key={item.propertyId} className="bg-background">
+                              <td className="px-3 py-2 font-medium">{item.propertyName}</td>
+                              <td className="px-3 py-2 text-right text-muted-foreground">{item.nbSejours}</td>
+                              <td className="px-3 py-2 text-right">{item.revenusNet.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €</td>
+                              <td className="px-3 py-2 text-right text-muted-foreground">{Math.round(item.taux * 100)}%</td>
+                              <td className="px-3 py-2 text-right font-semibold text-primary">{item.honoraires.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €</td>
+                            </tr>
+                          ))}
+                          <tr className="bg-muted/30 font-semibold">
+                            <td className="px-3 py-2" colSpan={4}>Total honoraires HT</td>
+                            <td className="px-3 py-2 text-right text-primary">
+                              {autoCalcResult.reduce((s, i) => s + i.honoraires, 0).toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={injectAutoCalcLines}
+                      className="flex items-center gap-2 text-sm text-primary hover:underline cursor-pointer font-medium"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Utiliser ces données comme lignes de prestation
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Section — Lignes de prestation */}
         <div className="px-6 py-5 border-t border-border space-y-4">
