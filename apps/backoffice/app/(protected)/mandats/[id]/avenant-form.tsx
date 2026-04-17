@@ -148,13 +148,14 @@ export function AvenantForm({ mandateId, avenants }: { mandateId: string; avenan
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{avenant.description}</p>
-                  {avenant.modifications && typeof avenant.modifications === "object" &&
-                    "texte" in (avenant.modifications as Record<string, unknown>) &&
-                    (avenant.modifications as Record<string, string>).texte && (
-                      <p className="text-xs text-muted-foreground/70 mt-1 italic">
-                        {(avenant.modifications as Record<string, string>).texte}
-                      </p>
-                  )}
+                  {(() => {
+                    const m = avenant.modifications
+                    if (m && typeof m === "object" && !Array.isArray(m) && "texte" in (m as Record<string, unknown>)) {
+                      const texte = String((m as Record<string, unknown>).texte ?? "")
+                      if (texte) return <p className="text-xs text-muted-foreground/70 mt-1 italic">{texte}</p>
+                    }
+                    return null
+                  })()}
                 </div>
                 <button
                   onClick={() => handleDelete(avenant.id)}
