@@ -828,6 +828,28 @@ enum DocStatus {
   MANQUANT
 }
 
+// ─── PDF TEMPLATES ─────────────────────────────────────────────
+
+model PdfTemplate {
+  id         String          @id @default(cuid())
+  nom        String
+  type       PdfTemplateType
+  config     Json
+  is_default Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@map("pdf_templates")
+}
+
+enum PdfTemplateType {
+  FACTURE
+  DEVIS
+  MANDAT
+  CONTRAT
+  QUITTANCE
+}
+
 // ─── SERVICES ADDITIONNELS ─────────────────────────────────────
 
 model ServiceCatalog {

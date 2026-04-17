@@ -21,6 +21,7 @@ import {
   Mail,
   FolderOpen,
   ClipboardList,
+  LayoutTemplate,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -69,6 +70,12 @@ const NAV_SECTIONS = [
       { href: "/prestataires", label: "Prestataires", icon: HardHat },
       { href: "/travaux", label: "Travaux", icon: Wrench },
       { href: "/devis", label: "Devis", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "Configuration",
+    items: [
+      { href: "/modeles", label: "Modèles PDF", icon: LayoutTemplate },
     ],
   },
 ]
