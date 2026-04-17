@@ -15,7 +15,7 @@ const KPI_CONFIG = [
   { key: "totalOwners" as const, label: "Propriétaires", icon: Users, href: "/proprietaires", colorClass: "bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400" },
   { key: "totalProperties" as const, label: "Biens actifs", icon: Building2, href: "/biens", colorClass: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" },
   { key: "activeBookings" as const, label: "Réservations actives", icon: CalendarDays, href: "/reservations", colorClass: "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400" },
-  { key: "revenuMoisCourant" as const, label: "Revenus ce mois", icon: TrendingUp, href: "/comptabilite", colorClass: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400", format: (v: number) => fmt(v) },
+  { key: "honorairesMoisCourant" as const, label: "Honoraires ce mois", icon: TrendingUp, href: "/facturation", colorClass: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400", format: (v: number) => fmt(v) },
   { key: "pendingTravaux" as const, label: "Travaux ouverts", icon: Wrench, href: "/travaux", colorClass: "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400" },
 ]
 

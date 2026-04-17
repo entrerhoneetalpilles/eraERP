@@ -1,35 +1,126 @@
 import { db } from "@conciergerie/db"
 
-export async function getMandantAccounts() {
-  const accounts = await db.mandantAccount.findMany({
+export async function getComptabiliteList() {
+  const now = new Date()
+  const owners = await db.owner.findMany({
     include: {
-      owner: { select: { id: true, nom: true, email: true } },
-      _count: { select: { transactions: true } },
+      feeInvoices: {
+        where: { statut: { not: "BROUILLON" } },
+        select: {
+          statut: true, montant_ht: true, montant_ttc: true,
+          date_echeance: true, createdAt: true,
+        },
+      },
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { nom: "asc" },
   })
 
-  const totalSolde = accounts.reduce((s, a) => s + a.solde_courant, 0)
-  const totalSequestre = accounts.reduce((s, a) => s + a.solde_sequestre, 0)
-  return { accounts, totalSolde, totalSequestre }
+  const rows = owners.map(owner => {
+    const inv = owner.feeInvoices
+    const totalHT = inv.reduce((s, i) => s + i.montant_ht, 0)
+    const encaisseTTC = inv.filter(i => i.statut === "PAYEE").reduce((s, i) => s + i.montant_ttc, 0)
+    const emises = inv.filter(i => i.statut === "EMISE")
+    const enAttenteTTC = emises.reduce((s, i) => s + i.montant_ttc, 0)
+    const enRetardTTC = emises
+      .filter(i => i.date_echeance && new Date(i.date_echeance) < now)
+      .reduce((s, i) => s + i.montant_ttc, 0)
+    return {
+      id: owner.id,
+      owner: { id: owner.id, nom: owner.nom, email: owner.email },
+      totalHT,
+      encaisseTTC,
+      enAttenteTTC,
+      enRetardTTC,
+      nbFactures: inv.length,
+      nbEnAttente: emises.length,
+    }
+  })
+
+  const totaux = {
+    totalHT: rows.reduce((s, r) => s + r.totalHT, 0),
+    encaisseTTC: rows.reduce((s, r) => s + r.encaisseTTC, 0),
+    enAttenteTTC: rows.reduce((s, r) => s + r.enAttenteTTC, 0),
+    enRetardTTC: rows.reduce((s, r) => s + r.enRetardTTC, 0),
+    nbOwners: rows.length,
+    nbAvecRetard: rows.filter(r => r.enRetardTTC > 0).length,
+  }
+
+  return { rows, totaux }
+}
+
+export async function getComptabiliteDetail(ownerId: string) {
+  const now = new Date()
+  const owner = await db.owner.findUnique({
+    where: { id: ownerId },
+    include: {
+      mandates: {
+        where: { statut: "ACTIF" },
+        include: { property: { select: { id: true, nom: true } } },
+      },
+      feeInvoices: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true, numero_facture: true, objet: true, statut: true,
+          montant_ht: true, montant_ttc: true, tva_rate: true,
+          createdAt: true, date_echeance: true, date_paiement: true,
+          mode_paiement: true, periode_debut: true, periode_fin: true,
+        },
+      },
+      mandantAccount: {
+        include: {
+          transactions: {
+            where: { type: { in: ["HONORAIRES", "TRAVAUX", "CHARGE"] } },
+            orderBy: { date: "desc" },
+            take: 100,
+          },
+        },
+      },
+    },
+  })
+  if (!owner) return null
+
+  const inv = owner.feeInvoices
+  const totalHT = inv.filter(i => i.statut !== "BROUILLON").reduce((s, i) => s + i.montant_ht, 0)
+  const encaisseTTC = inv.filter(i => i.statut === "PAYEE").reduce((s, i) => s + i.montant_ttc, 0)
+  const emises = inv.filter(i => i.statut === "EMISE")
+  const enAttenteTTC = emises.reduce((s, i) => s + i.montant_ttc, 0)
+  const enRetardTTC = emises
+    .filter(i => i.date_echeance && new Date(i.date_echeance) < now)
+    .reduce((s, i) => s + i.montant_ttc, 0)
+  const tauxRecouvrement = totalHT > 0 ? Math.round((encaisseTTC / (totalHT * (1 + (inv[0]?.tva_rate ?? 0.2)))) * 100) : 0
+
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+  const honorairesCeMois = inv
+    .filter(i => i.statut !== "BROUILLON" && new Date(i.createdAt) >= monthStart)
+    .reduce((s, i) => s + i.montant_ht, 0)
+  const honorairesMoisPrec = inv
+    .filter(i => i.statut !== "BROUILLON" && new Date(i.createdAt) >= lastMonthStart && new Date(i.createdAt) <= lastMonthEnd)
+    .reduce((s, i) => s + i.montant_ht, 0)
+
+  return {
+    owner,
+    kpis: { totalHT, encaisseTTC, enAttenteTTC, enRetardTTC, tauxRecouvrement, honorairesCeMois, honorairesMoisPrec },
+  }
+}
+
+// Legacy exports kept for export CSV
+export async function getMandantAccounts() {
+  const { rows, totaux } = await getComptabiliteList()
+  return {
+    accounts: rows.map(r => ({ ...r, solde_courant: -r.enAttenteTTC, solde_sequestre: 0, updatedAt: new Date(), _count: { transactions: r.nbFactures } })),
+    totalSolde: -totaux.enAttenteTTC,
+    totalSequestre: 0,
+  }
 }
 
 export async function getMandantAccountById(id: string) {
   return db.mandantAccount.findUnique({
     where: { id },
     include: {
-      owner: {
-        include: {
-          mandates: { where: { statut: "ACTIF" }, include: { property: { select: { nom: true } } } },
-        },
-      },
-      transactions: {
-        orderBy: { date: "desc" },
-        take: 100,
-        include: {
-          booking: { select: { id: true, check_in: true, check_out: true, guest: { select: { prenom: true, nom: true } } } },
-        },
-      },
+      owner: { include: { mandates: { where: { statut: "ACTIF" }, include: { property: { select: { nom: true } } } } } },
+      transactions: { orderBy: { date: "desc" }, take: 100, include: { booking: { select: { id: true, check_in: true, check_out: true, guest: { select: { prenom: true, nom: true } } } } } },
       reports: { orderBy: { createdAt: "desc" }, take: 24 },
     },
   })
@@ -45,11 +136,7 @@ export async function getMandantAccountKpis(id: string) {
     db.transaction.aggregate({ where: { mandant_account_id: id, type: "REVENU_SEJOUR", date: { gte: lastMonthStart, lte: lastMonthEnd } }, _sum: { montant: true } }),
     db.transaction.count({ where: { mandant_account_id: id, statut: "PENDING" } }),
   ])
-  return {
-    revenuCeMois: thisMonth._sum.montant ?? 0,
-    revenuMoisPrecedent: lastMonth._sum.montant ?? 0,
-    nbPending: pending,
-  }
+  return { revenuCeMois: thisMonth._sum.montant ?? 0, revenuMoisPrecedent: lastMonth._sum.montant ?? 0, nbPending: pending }
 }
 
 export async function getMandantAccountByOwnerId(owner_id: string) {
@@ -69,19 +156,19 @@ export async function createTransaction(data: {
   return tx
 }
 
-export async function exportTransactionsCsv(id: string) {
-  const account = await db.mandantAccount.findUnique({
-    where: { id },
-    include: { owner: { select: { nom: true } }, transactions: { orderBy: { date: "desc" } } },
-  })
-  if (!account) return ""
-  const rows = account.transactions.map(tx => [
-    new Date(tx.date).toLocaleDateString("fr-FR"),
-    tx.libelle, tx.type,
-    tx.montant >= 0 ? tx.montant.toFixed(2).replace(".", ",") : "",
-    tx.montant < 0 ? Math.abs(tx.montant).toFixed(2).replace(".", ",") : "",
-    tx.statut,
+export async function exportTransactionsCsv(ownerId: string) {
+  const detail = await getComptabiliteDetail(ownerId)
+  if (!detail) return ""
+  const rows = detail.owner.feeInvoices.map(inv => [
+    new Date(inv.createdAt).toLocaleDateString("fr-FR"),
+    inv.numero_facture,
+    inv.objet ?? "",
+    inv.statut,
+    inv.montant_ht.toFixed(2).replace(".", ","),
+    inv.montant_ttc.toFixed(2).replace(".", ","),
+    inv.date_paiement ? new Date(inv.date_paiement).toLocaleDateString("fr-FR") : "",
+    inv.mode_paiement ?? "",
   ])
-  const headers = ["Date", "Libellé", "Type", "Débit", "Crédit", "Statut"]
+  const headers = ["Date", "N° Facture", "Objet", "Statut", "HT", "TTC", "Date paiement", "Mode règlement"]
   return [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n")
 }
