@@ -129,7 +129,7 @@ export function TimeEntryForm({
                       type="button"
                       disabled={isPending}
                       className="text-muted-foreground hover:text-destructive transition-colors"
-                      onClick={() => startTransition(() => deleteTimeEntryAction(entry.id, invoiceId))}
+                      onClick={() => startTransition(() => { void deleteTimeEntryAction(entry.id, invoiceId) })}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

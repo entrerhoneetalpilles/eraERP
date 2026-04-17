@@ -27,7 +27,7 @@ export function NotificationsList({ notifications, userId }: { notifications: No
           <Button
             size="sm" variant="outline"
             disabled={isPending}
-            onClick={() => startTransition(() => markAllReadAction())}
+            onClick={() => startTransition(() => { void markAllReadAction() })}
             className="gap-2 text-xs h-7"
           >
             <CheckCheck className="w-3.5 h-3.5" />
@@ -42,7 +42,7 @@ export function NotificationsList({ notifications, userId }: { notifications: No
             className={`flex items-start gap-3 px-4 py-3 rounded-lg border transition-colors cursor-pointer ${
               n.lu ? "bg-card border-border" : "bg-primary/5 border-primary/20"
             }`}
-            onClick={() => !n.lu && startTransition(() => markReadAction(n.id))}
+            onClick={() => !n.lu && startTransition(() => { void markReadAction(n.id) })}
           >
             <Bell className={`w-4 h-4 mt-0.5 shrink-0 ${n.lu ? "text-muted-foreground" : "text-primary"}`} />
             <div className="flex-1 min-w-0">

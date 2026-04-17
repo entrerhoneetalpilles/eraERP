@@ -175,7 +175,7 @@ export function TarificationForm({
                     title={rule.actif ? "Désactiver" : "Activer"}
                     disabled={isPending}
                     className="text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => startTransition(() => togglePriceRuleAction(rule.id, propertyId, !rule.actif))}
+                    onClick={() => startTransition(() => { void togglePriceRuleAction(rule.id, propertyId, !rule.actif) })}
                   >
                     {rule.actif
                       ? <ToggleRight className="w-5 h-5 text-green-600" />
@@ -187,7 +187,7 @@ export function TarificationForm({
                     title="Supprimer"
                     disabled={isPending}
                     className="text-muted-foreground hover:text-destructive transition-colors"
-                    onClick={() => startTransition(() => deletePriceRuleAction(rule.id, propertyId))}
+                    onClick={() => startTransition(() => { void deletePriceRuleAction(rule.id, propertyId) })}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -257,7 +257,7 @@ export function TarificationForm({
                   title="Supprimer"
                   disabled={isPending}
                   className="text-muted-foreground hover:text-destructive transition-colors ml-3"
-                  onClick={() => startTransition(() => deleteBlockedDateAction(block.id, propertyId))}
+                  onClick={() => startTransition(() => { void deleteBlockedDateAction(block.id, propertyId) })}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

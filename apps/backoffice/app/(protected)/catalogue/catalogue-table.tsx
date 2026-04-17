@@ -175,11 +175,11 @@ export function CatalogueTable({ services }: { services: Service[] }) {
                           <button type="button" onClick={() => startEdit(s)} className="text-muted-foreground hover:text-foreground transition-colors">
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
-                          <button type="button" disabled={isPending} onClick={() => startTransition(() => updateServiceAction(s.id, { actif: !s.actif }))} className="text-muted-foreground hover:text-foreground transition-colors">
+                          <button type="button" disabled={isPending} onClick={() => startTransition(() => { void updateServiceAction(s.id, { actif: !s.actif }) })} className="text-muted-foreground hover:text-foreground transition-colors">
                             {s.actif ? <ToggleRight className="w-5 h-5 text-green-600" /> : <ToggleLeft className="w-5 h-5" />}
                           </button>
                           {s._count.orders === 0 && (
-                            <button type="button" disabled={isPending} onClick={() => startTransition(() => deleteServiceAction(s.id))} className="text-muted-foreground hover:text-destructive transition-colors">
+                            <button type="button" disabled={isPending} onClick={() => startTransition(() => { void deleteServiceAction(s.id) })} className="text-muted-foreground hover:text-destructive transition-colors">
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           )}
