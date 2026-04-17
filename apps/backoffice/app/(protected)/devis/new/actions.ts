@@ -20,7 +20,10 @@ const schema = z.object({
   contractor_id: z.string().optional(),
 })
 
-export async function createDevisAction(formData: FormData) {
+export async function createDevisAction(
+  _prevState: { error: string } | null,
+  formData: FormData
+) {
   const session = await auth()
   if (!session?.user) return { error: "Non autorisé" }
 
