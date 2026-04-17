@@ -48,3 +48,8 @@ apps/*/graphify-out/
 # Claude Code IDE settings (personal, not project)
 .claude/settings.json
 .claude/settings.local.json
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
