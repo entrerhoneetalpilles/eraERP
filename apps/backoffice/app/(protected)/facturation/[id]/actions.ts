@@ -1,5 +1,6 @@
 "use server"
 
+import { createElement } from "react"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import {
@@ -12,6 +13,40 @@ import {
 import { getOwnerById } from "@/lib/dal/owners"
 import { sendFactureEmail } from "@conciergerie/email"
 import { logEmail } from "@/lib/dal/email-log"
+import { renderToBuffer } from "@react-pdf/renderer"
+import { InvoicePDF } from "@/lib/pdf/invoice-template"
+import { buildStorageKey, uploadFile } from "@conciergerie/storage"
+import { createDocument } from "@/lib/dal/documents"
+
+async function saveInvoicePdfToDocuments(id: string) {
+  try {
+    const invoice = await getFeeInvoiceById(id)
+    if (!invoice) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buffer = await renderToBuffer(createElement(InvoicePDF, { invoice }) as any)
+    const filename = `Facture-${invoice.numero_facture}-${Date.now()}.pdf`
+    const key = buildStorageKey({
+      entityType: "fee_invoice",
+      entityId: invoice.id,
+      folder: "facture",
+      fileName: filename,
+    })
+    const url = await uploadFile({ key, body: buffer, contentType: "application/pdf" })
+    await createDocument({
+      nom: `Facture ${invoice.numero_facture}.pdf`,
+      type: "FACTURE",
+      url_storage: url,
+      mime_type: "application/pdf",
+      taille: buffer.byteLength,
+      entity_type: "fee_invoice",
+      entity_id: invoice.id,
+      uploaded_by: "system",
+      owner_id: invoice.owner_id,
+    })
+  } catch (e) {
+    console.error("[saveInvoicePdf] error:", e)
+  }
+}
 
 export async function updateInvoiceStatutAction(
   id: string,
@@ -20,8 +55,12 @@ export async function updateInvoiceStatutAction(
   const session = await auth()
   if (!session?.user) return { error: "Non autorisé" }
   await updateInvoiceStatut(id, statut)
+  if (statut === "EMISE") {
+    await saveInvoicePdfToDocuments(id)
+  }
   revalidatePath(`/facturation/${id}`)
   revalidatePath("/facturation")
+  revalidatePath("/documents")
   return { success: true }
 }
 

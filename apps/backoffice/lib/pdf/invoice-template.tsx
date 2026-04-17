@@ -222,9 +222,19 @@ type Adresse = { rue?: string; complement?: string; code_postal?: string; ville?
 
 export function InvoicePDF({ invoice }: { invoice: InvoiceData }) {
   const isPaid = invoice.statut === "PAYEE"
-  const tva = invoice.montant_ht * invoice.tva_rate
+  const hasTva = invoice.tva_rate > 0
   const periode = `${fmtDate(invoice.periode_debut)} — ${fmtDate(invoice.periode_fin)}`
   const adresse = ((invoice.owner as any).adresse ?? {}) as Adresse
+
+  // Compute subtotal from line items (before any discount)
+  const subtotalHT = invoice.lineItems.length > 0
+    ? invoice.lineItems.reduce((s, l) => s + l.montant_ht, 0)
+    : invoice.montant_ht
+
+  const hasRemise = !!invoice.remise_pourcent && invoice.remise_pourcent > 0
+  // invoice.montant_ht is already the post-remise amount
+  const remiseAmount = hasRemise ? subtotalHT - invoice.montant_ht : 0
+  const tva = hasTva ? invoice.montant_ht * invoice.tva_rate : 0
 
   return (
     <Document title={`Facture ${invoice.numero_facture}`}>
@@ -313,26 +323,39 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceData }) {
 
         {/* Totaux */}
         <View style={S.totalsBlock}>
-          {invoice.remise_pourcent && (
-            <View style={S.totalsRow}>
-              <Text style={S.totalsLabel}>Remise ({invoice.remise_pourcent}%)</Text>
-              <Text style={S.totalsValue}>
-                -{fmt(invoice.montant_ht * (invoice.remise_pourcent / 100))}
-              </Text>
-            </View>
+          {hasRemise && (
+            <>
+              <View style={S.totalsRow}>
+                <Text style={S.totalsLabel}>Sous-total HT</Text>
+                <Text style={S.totalsValue}>{fmt(subtotalHT)}</Text>
+              </View>
+              <View style={S.totalsRow}>
+                <Text style={S.totalsLabel}>Remise ({invoice.remise_pourcent}%)</Text>
+                <Text style={S.totalsValue}>-{fmt(remiseAmount)}</Text>
+              </View>
+            </>
           )}
           <View style={S.totalsRow}>
-            <Text style={S.totalsLabel}>Sous-total HT</Text>
+            <Text style={S.totalsLabel}>Total HT</Text>
             <Text style={S.totalsValue}>{fmt(invoice.montant_ht)}</Text>
           </View>
-          <View style={S.totalsRow}>
-            <Text style={S.totalsLabel}>TVA ({(invoice.tva_rate * 100).toFixed(0)}%)</Text>
-            <Text style={S.totalsValue}>{fmt(tva)}</Text>
-          </View>
-          <View style={S.totalsFinalRow}>
-            <Text style={S.totalsFinalLabel}>TOTAL TTC</Text>
-            <Text style={S.totalsFinalValue}>{fmt(invoice.montant_ttc)}</Text>
-          </View>
+          {hasTva ? (
+            <>
+              <View style={S.totalsRow}>
+                <Text style={S.totalsLabel}>TVA ({(invoice.tva_rate * 100).toFixed(0)}%)</Text>
+                <Text style={S.totalsValue}>{fmt(tva)}</Text>
+              </View>
+              <View style={S.totalsFinalRow}>
+                <Text style={S.totalsFinalLabel}>TOTAL TTC</Text>
+                <Text style={S.totalsFinalValue}>{fmt(invoice.montant_ttc)}</Text>
+              </View>
+            </>
+          ) : (
+            <View style={S.totalsFinalRow}>
+              <Text style={S.totalsFinalLabel}>TOTAL</Text>
+              <Text style={S.totalsFinalValue}>{fmt(invoice.montant_ht)}</Text>
+            </View>
+          )}
         </View>
 
         {/* Paiement */}
@@ -360,16 +383,20 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceData }) {
           <View style={[S.notesBlock, { marginTop: 12 }]}>
             <Text style={[S.notesText, { fontFamily: "Helvetica-Bold", marginBottom: 3 }]}>Conditions de paiement</Text>
             <Text style={S.notesText}>Règlement par virement bancaire à réception de la présente facture.</Text>
-            <Text style={[S.notesText, { marginTop: 4 }]}>
-              Tout retard de paiement entraîne des pénalités au taux de 3× le taux d&apos;intérêt légal,
-              ainsi qu&apos;une indemnité forfaitaire de recouvrement de 40 €.
-            </Text>
+            {hasTva ? (
+              <Text style={[S.notesText, { marginTop: 4 }]}>
+                Tout retard de paiement entraîne des pénalités au taux de 3× le taux d&apos;intérêt légal,
+                ainsi qu&apos;une indemnité forfaitaire de recouvrement de 40 €.
+              </Text>
+            ) : null}
           </View>
         )}
 
         {/* Footer */}
         <View style={S.footer} fixed>
-          <Text style={S.footerText}>Entre Rhône et Alpilles — TVA non applicable, art. 293 B CGI</Text>
+          <Text style={S.footerText}>
+            Entre Rhône et Alpilles{hasTva ? "" : " — TVA non applicable, art. 293 B CGI"}
+          </Text>
           <Text style={S.footerText}>{invoice.numero_facture}</Text>
           <Text style={S.footerText} render={({ pageNumber, totalPages }) => `${pageNumber}/${totalPages}`} />
         </View>

@@ -23,6 +23,7 @@ import {
   Settings,
   KeyRound,
   FolderOpen,
+  ClipboardList,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -75,6 +76,7 @@ const DRAWER_SECTIONS = [
     items: [
       { href: "/prestataires", label: "Prestataires", icon: HardHat },
       { href: "/travaux", label: "Travaux", icon: Wrench },
+      { href: "/devis", label: "Devis", icon: ClipboardList },
     ],
   },
 ]
