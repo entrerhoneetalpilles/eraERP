@@ -141,19 +141,14 @@ export async function upsertPropertyDocumentAction(propertyId: string, data: {
   const session = await auth()
   if (!session?.user) return { error: "Non autorisé" }
   const type = data.type as "DPE" | "ELECTRICITE" | "GAZ" | "PLOMB" | "AMIANTE" | "PNO" | "AUTRE"
-  await db.propertyDocument.upsert({
-    where: { property_id_type: { property_id: propertyId, type } },
-    create: {
-      property_id: propertyId,
-      type,
-      date_validite: data.date_validite ? new Date(data.date_validite) : null,
-      statut: data.statut as "VALIDE" | "EXPIRE" | "MANQUANT",
-    },
-    update: {
-      date_validite: data.date_validite ? new Date(data.date_validite) : null,
-      statut: data.statut as "VALIDE" | "EXPIRE" | "MANQUANT",
-    },
-  })
+  const statut = data.statut as "VALIDE" | "EXPIRE" | "MANQUANT"
+  const date_validite = data.date_validite ? new Date(data.date_validite) : null
+  const existing = await db.propertyDocument.findFirst({ where: { property_id: propertyId, type } })
+  if (existing) {
+    await db.propertyDocument.update({ where: { id: existing.id }, data: { date_validite, statut } })
+  } else {
+    await db.propertyDocument.create({ data: { property_id: propertyId, type, date_validite, statut } })
+  }
   revalidatePath(`/biens/${propertyId}`)
   return { success: true }
 }
