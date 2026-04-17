@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FileText, FileImage, File, Download, AlertTriangle } from "lucide-react"
+import { FileText, FileImage, Download, AlertTriangle } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { getDocumentViewUrlAction } from "@/app/(protected)/documents/actions"
@@ -12,7 +12,9 @@ const TYPE_LABELS: Record<string, string> = {
   FACTURE: "Facture",
   CRG: "CRG",
   DEVIS: "Devis",
+  ETAT_LIEUX: "État des lieux",
   ATTESTATION_FISCALE: "Attestation",
+  PHOTO: "Photo",
   DIAGNOSTIC: "Diagnostic",
   AUTRE: "Document",
 }
@@ -62,8 +64,10 @@ interface DocumentCardProps {
 
 export function DocumentCard({ id, nom, type, mime_type, createdAt, date_expiration, pdfUrl }: DocumentCardProps) {
   const [loading, setLoading] = useState(false)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
 
   const handleDownload = async () => {
+    setDownloadError(null)
     if (pdfUrl) {
       window.open(pdfUrl, "_blank", "noopener,noreferrer")
       return
@@ -71,43 +75,53 @@ export function DocumentCard({ id, nom, type, mime_type, createdAt, date_expirat
     setLoading(true)
     const result = await getDocumentViewUrlAction(id)
     setLoading(false)
-    if (result.url) window.open(result.url, "_blank", "noopener,noreferrer")
+    if (result.url) {
+      window.open(result.url, "_blank", "noopener,noreferrer")
+    } else {
+      setDownloadError("Impossible d'ouvrir ce document")
+    }
   }
 
   return (
-    <div className="flex items-start gap-4 bg-white rounded-xl p-4 shadow-luxury-card border border-argile-200/40 hover:shadow-luxury transition-smooth group">
-      {/* Icon */}
-      <div className="w-10 h-10 rounded-lg bg-calcaire-100 flex items-center justify-center shrink-0 text-garrigue-400">
-        <DocIcon mimeType={mime_type} />
+    <div className="flex flex-col bg-white rounded-xl shadow-luxury-card border border-argile-200/40 hover:shadow-luxury transition-smooth group">
+      <div className="flex items-start gap-4 p-4">
+        {/* Icon */}
+        <div className="w-10 h-10 rounded-lg bg-calcaire-100 flex items-center justify-center shrink-0 text-garrigue-400">
+          <DocIcon mimeType={mime_type} />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-sm font-medium text-garrigue-900 truncate leading-snug">
+              {nom}
+            </p>
+            <ExpiryBadge date={date_expiration} />
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[10px] font-medium text-garrigue-400 bg-calcaire-200 px-2 py-0.5 rounded-full">
+              {TYPE_LABELS[type] ?? type}
+            </span>
+            <span className="text-[10px] text-garrigue-400">
+              {format(createdAt, "d MMM yyyy", { locale: fr })}
+            </span>
+          </div>
+        </div>
+
+        {/* Download */}
+        <button
+          onClick={handleDownload}
+          disabled={loading}
+          aria-label={`Télécharger ${nom}`}
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-calcaire-100 text-garrigue-400 hover:text-olivier-600 transition-fast cursor-pointer shrink-0 disabled:opacity-50"
+        >
+          <Download size={15} />
+        </button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium text-garrigue-900 truncate leading-snug">
-            {nom}
-          </p>
-          <ExpiryBadge date={date_expiration} />
-        </div>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] font-medium text-garrigue-400 bg-calcaire-200 px-2 py-0.5 rounded-full">
-            {TYPE_LABELS[type] ?? type}
-          </span>
-          <span className="text-[10px] text-garrigue-400">
-            {format(createdAt, "d MMM yyyy", { locale: fr })}
-          </span>
-        </div>
-      </div>
-
-      {/* Download */}
-      <button
-        onClick={handleDownload}
-        disabled={loading}
-        aria-label={`Télécharger ${nom}`}
-        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-calcaire-100 text-garrigue-400 hover:text-olivier-600 transition-fast cursor-pointer shrink-0 disabled:opacity-50"
-      >
-        <Download size={15} />
-      </button>
+      {downloadError && (
+        <p className="px-4 pb-3 text-xs text-red-500">{downloadError}</p>
+      )}
     </div>
   )
 }

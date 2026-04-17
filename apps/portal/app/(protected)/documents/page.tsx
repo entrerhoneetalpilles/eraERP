@@ -12,7 +12,9 @@ const FILTER_TYPES = [
   "FACTURE",
   "CRG",
   "DEVIS",
+  "ETAT_LIEUX",
   "ATTESTATION_FISCALE",
+  "PHOTO",
   "DIAGNOSTIC",
   "AUTRE",
 ] as const
@@ -23,10 +25,14 @@ const TYPE_LABELS: Record<string, string> = {
   FACTURE: "Facture",
   CRG: "CRG",
   DEVIS: "Devis",
+  ETAT_LIEUX: "État des lieux",
   ATTESTATION_FISCALE: "Fiscal",
+  PHOTO: "Photo",
   DIAGNOSTIC: "Diagnostic",
   AUTRE: "Autre",
 }
+
+const VALID_FILTER_TYPES = new Set(FILTER_TYPES as readonly string[])
 
 export default async function DocumentsPage({
   searchParams,
@@ -37,11 +43,12 @@ export default async function DocumentsPage({
   if (!session?.user?.ownerId) redirect("/login")
 
   const { type } = await searchParams
-  const activeType = type ?? undefined
+  // Validate type param to prevent arbitrary values reaching the DB query
+  const activeType = (type && VALID_FILTER_TYPES.has(type) ? type : undefined) as DocumentType | undefined
   const ownerId = session.user.ownerId as string
 
   const [documents, invoices] = await Promise.all([
-    getOwnerDocuments(ownerId, activeType as DocumentType | undefined),
+    getOwnerDocuments(ownerId, activeType),
     // Always fetch invoices; filter client-side to keep query simple
     (activeType === undefined || activeType === "FACTURE")
       ? getOwnerFeeInvoices(ownerId)
@@ -49,12 +56,13 @@ export default async function DocumentsPage({
   ])
 
   // Merge invoices as virtual FACTURE documents — avoid duplicating ones already
-  // stored as Document records (created by attestation/upload flows)
-  const storedFactureIds = new Set(
+  // stored as Document records. Match on nom format used by saveInvoicePdfToDocuments:
+  // `Facture ${numero_facture}.pdf` (space, not hyphen).
+  const storedFactureNoms = new Set(
     documents.filter((d) => d.type === "FACTURE").map((d) => d.nom)
   )
   const invoiceCards = invoices
-    .filter((inv) => !storedFactureIds.has(`Facture-${inv.numero_facture}.pdf`))
+    .filter((inv) => !storedFactureNoms.has(`Facture ${inv.numero_facture}.pdf`))
     .map((inv) => ({
       id: inv.id,
       nom: inv.objet
