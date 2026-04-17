@@ -12,8 +12,12 @@ export async function getDocumentViewUrlAction(id: string) {
   if (!doc) return { error: "Document introuvable ou accès refusé" }
 
   try {
+    // Detect corrupted/encrypted url_storage values (not a valid URL/path)
+    if (!doc.url_storage.startsWith("http") && !doc.url_storage.includes("/")) {
+      console.error("[getDocumentViewUrl] url_storage invalide:", doc.url_storage.slice(0, 40))
+      return { error: "Ce document est corrompu — veuillez le régénérer" }
+    }
     // Always presign — R2 buckets are private even when S3_PUBLIC_URL is set.
-    // extractStorageKey handles single-bucket and double-bucket URL shapes.
     const key = extractStorageKey(doc.url_storage)
     const url = await getPresignedDownloadUrl(key, 900) // 15 min
     return { url }
