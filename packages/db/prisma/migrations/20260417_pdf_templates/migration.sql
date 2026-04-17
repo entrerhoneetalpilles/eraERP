@@ -1,7 +1,10 @@
--- CreateEnum
-CREATE TYPE IF NOT EXISTS "PdfTemplateType" AS ENUM ('FACTURE', 'DEVIS', 'MANDAT', 'CONTRAT', 'QUITTANCE');
+-- CreateEnum (idempotent)
+DO $$ BEGIN
+  CREATE TYPE "PdfTemplateType" AS ENUM ('FACTURE', 'DEVIS', 'MANDAT', 'CONTRAT', 'QUITTANCE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateTable
+-- CreateTable (idempotent)
 CREATE TABLE IF NOT EXISTS "pdf_templates" (
     "id"         TEXT NOT NULL,
     "nom"        TEXT NOT NULL,
