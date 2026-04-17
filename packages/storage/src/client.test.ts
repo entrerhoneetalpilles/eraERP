@@ -49,7 +49,10 @@ describe("_extractKey (extractStorageKey pure logic)", () => {
   })
 
   it("gère le double-bucket bug (endpoint qui contient le bucket dans son path)", () => {
+    // R2 stores the key as "my-bucket/mandate/..." (bucket prefix included) when
+    // S3_ENDPOINT was misconfigured with the bucket name in the URL.
+    // indexOf (first occurrence) returns "my-bucket/mandate/..." which is the real key.
     expect(_extractKey("https://account.r2.cloudflarestorage.com/my-bucket/my-bucket/mandate/abc/mandat/file.pdf", BUCKET, null))
-      .toBe("mandate/abc/mandat/file.pdf")
+      .toBe("my-bucket/mandate/abc/mandat/file.pdf")
   })
 })

@@ -121,7 +121,10 @@ export function _extractKey(
   } catch {
     pathname = urlStorage
   }
-  const idx = pathname.lastIndexOf(marker)
+  // Use indexOf (first occurrence) — not lastIndexOf — so that in the
+  // double-bucket case (/bucket/bucket/key) the returned key is bucket/key
+  // (as stored in R2), not key (which would be NoSuchKey).
+  const idx = pathname.indexOf(marker)
   if (idx !== -1) return pathname.slice(idx + marker.length)
   // Fallback: strip one leading path segment (endpoint/bucket prefix)
   return pathname.replace(/^\/[^/]+\//, "")
