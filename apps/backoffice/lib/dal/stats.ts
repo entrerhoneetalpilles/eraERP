@@ -14,6 +14,9 @@ export async function getDashboardStats() {
     activeBookings,
     upcomingCheckIns,
     recentRevenu,
+    honorairesMoisCourant,
+    honorairesEnAttente,
+    honorairesEnRetard,
     todayArrivals,
     todayDepartures,
     pendingCleanings,
@@ -26,6 +29,7 @@ export async function getDashboardStats() {
     missingDocs,
     unrepliedReviews,
     monthlyRevenueTrend,
+    monthlyHonorairesTrend,
     occupancyData,
   ] = await Promise.all([
     db.owner.count(),
@@ -46,6 +50,21 @@ export async function getDashboardStats() {
         createdAt: { gte: monthStart },
       },
       _sum: { revenu_net_proprietaire: true },
+    }),
+    // Honoraires facturés ce mois (EMISE + PAYEE)
+    db.feeInvoice.aggregate({
+      where: { statut: { in: ["EMISE", "PAYEE"] }, createdAt: { gte: monthStart } },
+      _sum: { montant_ht: true },
+    }),
+    // Honoraires en attente de paiement (EMISE)
+    db.feeInvoice.aggregate({
+      where: { statut: "EMISE" },
+      _sum: { montant_ttc: true },
+    }),
+    // Honoraires en retard
+    db.feeInvoice.aggregate({
+      where: { statut: "EMISE", date_echeance: { lt: now } },
+      _sum: { montant_ttc: true },
     }),
     db.booking.findMany({
       where: { statut: { in: ["CONFIRMED", "CHECKEDIN"] }, check_in: { gte: todayStart, lte: todayEnd } },
@@ -116,6 +135,20 @@ export async function getDashboardStats() {
         }))
       })
     ),
+    // Honoraires facturés par mois sur 6 mois
+    Promise.all(
+      Array.from({ length: 6 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+        const dEnd = new Date(d.getFullYear(), d.getMonth() + 1, 1)
+        return db.feeInvoice.aggregate({
+          where: { statut: { in: ["EMISE", "PAYEE"] }, createdAt: { gte: d, lt: dEnd } },
+          _sum: { montant_ht: true },
+        }).then(r => ({
+          month: d.toLocaleDateString("fr-FR", { month: "short" }),
+          montant: r._sum.montant_ht ?? 0,
+        }))
+      })
+    ),
     db.property.findMany({
       where: { statut: "ACTIF" },
       select: {
@@ -173,12 +206,16 @@ export async function getDashboardStats() {
     activeBookings,
     upcomingCheckIns,
     revenuMoisCourant: recentRevenu._sum.revenu_net_proprietaire ?? 0,
+    honorairesMoisCourant: honorairesMoisCourant._sum.montant_ht ?? 0,
+    honorairesEnAttente: honorairesEnAttente._sum.montant_ttc ?? 0,
+    honorairesEnRetard: honorairesEnRetard._sum.montant_ttc ?? 0,
     todayArrivals,
     todayDepartures,
     pendingCleanings,
     pendingTravaux,
     alerts,
     monthlyRevenueTrend,
+    monthlyHonorairesTrend,
     occupancy,
   }
 }

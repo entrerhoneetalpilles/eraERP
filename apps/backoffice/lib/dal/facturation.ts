@@ -134,7 +134,48 @@ export async function createFeeInvoice(data: {
 }
 
 export async function updateInvoiceStatut(id: string, statut: InvoiceStatut) {
-  return db.feeInvoice.update({ where: { id }, data: { statut } })
+  const invoice = await db.feeInvoice.findUnique({ where: { id } })
+  if (!invoice) throw new Error("Facture introuvable")
+
+  const prev = invoice.statut
+  const updated = await db.feeInvoice.update({ where: { id }, data: { statut } })
+
+  if (prev !== "EMISE" && statut === "EMISE") {
+    // Écriture comptable entreprise — journal ventes
+    await db.companyTransaction.create({
+      data: {
+        type: "REVENU_HONORAIRES",
+        journal: "VENTES",
+        montant_ht: invoice.montant_ht,
+        tva_rate: invoice.tva_rate,
+        montant_ttc: invoice.montant_ttc,
+        libelle: `Honoraires ${invoice.numero_facture}`,
+        date: new Date(),
+        fee_invoice_id: id,
+      },
+    })
+    // Transaction dans le compte mandant propriétaire
+    const account = await db.mandantAccount.findUnique({ where: { owner_id: invoice.owner_id } })
+    if (account) {
+      await db.transaction.create({
+        data: {
+          mandant_account_id: account.id,
+          fee_invoice_id: id,
+          type: "HONORAIRES",
+          montant: -invoice.montant_ttc,
+          date: new Date(),
+          libelle: `Honoraires ${invoice.numero_facture}`,
+          statut: "PENDING",
+        },
+      })
+      await db.mandantAccount.update({
+        where: { id: account.id },
+        data: { solde_courant: { decrement: invoice.montant_ttc } },
+      })
+    }
+  }
+
+  return updated
 }
 
 export async function recordPayment(
@@ -145,10 +186,36 @@ export async function recordPayment(
     reference_paiement?: string
   }
 ) {
-  return db.feeInvoice.update({
+  const invoice = await db.feeInvoice.findUnique({ where: { id } })
+  if (!invoice) throw new Error("Facture introuvable")
+
+  const updated = await db.feeInvoice.update({
     where: { id },
     data: { ...payment, statut: "PAYEE" },
   })
+
+  // Écriture de règlement en banque
+  await db.companyTransaction.create({
+    data: {
+      type: "REVENU_HONORAIRES",
+      journal: "BANQUE",
+      montant_ht: invoice.montant_ht,
+      tva_rate: invoice.tva_rate,
+      montant_ttc: invoice.montant_ttc,
+      libelle: `Règlement ${invoice.numero_facture}`,
+      date: payment.date_paiement,
+      fee_invoice_id: id,
+      lettree: true,
+    },
+  })
+
+  // Valider la transaction mandant correspondante
+  await db.transaction.updateMany({
+    where: { fee_invoice_id: id, type: "HONORAIRES" },
+    data: { statut: "VALIDATED" },
+  })
+
+  return updated
 }
 
 export async function updateInvoiceNotes(

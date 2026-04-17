@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import {
   Users, Building2, CalendarDays, TrendingUp, LogIn, LogOut,
   SprayCan, ArrowUpRight, AlertTriangle, AlertCircle, Info,
-  Wrench, Star, BarChart2, Activity,
+  Wrench, Star, BarChart2, Activity, Receipt, Clock,
 } from "lucide-react"
 
 function fmt(n: number) {
@@ -21,7 +21,6 @@ const KPI_CONFIG = [
 
 export default async function DashboardPage() {
   const stats = await getDashboardStats()
-  const maxRevenu = Math.max(...stats.monthlyRevenueTrend.map((m: any) => m.montant), 1)
 
   return (
     <div className="space-y-6">
@@ -56,21 +55,64 @@ export default async function DashboardPage() {
         })}
       </div>
 
+      {/* Facturation KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <Link href="/facturation" className="group bg-card rounded-lg border border-border p-4 hover:border-primary/40 transition-colors cursor-pointer">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Honoraires ce mois HT</p>
+              <p className="text-2xl font-bold text-foreground mt-1.5 tabular-nums">{fmt(stats.honorairesMoisCourant)}</p>
+            </div>
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 shrink-0">
+              <Receipt className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="mt-2.5 text-xs text-muted-foreground group-hover:text-primary transition-colors flex items-center gap-1">Facturés (émis + payés) <ArrowUpRight className="w-3 h-3" /></p>
+        </Link>
+        <Link href="/facturation?statut=EMISE" className="group bg-card rounded-lg border border-border p-4 hover:border-primary/40 transition-colors cursor-pointer">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">En attente de règlement</p>
+              <p className="text-2xl font-bold text-foreground mt-1.5 tabular-nums">{fmt(stats.honorairesEnAttente)}</p>
+            </div>
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="mt-2.5 text-xs text-muted-foreground group-hover:text-primary transition-colors flex items-center gap-1">Factures émises TTC <ArrowUpRight className="w-3 h-3" /></p>
+        </Link>
+        <Link href="/facturation" className={`group bg-card rounded-lg border p-4 hover:border-primary/40 transition-colors cursor-pointer ${stats.honorairesEnRetard > 0 ? "border-red-200 dark:border-red-800" : "border-border"}`}>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">En retard de paiement</p>
+              <p className={`text-2xl font-bold mt-1.5 tabular-nums ${stats.honorairesEnRetard > 0 ? "text-red-600 dark:text-red-400" : "text-foreground"}`}>{fmt(stats.honorairesEnRetard)}</p>
+            </div>
+            <div className={`p-2 rounded-lg shrink-0 ${stats.honorairesEnRetard > 0 ? "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400" : "bg-muted text-muted-foreground"}`}>
+              <AlertCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="mt-2.5 text-xs text-muted-foreground group-hover:text-primary transition-colors flex items-center gap-1">Échéance dépassée TTC <ArrowUpRight className="w-3 h-3" /></p>
+        </Link>
+      </div>
+
       {/* Revenue trend + Occupancy */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-card rounded-lg border border-border p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">Revenus nets — 6 derniers mois</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-muted-foreground" />
+              <h2 className="text-sm font-semibold text-foreground">Honoraires HT — 6 derniers mois</h2>
+            </div>
           </div>
           <div className="flex items-end gap-2 h-28">
-            {stats.monthlyRevenueTrend.map((m: any, i: number) => {
-              const height = maxRevenu > 0 ? Math.max(4, Math.round((m.montant / maxRevenu) * 100)) : 4
-              const isLast = i === stats.monthlyRevenueTrend.length - 1
+            {stats.monthlyHonorairesTrend.map((m: any, i: number) => {
+              const maxH = Math.max(...stats.monthlyHonorairesTrend.map((x: any) => x.montant), 1)
+              const height = maxH > 0 ? Math.max(4, Math.round((m.montant / maxH) * 100)) : 4
+              const isLast = i === stats.monthlyHonorairesTrend.length - 1
               return (
                 <div key={m.month} className="flex-1 flex flex-col items-center gap-1 group" title={fmt(m.montant)}>
                   <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">{fmt(m.montant)}</span>
-                  <div className={`w-full rounded-t-md ${isLast ? "bg-primary" : "bg-primary/30"}`} style={{ height: `${height}%` }} />
+                  <div className={`w-full rounded-t-md ${isLast ? "bg-emerald-500" : "bg-emerald-500/30"}`} style={{ height: `${height}%` }} />
                   <span className="text-xs text-muted-foreground">{m.month}</span>
                 </div>
               )
