@@ -5,11 +5,20 @@ import { auth } from "@/auth"
 import { updateDevisStatut, getDevisById } from "@/lib/dal/devis"
 import { sendTravauxNotificationEmail } from "@conciergerie/email"
 import { logEmail } from "@/lib/dal/email-log"
+import { saveDevisPdfToDocuments } from "@/lib/pdf/auto-save"
 
 export async function validateDevisAction(id: string) {
   const session = await auth()
   if (!session?.user) return { error: "Non autorisé" }
   await updateDevisStatut(id, "VALIDE")
+
+  // Auto-save PDF to S3 + Document record
+  try {
+    await saveDevisPdfToDocuments(id)
+  } catch (e) {
+    console.error("[PDF] Erreur sauvegarde devis PDF:", e)
+  }
+
   revalidatePath(`/devis/${id}`)
   revalidatePath("/devis")
   return { success: true }
@@ -35,6 +44,13 @@ export async function sendDevisToOwnerAction(id: string) {
   if (!owner?.email) return { error: "Aucun email propriétaire associé à ce bien" }
 
   const montantStr = (devis.montant_devis ?? 0).toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+
+  // Save PDF before sending so the document is available on the portal
+  try {
+    await saveDevisPdfToDocuments(id)
+  } catch (e) {
+    console.error("[PDF] Erreur sauvegarde devis PDF:", e)
+  }
 
   try {
     await sendTravauxNotificationEmail({

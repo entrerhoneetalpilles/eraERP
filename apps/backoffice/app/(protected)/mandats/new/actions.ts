@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { mandateSchema } from "@/lib/validations/mandate"
 import { createMandate, getNextMandateNumber } from "@/lib/dal/mandates"
+import { saveMandatePdfSystem } from "@/lib/pdf/auto-save"
 
 export async function createMandateAction(_prev: unknown, formData: FormData) {
   const raw = {
@@ -31,6 +32,13 @@ export async function createMandateAction(_prev: unknown, formData: FormData) {
     date_fin: parsed.data.date_fin ? new Date(parsed.data.date_fin) : undefined,
     prestations_incluses: parsed.data.prestations_incluses ?? [],
   })
+
+  // Auto-save mandate PDF to S3 + Document record
+  try {
+    await saveMandatePdfSystem(mandate.id)
+  } catch (e) {
+    console.error("[PDF] Erreur sauvegarde mandat PDF:", e)
+  }
 
   revalidatePath("/mandats")
   redirect(`/mandats/${mandate.id}`)

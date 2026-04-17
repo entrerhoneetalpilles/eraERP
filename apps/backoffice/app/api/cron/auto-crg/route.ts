@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { generateCrg, getMandatesWithActiveBookings } from "@/lib/dal/crg"
 import { sendCrgMensuelEmail } from "@conciergerie/email"
 import { db } from "@conciergerie/db"
+import { saveCrgPdfToDocuments } from "@/lib/pdf/auto-save"
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("Authorization")
@@ -23,6 +24,13 @@ export async function GET(req: NextRequest) {
   for (const { owner_id } of mandates) {
     try {
       const report = await generateCrg({ owner_id, periode_debut: periodeDebut, periode_fin: periodeFin })
+
+      // Auto-save PDF to S3 + Document record
+      try {
+        await saveCrgPdfToDocuments(report.id)
+      } catch (e) {
+        console.error(`[PDF] Erreur sauvegarde CRG PDF owner=${owner_id}:`, e)
+      }
 
       const owner = await db.owner.findUnique({
         where: { id: owner_id },

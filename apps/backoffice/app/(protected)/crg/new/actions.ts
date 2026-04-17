@@ -7,6 +7,7 @@ import { generateCrg } from "@/lib/dal/crg"
 import { getOwnerById } from "@/lib/dal/owners"
 import { sendCrgMensuelEmail } from "@conciergerie/email"
 import { logEmail } from "@/lib/dal/email-log"
+import { saveCrgPdfToDocuments } from "@/lib/pdf/auto-save"
 
 const schema = z.object({
   owner_id: z.string().min(1, "Propriétaire requis"),
@@ -40,6 +41,13 @@ export async function generateCrgAction(_prev: unknown, formData: FormData) {
     })
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Erreur lors de la génération" }
+  }
+
+  // Auto-save PDF to S3 + Document record
+  try {
+    await saveCrgPdfToDocuments(report.id)
+  } catch (e) {
+    console.error("[PDF] Erreur sauvegarde CRG PDF:", e)
   }
 
   // Email au propriétaire

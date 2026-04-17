@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { getWorkOrderForOwner } from "@/lib/dal/travaux"
 import { validateDevisAction, refuseDevisAction } from "../actions"
-import { Building2, Wrench, Phone, CheckCircle2, XCircle } from "lucide-react"
+import { Building2, Wrench, Phone, CheckCircle2, XCircle, Download } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -103,6 +103,17 @@ export default async function DevisDetailPage({
           </p>
         </section>
       )}
+
+      {/* PDF */}
+      <a
+        href={`/api/pdf/devis/${wo.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 border border-argile-200 text-garrigue-600 hover:bg-calcaire-100 rounded-xl px-5 py-3 text-sm font-medium transition-smooth"
+      >
+        <Download size={15} strokeWidth={2} />
+        Télécharger le devis PDF
+      </a>
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
