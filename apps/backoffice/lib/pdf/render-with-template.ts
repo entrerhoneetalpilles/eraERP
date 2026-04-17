@@ -53,7 +53,14 @@ function invoiceToSampleData(invoice: Invoice): SampleData {
 export async function renderInvoicePdf(invoice: Invoice): Promise<Buffer> {
   const tpl = await getDefaultTemplate("FACTURE")
   if (tpl) {
-    const config: TemplateConfig = { ...DEFAULT_CONFIG, ...(tpl.config as Partial<TemplateConfig>) }
+    const stored = tpl.config as Partial<TemplateConfig>
+    const config: TemplateConfig = {
+      branding: { ...DEFAULT_CONFIG.branding, ...(stored.branding ?? {}) },
+      header:   { ...DEFAULT_CONFIG.header,   ...(stored.header   ?? {}) },
+      body:     { ...DEFAULT_CONFIG.body,     ...(stored.body     ?? {}) },
+      table:    { ...DEFAULT_CONFIG.table,    ...(stored.table    ?? {}) },
+      footer:   { ...DEFAULT_CONFIG.footer,   ...(stored.footer   ?? {}) },
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const element = createElement(DynamicPDF, { config, type: "FACTURE", data: invoiceToSampleData(invoice) }) as any
     return renderToBuffer(element) as Promise<Buffer>

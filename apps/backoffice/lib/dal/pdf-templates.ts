@@ -11,7 +11,10 @@ export async function getPdfTemplateById(id: string) {
 }
 
 export async function getDefaultTemplate(type: PdfTemplateType) {
-  return db.pdfTemplate.findFirst({ where: { type, is_default: true } })
+  return (
+    (await db.pdfTemplate.findFirst({ where: { type, is_default: true } })) ??
+    (await db.pdfTemplate.findFirst({ where: { type }, orderBy: { updatedAt: "desc" } }))
+  )
 }
 
 export async function createPdfTemplate(data: {
