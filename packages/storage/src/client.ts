@@ -96,19 +96,25 @@ export async function deleteFile(key: string): Promise<void> {
 }
 
 /**
- * Extract the storage key from a url_storage value.
+ * Pure helper — separated so it can be unit-tested without module-level env mocking.
  *
- * Handles three formats produced in the wild:
- *  1. MinIO path-style:  http://endpoint/bucket/key  → key
- *  2. R2 path-style:     https://account.r2.../bucket/key → key
- *  3. Double-bucket bug: https://account.r2.../bucket/bucket/key → key
- *     (caused by S3_ENDPOINT including the bucket path)
- *
- * Uses `lastIndexOf("/${BUCKET}/")` so a single pass resolves all cases.
+ * Handles four URL formats stored in `url_storage`:
+ *  1. R2 public domain / CDN:  https://pub.r2.dev/key              → key
+ *  2. MinIO path-style:        http://endpoint/bucket/key           → key
+ *  3. R2 path-style:           https://account.r2.../bucket/key    → key
+ *  4. Double-bucket bug:       https://.../bucket/bucket/key       → key
  */
-export function extractStorageKey(urlStorage: string): string {
-  const marker = `/${BUCKET}/`
-  // Try parsing as URL first; fall back to treating the value as a raw path
+export function _extractKey(
+  urlStorage: string,
+  bucket: string,
+  publicBase: string | null
+): string {
+  // Case 1: built from PUBLIC_BASE — bucket is not part of the path, just strip prefix.
+  if (publicBase && urlStorage.startsWith(publicBase)) {
+    return urlStorage.slice(publicBase.length).replace(/^\//, "")
+  }
+
+  const marker = `/${bucket}/`
   let pathname: string
   try {
     pathname = new URL(urlStorage).pathname
@@ -117,6 +123,10 @@ export function extractStorageKey(urlStorage: string): string {
   }
   const idx = pathname.lastIndexOf(marker)
   if (idx !== -1) return pathname.slice(idx + marker.length)
-  // Fallback: strip one leading path segment (original behaviour)
+  // Fallback: strip one leading path segment (endpoint/bucket prefix)
   return pathname.replace(/^\/[^/]+\//, "")
+}
+
+export function extractStorageKey(urlStorage: string): string {
+  return _extractKey(urlStorage, BUCKET, PUBLIC_BASE)
 }
