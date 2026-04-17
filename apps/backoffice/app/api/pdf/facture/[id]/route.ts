@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { renderToBuffer } from "@react-pdf/renderer"
-import { createElement } from "react"
 import { getFeeInvoiceById } from "@/lib/dal/facturation"
-import { InvoicePDF } from "@/lib/pdf/invoice-template"
+import { renderInvoicePdf } from "@/lib/pdf/render-with-template"
 import { auth } from "@/auth"
 
 export async function GET(
@@ -15,9 +13,7 @@ export async function GET(
   const invoice = await getFeeInvoiceById(params.id)
   if (!invoice) return new NextResponse("Facture introuvable", { status: 404 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const element = createElement(InvoicePDF, { invoice }) as any
-  const buffer = await renderToBuffer(element)
+  const buffer = await renderInvoicePdf(invoice)
 
   const filename = `Facture-${invoice.numero_facture}.pdf`
 
