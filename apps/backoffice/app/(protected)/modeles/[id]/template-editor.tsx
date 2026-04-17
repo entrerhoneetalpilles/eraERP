@@ -360,12 +360,19 @@ export function TemplateEditor({ id, nom: initialNom, type, initialConfig }: Pro
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
-            onClick={() => refreshPreview(config)}
-            disabled={previewLoading}
+            onClick={() => {
+              if (typeof window !== "undefined" && window.innerWidth < 768 && previewUrl) {
+                window.open(previewUrl, "_blank", "noopener,noreferrer")
+              } else {
+                refreshPreview(config)
+              }
+            }}
+            disabled={previewLoading && typeof window !== "undefined" && window.innerWidth >= 768}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${previewLoading ? "animate-spin" : ""}`} />
-            Aperçu
+            <span className="hidden md:inline">Aperçu</span>
+            <span className="md:hidden">Ouvrir aperçu</span>
           </button>
 
           <button
@@ -397,7 +404,7 @@ export function TemplateEditor({ id, nom: initialNom, type, initialConfig }: Pro
       <div className="flex flex-1 min-h-0">
 
         {/* ─── LEFT PANEL: Editor ─────────────────────────── */}
-        <div className="w-[400px] shrink-0 border-r border-border overflow-y-auto bg-card">
+        <div className="w-full md:w-[400px] shrink-0 md:border-r border-border overflow-y-auto bg-card">
 
           {/* ── Identité visuelle ── */}
           <Section title="Identité visuelle" icon={Palette} defaultOpen>
@@ -513,8 +520,8 @@ export function TemplateEditor({ id, nom: initialNom, type, initialConfig }: Pro
           </Section>
         </div>
 
-        {/* ─── RIGHT PANEL: Preview ───────────────────────── */}
-        <div className="flex-1 min-w-0 bg-muted/20 flex flex-col">
+        {/* ─── RIGHT PANEL: Preview (desktop only) ────────── */}
+        <div className="hidden md:flex flex-1 min-w-0 bg-muted/20 flex-col">
           <div className="flex items-center justify-between px-5 h-10 border-b border-border/60 bg-card/50 shrink-0">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Eye className="w-3.5 h-3.5" />
