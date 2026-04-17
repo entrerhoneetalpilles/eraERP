@@ -13,12 +13,16 @@ import {
   Settings,
   LogOut,
   ClipboardList,
+  CalendarCheck,
+  Wrench,
 } from "lucide-react"
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Accueil", badgeKey: null },
   { href: "/biens", icon: Building2, label: "Mes biens", badgeKey: null },
+  { href: "/reservations", icon: CalendarCheck, label: "Réservations", badgeKey: null },
   { href: "/revenus", icon: TrendingUp, label: "Revenus", badgeKey: null },
+  { href: "/travaux", icon: Wrench, label: "Travaux", badgeKey: null },
   { href: "/documents", icon: FileText, label: "Documents", badgeKey: null },
   { href: "/messagerie", icon: MessageCircle, label: "Messages", badgeKey: "unread" },
   { href: "/devis", icon: ClipboardList, label: "Devis", badgeKey: "devis" },

@@ -9,7 +9,7 @@ import { Download, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { getFeeInvoices } from "@/lib/dal/facturation"
-import { exportInvoiceCsvAction } from "./[id]/actions"
+import { exportInvoiceCsvAction, exportFecAction } from "./[id]/actions"
 import { cn } from "@conciergerie/ui"
 
 type InvoiceRow = Awaited<ReturnType<typeof getFeeInvoices>>[number]
@@ -118,6 +118,20 @@ export function FacturationTable({ data }: { data: InvoiceRow[] }) {
     toast.success("Export CSV téléchargé")
   }
 
+  async function exportFec() {
+    const res = await exportFecAction()
+    if (!res || res.error || !res.fec) return toast.error((res as any)?.error ?? "Erreur export FEC")
+    const blob = new Blob([res.fec], { type: "text/plain;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    const siren = "000000000"
+    a.download = `${siren}FEC${new Date().toISOString().slice(0, 10).replace(/-/g, "")}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("Fichier FEC téléchargé")
+  }
+
   const overdueCount = filtered.filter(isOverdue).length
 
   return (
@@ -148,14 +162,16 @@ export function FacturationTable({ data }: { data: InvoiceRow[] }) {
           })}
         </div>
 
-        <Button
-          size="sm" variant="outline"
-          onClick={exportCsv}
-          className="gap-1.5 cursor-pointer"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={exportFec} className="gap-1.5 cursor-pointer">
+            <Download className="w-3.5 h-3.5" />
+            Export FEC
+          </Button>
+          <Button size="sm" variant="outline" onClick={exportCsv} className="gap-1.5 cursor-pointer">
+            <Download className="w-3.5 h-3.5" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {overdueCount > 0 && (

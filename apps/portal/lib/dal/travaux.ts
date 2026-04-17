@@ -1,5 +1,16 @@
 import { db } from "@conciergerie/db"
 
+export async function getOwnerWorkOrders(ownerId: string) {
+  return db.workOrder.findMany({
+    where: { property: { mandate: { owner_id: ownerId } } },
+    include: {
+      property: { select: { id: true, nom: true } },
+      contractor: { select: { id: true, nom: true, metier: true, telephone: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  })
+}
+
 export async function getPendingDevisForOwner(ownerId: string) {
   return db.workOrder.findMany({
     where: {

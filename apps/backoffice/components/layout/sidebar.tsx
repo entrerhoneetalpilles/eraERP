@@ -22,6 +22,9 @@ import {
   FolderOpen,
   ClipboardList,
   LayoutTemplate,
+  Star,
+  ShoppingBag,
+  Bell,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -47,6 +50,7 @@ const NAV_SECTIONS = [
       { href: "/planning", label: "Planning", icon: CalendarRange },
       { href: "/menage", label: "Ménage", icon: SprayCan },
       { href: "/voyageurs", label: "Voyageurs", icon: UserCheck },
+      { href: "/avis", label: "Avis voyageurs", icon: Star },
     ],
   },
   {
@@ -70,12 +74,14 @@ const NAV_SECTIONS = [
       { href: "/prestataires", label: "Prestataires", icon: HardHat },
       { href: "/travaux", label: "Travaux", icon: Wrench },
       { href: "/devis", label: "Devis", icon: ClipboardList },
+      { href: "/catalogue", label: "Catalogue services", icon: ShoppingBag },
     ],
   },
   {
     label: "Configuration",
     items: [
       { href: "/modeles", label: "Modèles PDF", icon: LayoutTemplate },
+      { href: "/notifications", label: "Notifications", icon: Bell },
     ],
   },
 ]

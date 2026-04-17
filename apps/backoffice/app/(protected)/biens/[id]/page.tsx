@@ -7,12 +7,14 @@ import { Button } from "@conciergerie/ui"
 import {
   Edit, Key, CalendarDays, TrendingUp, Wrench, Home,
   Wifi, Lock, MapPin, Users, BedDouble, Ruler,
-  Euro, ShieldCheck, AlertTriangle,
+  ShieldCheck, AlertTriangle,
 } from "lucide-react"
 import { DeletePropertyButton } from "./delete-button"
 import { PropertyStatusButton } from "./status-button"
+import { TarificationForm } from "./tarification-form"
+import { PropertyDocumentsForm } from "./documents-legaux-form"
 
-const TABS = ["resume", "reservations", "acces", "tarification", "travaux"] as const
+const TABS = ["resume", "reservations", "acces", "tarification", "documents", "travaux"] as const
 type Tab = typeof TABS[number]
 
 const TAB_LABELS: Record<Tab, string> = {
@@ -20,6 +22,7 @@ const TAB_LABELS: Record<Tab, string> = {
   reservations: "Réservations",
   acces: "Accès",
   tarification: "Tarification",
+  documents: "Documents légaux",
   travaux: "Travaux & Ménage",
 }
 
@@ -362,73 +365,18 @@ export default async function PropertyDetailPage({
       )}
 
       {activeTab === "tarification" && (
-        <div className="space-y-4">
-          <div className="bg-card rounded-md border border-border p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <Euro className="w-3.5 h-3.5" />
-                Règles tarifaires
-              </h2>
-            </div>
-            {property.priceRules.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">Aucune règle tarifaire</p>
-            ) : (
-              <div className="space-y-0.5">
-                {property.priceRules.map((rule: {
-                  id: string
-                  type: string
-                  nom: string | null
-                  prix_nuit: number
-                  sejour_min: number
-                  date_debut: Date | null
-                  date_fin: Date | null
-                  actif: boolean
-                  priorite: number
-                }) => (
-                  <div
-                    key={rule.id}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-md ${!rule.actif ? "opacity-50" : ""}`}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {rule.nom ?? rule.type}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {rule.date_debut && rule.date_fin
-                          ? `${new Date(rule.date_debut).toLocaleDateString("fr-FR")} → ${new Date(rule.date_fin).toLocaleDateString("fr-FR")}`
-                          : "Règle permanente"
-                        } · Séjour min. {rule.sejour_min} nuit{rule.sejour_min !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold tabular-nums">
-                        {rule.prix_nuit.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}/nuit
-                      </p>
-                      {!rule.actif && <p className="text-xs text-muted-foreground">Inactif</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <TarificationForm
+          propertyId={property.id}
+          priceRules={property.priceRules as any}
+          blockedDates={property.blockedDates as any}
+        />
+      )}
 
-          {/* Dates bloquées */}
-          {property.blockedDates.length > 0 && (
-            <div className="bg-card rounded-md border border-border p-5">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Dates bloquées</h2>
-              <div className="space-y-1">
-                {property.blockedDates.map((block: { id: string; date_debut: Date; date_fin: Date; motif: string | null }) => (
-                  <div key={block.id} className="flex items-center justify-between py-1.5 text-sm">
-                    <span className="text-foreground">
-                      {new Date(block.date_debut).toLocaleDateString("fr-FR")} → {new Date(block.date_fin).toLocaleDateString("fr-FR")}
-                    </span>
-                    {block.motif && <span className="text-xs text-muted-foreground">{block.motif}</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+      {activeTab === "documents" && (
+        <PropertyDocumentsForm
+          propertyId={property.id}
+          documents={property.propertyDocuments as any}
+        />
       )}
 
       {activeTab === "travaux" && (

@@ -12,6 +12,7 @@ import { MandateStatusButton } from "./status-button"
 import { DeleteMandateButton } from "./delete-button"
 import { MandatePdfButton } from "./pdf-button"
 import { DocumentDownloadButton } from "./document-download"
+import { AvenantForm } from "./avenant-form"
 
 const TABS = ["resume", "reservations", "conditions", "avenants", "documents"] as const
 type Tab = typeof TABS[number]
@@ -398,39 +399,7 @@ export default async function MandateDetailPage({
       {/* ── AVENANTS ── */}
       {activeTab === "avenants" && (
         <div className="bg-card rounded-md border border-border p-5">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-            <FileText className="w-3.5 h-3.5" />
-            Avenants ({mandate.avenants.length})
-          </h2>
-          {mandate.avenants.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-10">Aucun avenant</p>
-          ) : (
-            <div className="space-y-3">
-              {mandate.avenants.map((avenant: {
-                id: string
-                numero: number
-                date: Date
-                description: string
-                statut_signature: string
-              }) => (
-                <div
-                  key={avenant.id}
-                  className="rounded-md border border-border p-4 space-y-1.5"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-foreground">Avenant n°{avenant.numero}</span>
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={avenant.statut_signature} />
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(avenant.date).toLocaleDateString("fr-FR")}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{avenant.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
+          <AvenantForm mandateId={mandate.id} avenants={mandate.avenants as any} />
         </div>
       )}
 

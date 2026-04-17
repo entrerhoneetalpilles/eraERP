@@ -1,6 +1,8 @@
+import Link from "next/link"
 import { auth, signOut } from "@/auth"
-import { LogOut } from "lucide-react"
+import { LogOut, Bell } from "lucide-react"
 import { Button } from "@conciergerie/ui"
+import { getUnreadNotificationsCount } from "@/lib/dal/notifications"
 
 function getInitials(name?: string | null): string {
   if (!name) return "?"
@@ -27,6 +29,9 @@ function formatRole(role?: string | null): string {
 
 export async function Header() {
   const session = await auth()
+  const unreadCount = session?.user?.id
+    ? await getUnreadNotificationsCount(session.user.id)
+    : 0
 
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
@@ -43,6 +48,16 @@ export async function Header() {
 
       {/* Right: user */}
       <div className="flex items-center gap-3 ml-auto">
+        {/* Bell */}
+        <Link href="/notifications" className="relative text-muted-foreground hover:text-foreground transition-colors">
+          <Bell className="w-4 h-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold text-white bg-primary rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 tabular-nums">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </Link>
+
         {/* Avatar */}
         <div className="w-7 h-7 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center shrink-0">
           <span className="text-white text-[11px] font-semibold">

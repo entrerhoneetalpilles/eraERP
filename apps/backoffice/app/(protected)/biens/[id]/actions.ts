@@ -2,8 +2,10 @@
 
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import { auth } from "@/auth"
 import { propertySchema } from "@/lib/validations/property"
 import { updateProperty, upsertPropertyAccess, deleteProperty } from "@/lib/dal/properties"
+import { db } from "@conciergerie/db"
 
 export async function updatePropertyAction(id: string, _prev: unknown, formData: FormData) {
   const raw = {
@@ -61,4 +63,97 @@ export async function changePropertyStatusAction(id: string, statut: "ACTIF" | "
   await updateProperty(id, { statut })
   revalidatePath(`/biens/${id}`)
   revalidatePath("/biens")
+}
+
+// ─── TARIFICATION ──────────────────────────────────────────────
+
+export async function createPriceRuleAction(propertyId: string, data: {
+  type: string; nom?: string; date_debut?: string; date_fin?: string
+  prix_nuit: number; sejour_min: number; priorite: number
+}) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  await db.priceRule.create({
+    data: {
+      property_id: propertyId,
+      type: data.type as "DEFAUT" | "SAISON" | "WEEKEND" | "EVENEMENT",
+      nom: data.nom || null,
+      date_debut: data.date_debut ? new Date(data.date_debut) : null,
+      date_fin: data.date_fin ? new Date(data.date_fin) : null,
+      prix_nuit: data.prix_nuit,
+      sejour_min: data.sejour_min,
+      priorite: data.priorite,
+    },
+  })
+  revalidatePath(`/biens/${propertyId}`)
+  return { success: true }
+}
+
+export async function deletePriceRuleAction(id: string, propertyId: string) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  await db.priceRule.delete({ where: { id } })
+  revalidatePath(`/biens/${propertyId}`)
+  return { success: true }
+}
+
+export async function togglePriceRuleAction(id: string, propertyId: string, actif: boolean) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  await db.priceRule.update({ where: { id }, data: { actif } })
+  revalidatePath(`/biens/${propertyId}`)
+  return { success: true }
+}
+
+// ─── DATES BLOQUÉES ────────────────────────────────────────────
+
+export async function createBlockedDateAction(propertyId: string, data: {
+  date_debut: string; date_fin: string; motif: string; notes?: string
+}) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  await db.blockedDate.create({
+    data: {
+      property_id: propertyId,
+      date_debut: new Date(data.date_debut),
+      date_fin: new Date(data.date_fin),
+      motif: data.motif as "PROPRIETAIRE" | "TRAVAUX" | "MAINTENANCE",
+      notes: data.notes || null,
+    },
+  })
+  revalidatePath(`/biens/${propertyId}`)
+  return { success: true }
+}
+
+export async function deleteBlockedDateAction(id: string, propertyId: string) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  await db.blockedDate.delete({ where: { id } })
+  revalidatePath(`/biens/${propertyId}`)
+  return { success: true }
+}
+
+// ─── DOCUMENTS LÉGAUX ──────────────────────────────────────────
+
+export async function upsertPropertyDocumentAction(propertyId: string, data: {
+  type: string; date_validite?: string; statut: string
+}) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  const type = data.type as "DPE" | "ELECTRICITE" | "GAZ" | "PLOMB" | "AMIANTE" | "PNO" | "AUTRE"
+  await db.propertyDocument.upsert({
+    where: { property_id_type: { property_id: propertyId, type } },
+    create: {
+      property_id: propertyId,
+      type,
+      date_validite: data.date_validite ? new Date(data.date_validite) : null,
+      statut: data.statut as "VALIDE" | "EXPIRE" | "MANQUANT",
+    },
+    update: {
+      date_validite: data.date_validite ? new Date(data.date_validite) : null,
+      statut: data.statut as "VALIDE" | "EXPIRE" | "MANQUANT",
+    },
+  })
+  revalidatePath(`/biens/${propertyId}`)
+  return { success: true }
 }

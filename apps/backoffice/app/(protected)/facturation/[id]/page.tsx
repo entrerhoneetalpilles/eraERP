@@ -4,6 +4,7 @@ import { getFeeInvoiceById } from "@/lib/dal/facturation"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { ArrowLeft, Building2, Calendar, Clock, CheckCircle2, AlertTriangle, CreditCard, FileDown } from "lucide-react"
 import { InvoiceActions } from "./invoice-actions"
+import { TimeEntryForm } from "./time-entry-form"
 
 function fmt(n: number) {
   return n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
@@ -131,6 +132,13 @@ export default async function FactureDetailPage({ params }: { params: { id: stri
             <p className="text-sm"><span className="font-medium text-muted-foreground">Objet : </span><span className="text-foreground">{invoice.objet}</span></p>
           </div>
         )}
+
+        {/* Time entries — always visible for BROUILLON invoices, read-only otherwise */}
+        <TimeEntryForm
+          invoiceId={invoice.id}
+          entries={invoice.timeEntries as any}
+          readOnly={invoice.statut !== "BROUILLON"}
+        />
 
         {/* Line items */}
         {invoice.lineItems.length > 0 ? (

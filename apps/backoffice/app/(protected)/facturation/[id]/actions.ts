@@ -9,6 +9,7 @@ import {
   updateInvoiceNotes,
   getFeeInvoiceById,
 } from "@/lib/dal/facturation"
+import { db } from "@conciergerie/db"
 import { getOwnerById } from "@/lib/dal/owners"
 import { sendFactureEmail } from "@conciergerie/email"
 import { logEmail } from "@/lib/dal/email-log"
@@ -163,6 +164,38 @@ export async function sendReminderAction(id: string) {
   }
 }
 
+export async function createTimeEntryAction(invoiceId: string, data: {
+  date: string; description: string; nb_heures: number; taux_horaire: number
+}) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  const invoice = await getFeeInvoiceById(invoiceId)
+  if (!invoice) return { error: "Facture introuvable" }
+  const montant_ht = data.nb_heures * data.taux_horaire
+  await db.timeEntry.create({
+    data: {
+      owner_id: invoice.owner_id,
+      fee_invoice_id: invoiceId,
+      date: new Date(data.date),
+      description: data.description,
+      nb_heures: data.nb_heures,
+      taux_horaire: data.taux_horaire,
+      montant_ht,
+      created_by: session.user.id ?? "system",
+    },
+  })
+  revalidatePath(`/facturation/${invoiceId}`)
+  return { success: true }
+}
+
+export async function deleteTimeEntryAction(entryId: string, invoiceId: string) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  await db.timeEntry.delete({ where: { id: entryId } })
+  revalidatePath(`/facturation/${invoiceId}`)
+  return { success: true }
+}
+
 export async function exportInvoiceCsvAction() {
   const session = await auth()
   if (!session?.user) return { error: "Non autorisé" }
@@ -183,4 +216,40 @@ export async function exportInvoiceCsvAction() {
   ]
   const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n")
   return { success: true, csv }
+}
+
+export async function exportFecAction() {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  const { getFeeInvoices } = await import("@/lib/dal/facturation")
+  const invoices = await getFeeInvoices()
+  const fmtFec = (d: Date | string) => {
+    const dt = new Date(d)
+    return `${dt.getFullYear()}${String(dt.getMonth() + 1).padStart(2, "0")}${String(dt.getDate()).padStart(2, "0")}`
+  }
+  const rows: string[][] = []
+  let ecritureNum = 1
+  for (const inv of invoices) {
+    if (inv.statut === "BROUILLON") continue
+    const dateEmission = inv.createdAt
+    const ref = inv.numero_facture
+    const tvaAmount = inv.montant_ttc - inv.montant_ht
+    // Débit client 411
+    rows.push(["VT", "Ventes", String(ecritureNum), fmtFec(dateEmission), "411000", `Client ${inv.owner.nom}`, "", "", ref, fmtFec(dateEmission), inv.objet ?? "Honoraires gestion", inv.montant_ttc.toFixed(2), "0.00", "", "", fmtFec(dateEmission), "", "EUR"])
+    // Crédit produits 706
+    rows.push(["VT", "Ventes", String(ecritureNum), fmtFec(dateEmission), "706000", "Honoraires de gestion", "", "", ref, fmtFec(dateEmission), inv.objet ?? "Honoraires gestion", "0.00", inv.montant_ht.toFixed(2), "", "", fmtFec(dateEmission), "", "EUR"])
+    // TVA collectée 44571
+    if (tvaAmount > 0) {
+      rows.push(["VT", "Ventes", String(ecritureNum), fmtFec(dateEmission), "44571", "TVA collectée", "", "", ref, fmtFec(dateEmission), inv.objet ?? "Honoraires gestion", "0.00", tvaAmount.toFixed(2), "", "", fmtFec(dateEmission), "", "EUR"])
+    }
+    ecritureNum++
+    if (inv.date_paiement) {
+      rows.push(["BQ", "Banque", String(ecritureNum), fmtFec(inv.date_paiement), "512000", "Banque", "", "", inv.reference_paiement ?? ref, fmtFec(inv.date_paiement), `Règlement ${ref}`, inv.montant_ttc.toFixed(2), "0.00", "", "", fmtFec(inv.date_paiement), "", "EUR"])
+      rows.push(["BQ", "Banque", String(ecritureNum), fmtFec(inv.date_paiement), "411000", `Client ${inv.owner.nom}`, "", "", inv.reference_paiement ?? ref, fmtFec(inv.date_paiement), `Règlement ${ref}`, "0.00", inv.montant_ttc.toFixed(2), "", "", fmtFec(inv.date_paiement), "", "EUR"])
+      ecritureNum++
+    }
+  }
+  const header = ["JournalCode","JournalLib","EcritureNum","EcritureDate","CompteNum","CompteLib","CompAuxNum","CompAuxLib","PieceRef","PieceDate","EcritureLib","Debit","Credit","EcritureLet","DateLet","ValidDate","Montantdevise","Idevise"]
+  const fec = [header, ...rows].map(r => r.join("\t")).join("\r\n")
+  return { success: true, fec }
 }
