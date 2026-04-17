@@ -11,6 +11,7 @@ const TYPE_LABELS: Record<string, string> = {
   AVENANT: "Avenant",
   FACTURE: "Facture",
   CRG: "CRG",
+  DEVIS: "Devis",
   ATTESTATION_FISCALE: "Attestation",
   DIAGNOSTIC: "Diagnostic",
   AUTRE: "Document",
