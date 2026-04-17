@@ -58,6 +58,8 @@ const S = StyleSheet.create({
   paid: { position: "absolute", top: 80, right: 40, fontSize: 36, fontFamily: "Helvetica-Bold", color: colors.success, opacity: 0.12 },
 })
 
+type Adresse = { rue?: string; complement?: string; code_postal?: string; ville?: string }
+
 const fmt = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
 const fmtDate = (d: Date | string) => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
 
@@ -65,6 +67,7 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceData }) {
   const isPaid = invoice.statut === "PAYEE"
   const tva = invoice.montant_ht * invoice.tva_rate
   const periode = `${fmtDate(invoice.periode_debut)} — ${fmtDate(invoice.periode_fin)}`
+  const adresse = ((invoice.owner as any).adresse ?? {}) as Adresse
 
   return (
     <Document title={`Facture ${invoice.numero_facture}`}>
@@ -74,6 +77,7 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceData }) {
           <View>
             <Text style={S.companyName}>Entre Rhône et Alpilles</Text>
             <Text style={S.companyTagline}>Gestion locative haut de gamme</Text>
+            <Text style={S.companyTagline}>Saint-Rémy-de-Provence (13210) — France</Text>
           </View>
           <View>
             <Text style={S.invoiceTitle}>FACTURE</Text>
@@ -84,7 +88,19 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceData }) {
           <View style={S.infoBlock}>
             <Text style={S.sectionTitle}>Facturé à</Text>
             <Text style={S.infoValue}>{invoice.owner.nom}</Text>
+            {adresse.rue && (
+              <Text style={S.tableCell}>{adresse.rue}{adresse.complement ? `, ${adresse.complement}` : ""}</Text>
+            )}
+            {adresse.code_postal && adresse.ville && (
+              <Text style={S.tableCell}>{adresse.code_postal} {adresse.ville}</Text>
+            )}
             <Text style={S.tableCell}>{invoice.owner.email}</Text>
+            {(invoice.owner as any).telephone && (
+              <Text style={S.tableCell}>{(invoice.owner as any).telephone}</Text>
+            )}
+            {(invoice.owner as any).nif && (
+              <Text style={S.tableCell}>NIF : {(invoice.owner as any).nif}</Text>
+            )}
           </View>
           <View style={S.infoBlock}>
             <Text style={S.sectionTitle}>Détails</Text>
@@ -165,8 +181,18 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceData }) {
             <Text style={S.notesText}>{invoice.notes_client}</Text>
           </View>
         )}
+        {!isPaid && (
+          <View style={[S.notesBlock, { marginTop: 12 }]}>
+            <Text style={[S.notesText, { fontFamily: "Helvetica-Bold", marginBottom: 3 }]}>Conditions de paiement</Text>
+            <Text style={S.notesText}>Règlement par virement bancaire à réception de la présente facture.</Text>
+            <Text style={[S.notesText, { marginTop: 4 }]}>
+              Tout retard de paiement entraîne des pénalités au taux de 3× le taux d&apos;intérêt légal,
+              ainsi qu&apos;une indemnité forfaitaire de recouvrement de 40 €.
+            </Text>
+          </View>
+        )}
         <View style={S.footer} fixed>
-          <Text style={S.footerText}>Entre Rhône et Alpilles — Gestion locative</Text>
+          <Text style={S.footerText}>Entre Rhône et Alpilles — TVA non applicable, art. 293 B CGI</Text>
           <Text style={S.footerText}>{invoice.numero_facture}</Text>
           <Text style={S.footerText} render={({ pageNumber, totalPages }) => `${pageNumber}/${totalPages}`} />
         </View>

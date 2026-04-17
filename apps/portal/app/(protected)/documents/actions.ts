@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth"
 import { getOwnerDocument } from "@/lib/dal/documents"
-import { getPresignedDownloadUrl } from "@conciergerie/storage"
+import { extractStorageKey, getPresignedDownloadUrl } from "@conciergerie/storage"
 
 export async function getDocumentViewUrlAction(id: string) {
   const session = await auth()
@@ -11,17 +11,14 @@ export async function getDocumentViewUrlAction(id: string) {
   const doc = await getOwnerDocument(session.user.ownerId, id)
   if (!doc) return { error: "Document introuvable ou accès refusé" }
 
-  const publicBase = process.env.S3_PUBLIC_URL
-  if (publicBase && doc.url_storage.startsWith(publicBase)) {
-    return { url: doc.url_storage }
-  }
-
   try {
-    const urlParts = new URL(doc.url_storage)
-    const key = urlParts.pathname.replace(/^\/[^/]+\//, "")
-    const url = await getPresignedDownloadUrl(key, 900)
+    // Always presign — R2 buckets are private even when S3_PUBLIC_URL is set.
+    // extractStorageKey handles single-bucket and double-bucket URL shapes.
+    const key = extractStorageKey(doc.url_storage)
+    const url = await getPresignedDownloadUrl(key, 900) // 15 min
     return { url }
-  } catch {
-    return { url: doc.url_storage }
+  } catch (e) {
+    console.error("[getDocumentViewUrl] presign error:", e)
+    return { error: "Impossible de générer le lien de téléchargement" }
   }
 }

@@ -9,6 +9,7 @@ import {
   uploadFile,
   deleteFile,
   getPresignedDownloadUrl,
+  extractStorageKey,
 } from "@conciergerie/storage"
 import { createElement } from "react"
 import { renderToBuffer } from "@react-pdf/renderer"
@@ -72,16 +73,7 @@ export async function deleteDocumentAction(id: string) {
 
   // Extract S3 key from url
   try {
-    const publicBase = process.env.S3_PUBLIC_URL
-    let key: string
-    if (publicBase && doc.url_storage.startsWith(publicBase)) {
-      // Public R2 URL: strip base prefix
-      key = doc.url_storage.slice(publicBase.length).replace(/^\//, "")
-    } else {
-      // MinIO-style URL: http://endpoint/bucket/key → strip /bucket/
-      const urlParts = new URL(doc.url_storage)
-      key = urlParts.pathname.replace(/^\/[^/]+\//, "")
-    }
+    const key = extractStorageKey(doc.url_storage)
     await deleteFile(key)
   } catch {
     // Storage deletion failed silently — keep DB record deletion
@@ -101,24 +93,15 @@ export async function getDocumentViewUrlAction(id: string) {
   const doc = await getDocumentById(id)
   if (!doc) return { error: "Document introuvable" }
 
-  // If a public base URL is configured (R2 public bucket, CDN, etc.)
-  // the stored URL is already publicly accessible — return it directly
-  const publicBase = process.env.S3_PUBLIC_URL
-  if (publicBase && doc.url_storage.startsWith(publicBase)) {
-    return { url: doc.url_storage }
-  }
-
   try {
-    // MinIO-style URL: http://endpoint/bucket/key  → strip /bucket/ prefix
-    const urlParts = new URL(doc.url_storage)
-    const key = urlParts.pathname.replace(/^\/[^/]+\//, "")
-    console.log('[getDocumentViewUrl] url_storage:', doc.url_storage, '| extracted key:', key)
+    // Always presign — R2 buckets are private even when S3_PUBLIC_URL is set.
+    // extractStorageKey handles single-bucket and double-bucket URL shapes.
+    const key = extractStorageKey(doc.url_storage)
     const url = await getPresignedDownloadUrl(key, 900) // 15 min
-    console.log('[getDocumentViewUrl] presigned URL generated (first 100 chars):', url.slice(0, 100))
     return { url }
   } catch (e) {
-    console.error('[getDocumentViewUrl] error:', e)
-    return { url: doc.url_storage }
+    console.error("[getDocumentViewUrl] presign error:", e)
+    return { error: "Impossible de générer le lien de téléchargement" }
   }
 }
 

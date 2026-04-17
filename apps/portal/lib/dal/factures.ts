@@ -23,7 +23,7 @@ export async function getOwnerFeeInvoiceForPdf(ownerId: string, invoiceId: strin
   return db.feeInvoice.findFirst({
     where: { id: invoiceId, owner_id: ownerId },
     include: {
-      owner: { select: { nom: true, email: true } },
+      owner: { select: { nom: true, email: true, telephone: true, adresse: true, nif: true } },
       lineItems: { orderBy: { ordre: "asc" } },
     },
   })

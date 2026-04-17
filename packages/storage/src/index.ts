@@ -5,4 +5,5 @@ export {
   getPresignedUploadUrl,
   getPresignedDownloadUrl,
   deleteFile,
+  extractStorageKey,
 } from "./client"

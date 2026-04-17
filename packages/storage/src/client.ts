@@ -94,3 +94,29 @@ export async function getPresignedDownloadUrl(
 export async function deleteFile(key: string): Promise<void> {
   await s3Client.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }))
 }
+
+/**
+ * Extract the storage key from a url_storage value.
+ *
+ * Handles three formats produced in the wild:
+ *  1. MinIO path-style:  http://endpoint/bucket/key  → key
+ *  2. R2 path-style:     https://account.r2.../bucket/key → key
+ *  3. Double-bucket bug: https://account.r2.../bucket/bucket/key → key
+ *     (caused by S3_ENDPOINT including the bucket path)
+ *
+ * Uses `lastIndexOf("/${BUCKET}/")` so a single pass resolves all cases.
+ */
+export function extractStorageKey(urlStorage: string): string {
+  const marker = `/${BUCKET}/`
+  // Try parsing as URL first; fall back to treating the value as a raw path
+  let pathname: string
+  try {
+    pathname = new URL(urlStorage).pathname
+  } catch {
+    pathname = urlStorage
+  }
+  const idx = pathname.lastIndexOf(marker)
+  if (idx !== -1) return pathname.slice(idx + marker.length)
+  // Fallback: strip one leading path segment (original behaviour)
+  return pathname.replace(/^\/[^/]+\//, "")
+}
