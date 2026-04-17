@@ -11,6 +11,7 @@ import {
 import { MandateStatusButton } from "./status-button"
 import { DeleteMandateButton } from "./delete-button"
 import { MandatePdfButton } from "./pdf-button"
+import { DocumentDownloadButton } from "./document-download"
 
 const TABS = ["resume", "reservations", "conditions", "avenants", "documents"] as const
 type Tab = typeof TABS[number]
@@ -464,14 +465,7 @@ export default async function MandateDetailPage({
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge status={doc.statut_signature} />
-                    <a
-                      href={doc.url_storage}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Ouvrir
-                    </a>
+                    <DocumentDownloadButton docId={doc.id} />
                   </div>
                 </div>
               ))}
