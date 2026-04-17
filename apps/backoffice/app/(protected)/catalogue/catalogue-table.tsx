@@ -21,14 +21,17 @@ const UNITE_LABELS: Record<string, string> = {
   ACTE: "Acte", HEURE: "Heure", NUIT: "Nuit", MOIS: "Mois",
 }
 
-const INITIAL_FORM = { nom: "", description: "", categorie: "", tarif: "", unite: "ACTE" as const, tva_rate: "20" }
+type ServiceUnite = "ACTE" | "HEURE" | "NUIT" | "MOIS"
+type FormState = { nom: string; description: string; categorie: string; tarif: string; unite: ServiceUnite; tva_rate: string }
+
+const INITIAL_FORM: FormState = { nom: "", description: "", categorie: "", tarif: "", unite: "ACTE", tva_rate: "20" }
 
 export function CatalogueTable({ services }: { services: Service[] }) {
   const [isPending, startTransition] = useTransition()
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
-  const [form, setForm] = useState(INITIAL_FORM)
-  const [editForm, setEditForm] = useState<Partial<typeof INITIAL_FORM>>({})
+  const [form, setForm] = useState<FormState>(INITIAL_FORM)
+  const [editForm, setEditForm] = useState<Partial<FormState>>({})
 
   const categories = [...new Set(services.map(s => s.categorie))].sort()
 
