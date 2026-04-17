@@ -20,7 +20,7 @@ export default async function ModelesPage() {
     <div className="space-y-8">
       <PageHeader
         title="Modèles de documents"
-        subtitle="Personnalisez la mise en page et le style de vos PDF"
+        description="Personnalisez la mise en page et le style de vos PDF"
         actions={<NewTemplateButton />}
       />
 
