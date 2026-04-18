@@ -25,6 +25,10 @@ import {
   Star,
   ShoppingBag,
   Bell,
+  BookOpen,
+  Landmark,
+  ClipboardCheck,
+  Package,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -49,6 +53,7 @@ const NAV_SECTIONS = [
       { href: "/reservations", label: "Réservations", icon: CalendarDays },
       { href: "/planning", label: "Planning", icon: CalendarRange },
       { href: "/menage", label: "Ménage", icon: SprayCan },
+      { href: "/etats-des-lieux", label: "États des lieux", icon: ClipboardCheck },
       { href: "/voyageurs", label: "Voyageurs", icon: UserCheck },
       { href: "/avis", label: "Avis voyageurs", icon: Star },
     ],
@@ -63,9 +68,11 @@ const NAV_SECTIONS = [
   {
     label: "Finance",
     items: [
-      { href: "/comptabilite", label: "Comptabilité", icon: Wallet },
+      { href: "/comptabilite", label: "Honoraires", icon: Wallet },
       { href: "/facturation", label: "Facturation", icon: Receipt },
       { href: "/crg", label: "CRG", icon: FileBarChart2 },
+      { href: "/journal-comptable", label: "Journal comptable", icon: BookOpen },
+      { href: "/rapprochement", label: "Rapprochement", icon: Landmark },
     ],
   },
   {
@@ -75,6 +82,7 @@ const NAV_SECTIONS = [
       { href: "/travaux", label: "Travaux", icon: Wrench },
       { href: "/devis", label: "Devis", icon: ClipboardList },
       { href: "/catalogue", label: "Catalogue services", icon: ShoppingBag },
+      { href: "/commandes-services", label: "Commandes services", icon: Package },
     ],
   },
   {

@@ -32,42 +32,31 @@ const columns: ColumnDef<CrgRow>[] = [
   },
   {
     accessorKey: "revenus_sejours",
-    header: "Revenus",
+    header: "Revenus séjours (info)",
     cell: ({ row }) => (
-      <span className="text-sm text-foreground">{fmt(row.original.revenus_sejours)}</span>
+      <span className="text-sm text-muted-foreground">{fmt(row.original.revenus_sejours)}</span>
     ),
   },
   {
     accessorKey: "honoraires_deduits",
-    header: "Honoraires",
+    header: "Honoraires ERA HT",
     cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">{fmt(row.original.honoraires_deduits)}</span>
+      <span className="text-sm text-foreground">{fmt(row.original.honoraires_deduits)}</span>
     ),
   },
   {
     accessorKey: "charges_deduites",
-    header: "Charges",
+    header: "Charges travaux",
     cell: ({ row }) => (
       <span className="text-sm text-muted-foreground">{fmt(row.original.charges_deduites)}</span>
     ),
   },
   {
     accessorKey: "montant_reverse",
-    header: "Reversé",
+    header: "Net estimé propriétaire",
     cell: ({ row }) => (
-      <span className="text-sm font-semibold text-foreground">{fmt(row.original.montant_reverse)}</span>
+      <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{fmt(row.original.montant_reverse)}</span>
     ),
-  },
-  {
-    header: "Virement",
-    cell: ({ row }) =>
-      row.original.date_virement ? (
-        <span className="text-sm text-foreground">
-          {new Date(row.original.date_virement).toLocaleDateString("fr-FR")}
-        </span>
-      ) : (
-        <span className="text-xs text-muted-foreground">En attente</span>
-      ),
   },
   {
     id: "pdf",
