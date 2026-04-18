@@ -34,6 +34,16 @@ export async function createInventoryAction(_prev: unknown, formData: FormData) 
   return { success: true }
 }
 
+export async function updatePiecesAction(id: string, pieces: object[]) {
+  const session = await auth()
+  if (!session?.user) return { error: "Non autorisé" }
+  const { updateInventoryPieces } = await import("@/lib/dal/inventaires")
+  await updateInventoryPieces(id, pieces)
+  revalidatePath(`/etats-des-lieux/${id}`)
+  revalidatePath("/etats-des-lieux")
+  return { success: true }
+}
+
 export async function signInventoryAction(
   id: string,
   role: "voyageur" | "agent"

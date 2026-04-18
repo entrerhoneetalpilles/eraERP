@@ -49,6 +49,30 @@ export async function updateInventorySignatures(
   })
 }
 
+export async function getInventoryById(id: string) {
+  return db.propertyInventory.findUnique({
+    where: { id },
+    include: {
+      property: { select: { id: true, nom: true } },
+      booking: {
+        select: {
+          id: true,
+          check_in: true,
+          check_out: true,
+          guest: { select: { prenom: true, nom: true } },
+        },
+      },
+    },
+  })
+}
+
+export async function updateInventoryPieces(id: string, pieces: object[]) {
+  return db.propertyInventory.update({
+    where: { id },
+    data: { pieces },
+  })
+}
+
 export async function getInventoryStats() {
   const [total, signedBoth, pendingSignature] = await Promise.all([
     db.propertyInventory.count(),

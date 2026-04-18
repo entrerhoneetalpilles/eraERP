@@ -29,6 +29,7 @@ import {
   Landmark,
   ClipboardCheck,
   Package,
+  FileCheck2,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -71,6 +72,7 @@ const NAV_SECTIONS = [
       { href: "/comptabilite", label: "Honoraires", icon: Wallet },
       { href: "/facturation", label: "Facturation", icon: Receipt },
       { href: "/crg", label: "CRG", icon: FileBarChart2 },
+      { href: "/attestation-fiscale", label: "Attestations fiscales", icon: FileCheck2 },
       { href: "/journal-comptable", label: "Journal comptable", icon: BookOpen },
       { href: "/rapprochement", label: "Rapprochement", icon: Landmark },
     ],

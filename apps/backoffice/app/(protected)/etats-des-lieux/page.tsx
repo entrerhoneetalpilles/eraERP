@@ -83,12 +83,12 @@ export default async function EtatsDesLieuxPage() {
             {inventories.map(inv => {
               const bothSigned = inv.signe_voyageur && inv.signe_agent
               return (
-                <div key={inv.id} className="flex items-center gap-4 px-5 py-3">
+                <Link key={inv.id} href={`/etats-des-lieux/${inv.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-accent/50 transition-colors cursor-pointer">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <Link href={`/biens/${inv.property.id}`} className="text-sm font-semibold text-foreground hover:text-primary">
+                      <span className="text-sm font-semibold text-foreground">
                         {inv.property.nom}
-                      </Link>
+                      </span>
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${TYPE_COLORS[inv.type] ?? ""}`}>
                         {inv.type === "ENTREE" ? "Entrée" : "Sortie"}
                       </span>
@@ -115,7 +115,7 @@ export default async function EtatsDesLieuxPage() {
                       <CheckCircle2 className="w-3.5 h-3.5" />Voyageur
                     </span>
                   </div>
-                </div>
+                </Link>
               )
             })}
           </div>
