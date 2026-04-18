@@ -9,7 +9,7 @@ export async function getPropertyInventories() {
           id: true,
           check_in: true,
           check_out: true,
-          guest: { select: { prenom: true, nom: true } },
+          guest: { select: { prenom: true, nom: true, email: true, telephone: true } },
         },
       },
     },
@@ -23,6 +23,10 @@ export async function createPropertyInventory(data: {
   type: "ENTREE" | "SORTIE"
   date: Date
   realise_par: string
+  locataire_nom?: string
+  locataire_prenom?: string
+  locataire_email?: string
+  locataire_tel?: string
 }) {
   return db.propertyInventory.create({
     data: {
@@ -31,6 +35,10 @@ export async function createPropertyInventory(data: {
       type: data.type,
       date: data.date,
       realise_par: data.realise_par,
+      locataire_nom: data.locataire_nom,
+      locataire_prenom: data.locataire_prenom,
+      locataire_email: data.locataire_email,
+      locataire_tel: data.locataire_tel,
       pieces: [],
     },
   })
@@ -59,7 +67,7 @@ export async function getInventoryById(id: string) {
           id: true,
           check_in: true,
           check_out: true,
-          guest: { select: { prenom: true, nom: true } },
+          guest: { select: { prenom: true, nom: true, email: true, telephone: true } },
         },
       },
     },

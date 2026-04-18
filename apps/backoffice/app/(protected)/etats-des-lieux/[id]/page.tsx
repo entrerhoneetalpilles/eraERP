@@ -3,7 +3,7 @@ import Link from "next/link"
 import { getInventoryById } from "@/lib/dal/inventaires"
 import { PiecesEditor } from "./pieces-editor"
 import { SignaturePanel } from "./signature-panel"
-import { ArrowLeft, CheckCircle2, Clock, User } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Clock, User, Mail, Phone } from "lucide-react"
 
 function fmtDate(d: Date | string) {
   return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
@@ -75,6 +75,33 @@ export default async function InventoryDetailPage({ params }: { params: { id: st
             </div>
           )}
         </div>
+
+        {/* Locataire */}
+        {(() => {
+          const guest = inv.booking?.guest
+          const nom = guest ? `${guest.prenom} ${guest.nom}` : (inv.locataire_nom || inv.locataire_prenom) ? `${inv.locataire_prenom ?? ""} ${inv.locataire_nom ?? ""}`.trim() : null
+          const email = guest?.email ?? inv.locataire_email ?? null
+          const tel = guest?.telephone ?? inv.locataire_tel ?? null
+          if (!nom && !email && !tel) return null
+          return (
+            <div className="flex items-start gap-3 pt-2 border-t border-border flex-wrap">
+              <User className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="space-y-0.5 text-sm">
+                {nom && <p className="font-medium text-foreground">{nom}</p>}
+                {email && (
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Mail className="w-3 h-3" />{email}
+                  </p>
+                )}
+                {tel && (
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Phone className="w-3 h-3" />{tel}
+                  </p>
+                )}
+              </div>
+            </div>
+          )
+        })()}
 
         <SignaturePanel
           inventoryId={inv.id}

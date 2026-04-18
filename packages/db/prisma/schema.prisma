@@ -726,6 +726,10 @@ model PropertyInventory {
   type                 InventoryType
   date                 DateTime
   realise_par          String
+  locataire_nom        String?
+  locataire_prenom     String?
+  locataire_email      String?
+  locataire_tel        String?
   pieces               Json[]
   comparaison_id       String?
   yousign_procedure_id String?

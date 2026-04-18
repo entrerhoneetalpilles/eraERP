@@ -26,7 +26,7 @@ export default async function EtatsDesLieuxPage() {
         property_id: true,
         check_in: true,
         check_out: true,
-        guest: { select: { prenom: true, nom: true } },
+        guest: { select: { prenom: true, nom: true, email: true, telephone: true } },
       },
       orderBy: { check_in: "desc" },
       take: 100,
