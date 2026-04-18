@@ -25,6 +25,13 @@ import {
   FolderOpen,
   ClipboardList,
   LayoutTemplate,
+  Star,
+  ShoppingBag,
+  Bell,
+  BookOpen,
+  Landmark,
+  ClipboardCheck,
+  Package,
 } from "lucide-react"
 import { cn } from "@conciergerie/ui"
 
@@ -54,7 +61,9 @@ const DRAWER_SECTIONS = [
       { href: "/reservations", label: "Réservations", icon: CalendarDays },
       { href: "/planning", label: "Planning", icon: CalendarRange },
       { href: "/menage", label: "Ménage", icon: SprayCan },
+      { href: "/etats-des-lieux", label: "États des lieux", icon: ClipboardCheck },
       { href: "/voyageurs", label: "Voyageurs", icon: UserCheck },
+      { href: "/avis", label: "Avis voyageurs", icon: Star },
     ],
   },
   {
@@ -67,9 +76,11 @@ const DRAWER_SECTIONS = [
   {
     label: "Finance",
     items: [
-      { href: "/comptabilite", label: "Comptabilité", icon: Wallet },
+      { href: "/comptabilite", label: "Honoraires", icon: Wallet },
       { href: "/facturation", label: "Facturation", icon: Receipt },
       { href: "/crg", label: "CRG", icon: FileBarChart2 },
+      { href: "/journal-comptable", label: "Journal comptable", icon: BookOpen },
+      { href: "/rapprochement", label: "Rapprochement", icon: Landmark },
     ],
   },
   {
@@ -78,12 +89,15 @@ const DRAWER_SECTIONS = [
       { href: "/prestataires", label: "Prestataires", icon: HardHat },
       { href: "/travaux", label: "Travaux", icon: Wrench },
       { href: "/devis", label: "Devis", icon: ClipboardList },
+      { href: "/catalogue", label: "Catalogue services", icon: ShoppingBag },
+      { href: "/commandes-services", label: "Commandes services", icon: Package },
     ],
   },
   {
     label: "Configuration",
     items: [
       { href: "/modeles", label: "Modèles PDF", icon: LayoutTemplate },
+      { href: "/notifications", label: "Notifications", icon: Bell },
     ],
   },
 ]
