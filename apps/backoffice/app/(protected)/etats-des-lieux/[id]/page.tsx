@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getInventoryById } from "@/lib/dal/inventaires"
-import { PageHeader } from "@/components/ui/page-header"
 import { PiecesEditor } from "./pieces-editor"
+import { SignaturePanel } from "./signature-panel"
 import { ArrowLeft, CheckCircle2, Clock, User } from "lucide-react"
 
 function fmtDate(d: Date | string) {
@@ -76,20 +76,11 @@ export default async function InventoryDetailPage({ params }: { params: { id: st
           )}
         </div>
 
-        {/* Signatures */}
-        <div className="flex items-center gap-4 pt-2 border-t border-border">
-          <p className="text-xs text-muted-foreground">Signatures :</p>
-          <div className="flex items-center gap-3">
-            <span className={`flex items-center gap-1.5 text-xs font-medium ${inv.signe_agent ? "text-emerald-600" : "text-muted-foreground"}`}>
-              <CheckCircle2 className={`w-3.5 h-3.5 ${inv.signe_agent ? "text-emerald-500" : "text-muted-foreground/40"}`} />
-              <User className="w-3 h-3" />Agent
-            </span>
-            <span className={`flex items-center gap-1.5 text-xs font-medium ${inv.signe_voyageur ? "text-emerald-600" : "text-muted-foreground"}`}>
-              <CheckCircle2 className={`w-3.5 h-3.5 ${inv.signe_voyageur ? "text-emerald-500" : "text-muted-foreground/40"}`} />
-              <User className="w-3 h-3" />Voyageur
-            </span>
-          </div>
-        </div>
+        <SignaturePanel
+          inventoryId={inv.id}
+          signeAgent={inv.signe_agent}
+          signeVoyageur={inv.signe_voyageur}
+        />
       </div>
 
       {/* Éditeur pièce par pièce */}
