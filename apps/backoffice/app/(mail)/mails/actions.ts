@@ -99,8 +99,7 @@ export async function sendMailAction(data: {
   if (!session?.user) throw new Error('Non autorisé')
 
   const userEmail = session.user.email!
-  const userName = session.user.name ?? 'Entre Rhône et Alpilles'
-  const fromHeader = `${userName} - Entre Rhône et Alpilles <${userEmail}>`
+  const fromHeader = `Entre Rhône et Alpilles <${userEmail}>`
 
   const isHtmlBody = /<[a-z][\s\S]*>/i.test(data.body)
   const bodyHtml = isHtmlBody
