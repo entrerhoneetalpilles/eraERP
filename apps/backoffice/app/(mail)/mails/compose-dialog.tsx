@@ -241,7 +241,12 @@ export function ComposeDialog({
     }, [])
 
     function getBodyHtml(): string {
-        return editorRef.current?.innerHTML ?? ''
+        const raw = editorRef.current?.innerHTML ?? ''
+        // Strip trailing empty paragraphs/br inserted by contentEditable
+        return raw
+            .replace(/(<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>|<br\s*\/?>)+$/gi, '')
+            .replace(/(&nbsp;| )+$/g, '')
+            .trim()
     }
 
     const canSend = to.length > 0 && subject.trim() && hasBodyContent && !sending

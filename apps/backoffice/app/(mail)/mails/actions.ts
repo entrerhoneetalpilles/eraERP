@@ -47,7 +47,11 @@ function mapThread(t: any): Mail {
     to: [{ name: toName, email: toEmail }],
     subject: t.subject,
     body: t.messages?.at(-1)?.contenu ?? '',
-    preview: (t.messages?.at(-1)?.contenu ?? '').slice(0, 120),
+    preview: (t.messages?.at(-1)?.contenu ?? '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+      .trim()
+      .slice(0, 120),
     date: t.updatedAt.toISOString(),
     read: unreadMessages.length === 0,
     folder: t.folder ?? 'inbox',
