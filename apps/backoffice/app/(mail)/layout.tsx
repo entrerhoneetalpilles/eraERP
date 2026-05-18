@@ -9,7 +9,7 @@ export default async function MailLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-hidden bg-background flex flex-col">
       {children}
     </div>
   )
