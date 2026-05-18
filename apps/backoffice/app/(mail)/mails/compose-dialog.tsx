@@ -197,9 +197,18 @@ export function ComposeDialog({
     const [hasBodyContent, setHasBodyContent] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const editorRef = useRef<HTMLDivElement>(null)
+    // Track the open→closed transition to init fields only once per open
+    const wasOpenRef = useRef(false)
 
     useEffect(() => {
-        if (!open) return
+        // Only initialize when dialog transitions from closed to open
+        if (!open) {
+            wasOpenRef.current = false
+            return
+        }
+        if (wasOpenRef.current) return  // already initialized, user is typing — don't reset
+        wasOpenRef.current = true
+
         const initialTo = Array.isArray(defaultTo) ? defaultTo : defaultTo ? [defaultTo] : []
         setTo(initialTo)
         setCc([])
@@ -208,7 +217,6 @@ export function ComposeDialog({
         setAttachments([])
         setSending(false)
         setHasBodyContent(!!defaultBody?.trim())
-        // Init editor content after DOM is ready
         requestAnimationFrame(() => {
             if (editorRef.current) {
                 editorRef.current.innerHTML = defaultBody || ''
