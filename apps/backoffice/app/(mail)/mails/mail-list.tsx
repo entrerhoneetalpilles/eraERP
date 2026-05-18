@@ -3,7 +3,6 @@
 import { useRef } from 'react'
 import { cn } from '@conciergerie/ui'
 import { Input } from '@conciergerie/ui'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -64,7 +63,7 @@ export function MailList({
     }
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex flex-1 flex-col min-h-0">
             {/* Barre de recherche */}
             <div className="border-b p-3 shrink-0">
                 <div className="relative">
@@ -159,7 +158,7 @@ export function MailList({
             </div>
 
             {/* Liste */}
-            <ScrollArea className="flex-1">
+            <div className="flex-1 overflow-y-auto min-h-0">
                 {mails.length === 0 ? (
                     <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
                         Aucun message
@@ -236,7 +235,7 @@ export function MailList({
                         ))}
                     </div>
                 )}
-            </ScrollArea>
+            </div>
         </div>
     )
 }

@@ -6,13 +6,12 @@ import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import { Send, X, ChevronDown, Paperclip } from 'lucide-react'
+import { Send, X, ChevronDown, Paperclip, Bold, Italic, Underline, List, Save } from 'lucide-react'
 import { toast } from 'sonner'
-import { sendMailAction } from './actions'
+import { sendMailAction, saveDraftAction } from './actions'
 import type { ContactType } from './mail-data'
 import { cn } from '@conciergerie/ui'
 
@@ -96,6 +95,74 @@ function RecipientChips({
     )
 }
 
+// ── Éditeur riche ──────────────────────────────────────────────────────────
+
+function RichEditor({
+    editorRef,
+    onInput,
+    onKeyDown,
+}: {
+    editorRef: React.RefObject<HTMLDivElement>
+    onInput: () => void
+    onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void
+}) {
+    function fmt(cmd: string, val?: string) {
+        document.execCommand(cmd, false, val ?? undefined)
+        editorRef.current?.focus()
+    }
+
+    return (
+        <div className="border border-input rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-ring transition-shadow">
+            {/* Toolbar */}
+            <div className="flex items-center gap-0.5 border-b border-input bg-muted/40 px-1.5 py-1">
+                <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); fmt('bold') }}
+                    className="p-1.5 rounded hover:bg-accent transition-colors"
+                    title="Gras (Ctrl+B)"
+                >
+                    <Bold className="w-3.5 h-3.5" />
+                </button>
+                <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); fmt('italic') }}
+                    className="p-1.5 rounded hover:bg-accent transition-colors"
+                    title="Italique (Ctrl+I)"
+                >
+                    <Italic className="w-3.5 h-3.5" />
+                </button>
+                <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); fmt('underline') }}
+                    className="p-1.5 rounded hover:bg-accent transition-colors"
+                    title="Souligné (Ctrl+U)"
+                >
+                    <Underline className="w-3.5 h-3.5" />
+                </button>
+                <div className="w-px h-4 bg-border mx-1" />
+                <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); fmt('insertUnorderedList') }}
+                    className="p-1.5 rounded hover:bg-accent transition-colors"
+                    title="Liste à puces"
+                >
+                    <List className="w-3.5 h-3.5" />
+                </button>
+            </div>
+            {/* Zone d'édition */}
+            <div
+                ref={editorRef}
+                contentEditable
+                suppressContentEditableWarning
+                onInput={onInput}
+                onKeyDown={onKeyDown}
+                className="min-h-[180px] max-h-[280px] overflow-y-auto px-3 py-2 text-sm outline-none bg-background [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic [&_u]:underline"
+                data-placeholder="Votre message..."
+            />
+        </div>
+    )
+}
+
 // ── Dialog principal ────────────────────────────────────────────────────────
 
 export type ComposeMode = 'compose' | 'reply' | 'forward'
@@ -123,24 +190,31 @@ export function ComposeDialog({
     const [cc, setCc] = useState<string[]>([])
     const [showCc, setShowCc] = useState(false)
     const [subject, setSubject] = useState('')
-    const [body, setBody] = useState('')
     const [contactType, setContactType] = useState<ContactType>('autre')
     const [attachments, setAttachments] = useState<Array<{ filename: string; content: string; contentType: string; size: number }>>([])
     const [sending, setSending] = useState(false)
+    const [savingDraft, setSavingDraft] = useState(false)
+    const [hasBodyContent, setHasBodyContent] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const editorRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (!open) return
-        const initialTo = Array.isArray(defaultTo)
-            ? defaultTo
-            : defaultTo ? [defaultTo] : []
+        const initialTo = Array.isArray(defaultTo) ? defaultTo : defaultTo ? [defaultTo] : []
         setTo(initialTo)
         setCc([])
         setShowCc(false)
         setSubject(defaultSubject)
-        setBody(defaultBody)
         setAttachments([])
         setSending(false)
+        setHasBodyContent(!!defaultBody?.trim())
+        // Init editor content after DOM is ready
+        requestAnimationFrame(() => {
+            if (editorRef.current) {
+                editorRef.current.innerHTML = defaultBody || ''
+                setHasBodyContent(!!editorRef.current.textContent?.trim())
+            }
+        })
     }, [open, defaultTo, defaultSubject, defaultBody])
 
     const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
@@ -158,18 +232,23 @@ export function ComposeDialog({
         if (fileInputRef.current) fileInputRef.current.value = ''
     }, [])
 
-    const canSend = to.length > 0 && subject.trim() && body.trim()
+    function getBodyHtml(): string {
+        return editorRef.current?.innerHTML ?? ''
+    }
+
+    const canSend = to.length > 0 && subject.trim() && hasBodyContent && !sending
 
     async function handleSend() {
         if (!canSend) return
         setSending(true)
+        const htmlBody = getBodyHtml()
         try {
             for (const recipient of to) {
                 await sendMailAction({
                     to: recipient,
                     toName: recipient,
                     subject,
-                    body,
+                    body: htmlBody,
                     contactType,
                     replyToThreadId,
                     attachments: attachments.length > 0 ? attachments : undefined,
@@ -181,7 +260,7 @@ export function ComposeDialog({
                         to: recipient,
                         toName: recipient,
                         subject,
-                        body: body + '\n\n[Copie]',
+                        body: htmlBody + '\n\n[Copie]',
                         contactType,
                     })
                 }
@@ -194,6 +273,21 @@ export function ComposeDialog({
             toast.error("Erreur lors de l'envoi")
         } finally {
             setSending(false)
+        }
+    }
+
+    async function handleSaveDraft() {
+        const htmlBody = getBodyHtml()
+        if (!subject.trim() && !editorRef.current?.textContent?.trim()) return
+        setSavingDraft(true)
+        try {
+            await saveDraftAction({ to, subject, body: htmlBody, contactType })
+            toast.success('Brouillon enregistré')
+            onClose()
+        } catch {
+            toast.error("Erreur lors de la sauvegarde")
+        } finally {
+            setSavingDraft(false)
         }
     }
 
@@ -272,16 +366,15 @@ export function ComposeDialog({
                         <div className="w-10" />
                     </div>
 
-                    {/* Corps */}
-                    <Textarea
-                        placeholder="Votre message..."
-                        value={body}
-                        onChange={(e) => setBody(e.target.value)}
-                        className="min-h-[200px] resize-none text-sm"
+                    {/* Éditeur riche */}
+                    <RichEditor
+                        editorRef={editorRef}
+                        onInput={() => setHasBodyContent(!!editorRef.current?.textContent?.trim())}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSend()
                         }}
                     />
+
                     {/* Pièces jointes */}
                     {attachments.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
@@ -307,6 +400,10 @@ export function ComposeDialog({
                     <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} type="button">
                         <Paperclip className="mr-2 h-4 w-4" />
                         Joindre
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={handleSaveDraft} disabled={savingDraft} type="button">
+                        <Save className="mr-2 h-4 w-4" />
+                        {savingDraft ? 'Enregistrement...' : 'Brouillon'}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={onClose}>
                         <X className="mr-2 h-4 w-4" />

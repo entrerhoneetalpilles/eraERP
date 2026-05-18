@@ -184,7 +184,7 @@ export function MailClient({ initialMails, currentFolder, userEmail }: MailClien
                     />
                 </div>
 
-                <div className="w-80 shrink-0 border-r overflow-hidden">
+                <div className="w-80 shrink-0 border-r flex flex-col overflow-hidden">
                     {loading ? (
                         <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                             Chargement...
@@ -241,7 +241,7 @@ export function MailClient({ initialMails, currentFolder, userEmail }: MailClien
                                 Nouveau
                             </button>
                         </div>
-                        <div className="flex-1 overflow-hidden">
+                        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                             {loading ? (
                                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                                     Chargement...

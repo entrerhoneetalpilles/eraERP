@@ -1005,3 +1005,15 @@ model Notification {
 
   @@map("notifications")
 }
+
+model PdfTemplate {
+  id         String   @id @default(cuid())
+  name       String
+  type       String
+  config     Json
+  is_default Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("pdf_templates")
+}

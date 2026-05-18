@@ -98,12 +98,17 @@ export async function sendMailAction(data: {
   const userName = session.user.name ?? 'Entre Rhône et Alpilles'
   const fromHeader = `${userName} - Entre Rhône et Alpilles <${userEmail}>`
 
+  const isHtmlBody = /<[a-z][\s\S]*>/i.test(data.body)
+  const bodyHtml = isHtmlBody
+    ? data.body
+    : `<div style="white-space:pre-wrap;font-size:14px">${data.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
+
   await sendEmail({
     to: data.to,
     subject: data.subject,
     from: fromHeader,
     html: `<div style="font-family:sans-serif;line-height:1.6;color:#1a1a1a;max-width:600px">
-      <div style="white-space:pre-wrap;font-size:14px">${data.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+      ${bodyHtml}
       <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb" />
       <p style="font-size:12px;color:#6b7280">
         Entre Rhône et Alpilles · Conciergerie haut de gamme
@@ -161,4 +166,28 @@ export async function bulkMarkReadAction(ids: string[], read: boolean) {
   } else {
     await Promise.all(ids.map((id) => markThreadAsUnread(id)))
   }
+}
+
+export async function saveDraftAction(data: {
+  to: string[]
+  subject: string
+  body: string
+  contactType: ContactType
+}): Promise<void> {
+  const session = await auth()
+  if (!session?.user) return
+  const plainText = data.body.replace(/<[^>]*>/g, '').trim()
+  if (!data.subject.trim() && !plainText) return
+
+  await createThread({
+    subject: data.subject.trim() || '(Sans objet)',
+    contact_type: data.contactType,
+    folder: 'drafts',
+    to_email: data.to[0] ?? '',
+    to_name: data.to[0] ?? '',
+    firstMessage: {
+      contenu: data.body,
+      author_id: session.user.id!,
+    },
+  })
 }
