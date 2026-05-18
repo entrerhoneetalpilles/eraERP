@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { toast } from 'sonner'
 import {
     fetchThreadsAction, fetchThreadAction,
     markAsReadAction, moveThreadAction, deleteThreadAction,
@@ -29,6 +30,7 @@ export function useMail(initialMails: Mail[], initialFolder: MailFolder = 'inbox
             setMails(fresh)
         } catch (e) {
             console.error('[useMail] fetch error', e)
+            toast.error('Erreur lors du chargement des messages')
         } finally {
             setLoading(false)
         }

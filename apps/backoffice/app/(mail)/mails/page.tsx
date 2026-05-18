@@ -42,7 +42,7 @@ export default async function MailsPage({
             subject: t.subject,
             body: t.messages?.at(-1)?.contenu ?? '',
             preview: (t.messages?.at(-1)?.contenu ?? '').replace(/<[^>]*>/g, '').slice(0, 120),
-            date: t.updatedAt.toISOString(),
+            date: t.updatedAt ? t.updatedAt.toISOString() : t.createdAt.toISOString(),
             read: unreadMessages.length === 0,
             folder: t.folder ?? 'inbox',
             contactType: t.contact_type ?? 'autre',
@@ -51,7 +51,7 @@ export default async function MailsPage({
                 id: m.id,
                 contenu: m.contenu,
                 author_type: m.author_type,
-                createdAt: m.createdAt.toISOString(),
+                createdAt: m.createdAt ? m.createdAt.toISOString() : new Date().toISOString(),
                 attachments: (m.attachments ?? []).map((a: any) => ({
                     name: a.nom,
                     size: a.taille ? formatSize(a.taille) : '',

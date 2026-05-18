@@ -52,7 +52,7 @@ function mapThread(t: any): Mail {
       .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
       .trim()
       .slice(0, 120),
-    date: t.updatedAt.toISOString(),
+    date: t.updatedAt ? t.updatedAt.toISOString() : t.createdAt.toISOString(),
     read: unreadMessages.length === 0,
     folder: t.folder ?? 'inbox',
     contactType: t.contact_type ?? 'autre' as ContactType,
@@ -61,7 +61,7 @@ function mapThread(t: any): Mail {
       id: m.id,
       contenu: m.contenu,
       author_type: m.author_type,
-      createdAt: m.createdAt.toISOString(),
+      createdAt: m.createdAt ? m.createdAt.toISOString() : new Date().toISOString(),
       attachments: (m.attachments ?? []).map((a: any) => ({
         name: a.nom,
         size: a.taille ? formatAttachmentSize(a.taille) : '',
